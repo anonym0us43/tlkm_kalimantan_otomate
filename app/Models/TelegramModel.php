@@ -16,9 +16,9 @@ class TelegramModel extends Model
 
         curl_setopt_array($curl, [
             CURLOPT_URL            => "https://api.telegram.org/bot$tokenBot/sendmessage?chat_id=$chatID&text=$text&parse_mode=HTML",
-            CURLOPT_RETURNTRANSFER => true,
             CURLOPT_SSL_VERIFYHOST => false,
             CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_RETURNTRANSFER => true,
             CURLOPT_CUSTOMREQUEST  => 'POST',
         ]);
 
@@ -37,9 +37,9 @@ class TelegramModel extends Model
 
         curl_setopt_array($curl, [
             CURLOPT_URL            => "https://api.telegram.org/bot$tokenBot/sendmessage?chat_id=$chatID&text=$text&parse_mode=HTML&reply_to_message_id=$messageID",
-            CURLOPT_RETURNTRANSFER => true,
             CURLOPT_SSL_VERIFYHOST => false,
             CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_RETURNTRANSFER => true,
             CURLOPT_CUSTOMREQUEST  => 'POST',
         ]);
 
@@ -58,9 +58,9 @@ class TelegramModel extends Model
 
         curl_setopt_array($curl, [
             CURLOPT_URL            => "https://api.telegram.org/bot$tokenBot/sendmessage?chat_id=$chatID&message_thread_id=$threadID&text=$text&parse_mode=HTML",
-            CURLOPT_RETURNTRANSFER => true,
             CURLOPT_SSL_VERIFYHOST => false,
             CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_RETURNTRANSFER => true,
             CURLOPT_CUSTOMREQUEST  => 'POST',
         ]);
 
@@ -79,9 +79,9 @@ class TelegramModel extends Model
 
         curl_setopt_array($curl, [
             CURLOPT_URL            => "https://api.telegram.org/bot$tokenBot/sendmessage?chat_id=$chatID&message_thread_id=$threadID&text=$text&parse_mode=HTML&reply_to_message_id=$messageID",
-            CURLOPT_RETURNTRANSFER => true,
             CURLOPT_SSL_VERIFYHOST => false,
             CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_RETURNTRANSFER => true,
             CURLOPT_CUSTOMREQUEST  => 'POST',
         ]);
 
@@ -92,22 +92,29 @@ class TelegramModel extends Model
         return $response;
     }
 
-    public static function sendMessageReplyMarkupButton($tokenBot, $chatID, $message, $button)
+    public static function sendMessageReplyMarkupButton($tokenBot, $chatID, $message, $button, $messageID = null)
     {
         $curl = curl_init();
 
+        $postfields = [
+            'chat_id'      => $chatID,
+            'text'         => $message,
+            'parse_mode'   => 'HTML',
+            'reply_markup' => json_encode($button)
+        ];
+
+        if ($messageID)
+        {
+            $postfields['reply_to_message_id'] = $messageID;
+        }
+
         curl_setopt_array($curl, [
             CURLOPT_URL            => "https://api.telegram.org/bot$tokenBot/sendMessage",
-            CURLOPT_RETURNTRANSFER => true,
             CURLOPT_SSL_VERIFYHOST => false,
             CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_RETURNTRANSFER => true,
             CURLOPT_CUSTOMREQUEST  => 'POST',
-            CURLOPT_POSTFIELDS     => [
-                'chat_id'      => $chatID,
-                'text'         => $message,
-                'parse_mode'   => 'HTML',
-                'reply_markup' => json_encode($button)
-            ],
+            CURLOPT_POSTFIELDS     => $postfields,
         ]);
 
         $response = curl_exec($curl);
@@ -117,48 +124,29 @@ class TelegramModel extends Model
         return $response;
     }
 
-    public static function sendMessageReplyMarkupKeyboard($tokenBot, $chatID, $message, $keyboard)
+    public static function sendMessageReplyMarkupKeyboard($tokenBot, $chatID, $message, $keyboard, $messageID = null)
     {
         $curl = curl_init();
 
-        curl_setopt_array($curl, [
-            CURLOPT_URL            => "https://api.telegram.org/bot$tokenBot/sendMessage",
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_SSL_VERIFYHOST => false,
-            CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_CUSTOMREQUEST  => 'POST',
-            CURLOPT_POSTFIELDS     => [
-                'chat_id'      => $chatID,
-                'text'         => $message,
-                'parse_mode'   => 'HTML',
-                'reply_markup' => json_encode($keyboard),
-            ],
-        ]);
+        $postfields = [
+            'chat_id'      => $chatID,
+            'text'         => $message,
+            'parse_mode'   => 'HTML',
+            'reply_markup' => json_encode($keyboard),
+        ];
 
-        $response = curl_exec($curl);
-
-        curl_close($curl);
-
-        return $response;
-    }
-
-    public static function sendMessageReplyMarkupKeyboardWithReply($tokenBot, $chatID, $message, $messageID, $keyboard)
-    {
-        $curl = curl_init();
+        if ($messageID)
+        {
+            $postfields['reply_to_message_id'] = $messageID;
+        }
 
         curl_setopt_array($curl, [
             CURLOPT_URL            => "https://api.telegram.org/bot$tokenBot/sendMessage",
-            CURLOPT_RETURNTRANSFER => true,
             CURLOPT_SSL_VERIFYHOST => false,
             CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_RETURNTRANSFER => true,
             CURLOPT_CUSTOMREQUEST  => 'POST',
-            CURLOPT_POSTFIELDS     => [
-                'chat_id'             => $chatID,
-                'text'                => $message,
-                'parse_mode'          => 'HTML',
-                'reply_to_message_id' => $messageID,
-                'reply_markup'        => json_encode($keyboard),
-            ],
+            CURLOPT_POSTFIELDS     => $postfields,
         ]);
 
         $response = curl_exec($curl);
@@ -174,9 +162,9 @@ class TelegramModel extends Model
 
         curl_setopt_array($curl, [
             CURLOPT_URL            => "https://api.telegram.org/bot$tokenBot/sendPhoto",
-            CURLOPT_RETURNTRANSFER => true,
             CURLOPT_SSL_VERIFYHOST => false,
             CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_RETURNTRANSFER => true,
             CURLOPT_CUSTOMREQUEST  => 'POST',
             CURLOPT_POSTFIELDS     => [
                 'chat_id'    => $chatID,
@@ -199,38 +187,16 @@ class TelegramModel extends Model
 
         curl_setopt_array($curl, [
             CURLOPT_URL            => "https://api.telegram.org/bot$tokenBot/sendPhoto",
-            CURLOPT_RETURNTRANSFER => true,
             CURLOPT_SSL_VERIFYHOST => false,
             CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_RETURNTRANSFER => true,
             CURLOPT_CUSTOMREQUEST  => 'POST',
             CURLOPT_POSTFIELDS     => [
-                'chat_id'          => $chatID,
+                'chat_id'           => $chatID,
                 'message_thread_id' => $threadID,
-                'parse_mode'       => 'HTML',
-                'caption'          => $caption,
-                'photo'            => new \CURLFILE($photo),
-            ],
-        ]);
-
-        $response = curl_exec($curl);
-
-        curl_close($curl);
-
-        return $response;
-    }
-
-    public static function answerCallbackQuery($tokenBot, $callback_query_id)
-    {
-        $curl = curl_init();
-
-        curl_setopt_array($curl, [
-            CURLOPT_URL            => "https://api.telegram.org/bot$tokenBot/answerCallbackQuery",
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_SSL_VERIFYHOST => false,
-            CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_CUSTOMREQUEST  => 'POST',
-            CURLOPT_POSTFIELDS     => [
-                'callback_query_id' => $callback_query_id,
+                'parse_mode'        => 'HTML',
+                'caption'           => $caption,
+                'photo'             => new \CURLFILE($photo),
             ],
         ]);
 
@@ -255,6 +221,111 @@ class TelegramModel extends Model
                 'chat_id'   => $chatID,
                 'latitude'  => $latitude,
                 'longitude' => $longitude,
+            ],
+        ]);
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+
+        return $response;
+    }
+
+    public static function sendLocationThread($tokenBot, $chatID, $threadID, $latitude, $longitude)
+    {
+        $curl = curl_init();
+
+        curl_setopt_array($curl, [
+            CURLOPT_URL            => "https://api.telegram.org/bot$tokenBot/sendLocation",
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_SSL_VERIFYHOST => false,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_CUSTOMREQUEST  => 'POST',
+            CURLOPT_POSTFIELDS     => [
+                'chat_id'           => $chatID,
+                'message_thread_id' => $threadID,
+                'latitude'          => $latitude,
+                'longitude'         => $longitude,
+            ],
+        ]);
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+
+        return $response;
+    }
+
+    public static function sendMessageWithMarkup($tokenBot, $chatID, $message, array $button)
+    {
+        $curl = curl_init();
+
+        curl_setopt_array($curl, [
+            CURLOPT_URL            => "https://api.telegram.org/bot$tokenBot/sendMessage",
+            CURLOPT_SSL_VERIFYHOST => false,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CUSTOMREQUEST  => 'POST',
+            CURLOPT_POSTFIELDS     => [
+                'chat_id'      => $chatID,
+                'text'         => $message,
+                'parse_mode'   => 'HTML',
+                'reply_markup' => json_encode($button)
+            ],
+        ]);
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+
+        return $response;
+    }
+
+    public static function sendMessageThreadWithMarkup($tokenBot, $chatID, $threadID, $message, array $button, $messageID = null)
+    {
+        $curl = curl_init();
+
+        $postfields = [
+            'chat_id'           => $chatID,
+            'message_thread_id' => $threadID,
+            'text'              => $message,
+            'parse_mode'        => 'HTML',
+            'reply_markup'      => json_encode($button)
+        ];
+
+        if ($messageID)
+        {
+            $postfields['reply_to_message_id'] = $messageID;
+        }
+
+        curl_setopt_array($curl, [
+            CURLOPT_URL            => "https://api.telegram.org/bot$tokenBot/sendMessage",
+            CURLOPT_SSL_VERIFYHOST => false,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CUSTOMREQUEST  => 'POST',
+            CURLOPT_POSTFIELDS     => $postfields,
+        ]);
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+
+        return $response;
+    }
+
+    public static function answerCallbackQuery($tokenBot, $callback_query_id)
+    {
+        $curl = curl_init();
+
+        curl_setopt_array($curl, [
+            CURLOPT_URL            => "https://api.telegram.org/bot$tokenBot/answerCallbackQuery",
+            CURLOPT_SSL_VERIFYHOST => false,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CUSTOMREQUEST  => 'POST',
+            CURLOPT_POSTFIELDS     => [
+                'callback_query_id' => $callback_query_id,
             ],
         ]);
 
