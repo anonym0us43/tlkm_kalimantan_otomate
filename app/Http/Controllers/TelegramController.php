@@ -162,11 +162,11 @@ class TelegramController extends Controller
 
                 if ($thread_id)
                 {
-                    TelegramModel::sendMessageReplyThread($tokenBot, $chat_id, $thread_id, '🔖 Silakan masukkan Nama Site NE', $messageID);
+                    TelegramModel::sendMessageReplyThread($tokenBot, $chat_id, $thread_id, '🔖 Silakan masukkan Site NE', $messageID);
                 }
                 else
                 {
-                    TelegramModel::sendMessageReply($tokenBot, $chat_id, '🔖 Silakan masukkan Nama Site NE', $messageID);
+                    TelegramModel::sendMessageReply($tokenBot, $chat_id, '🔖 Silakan masukkan Site NE', $messageID);
                 }
                 return response()->json(['success' => true]);
             }
@@ -186,10 +186,10 @@ class TelegramController extends Controller
                 return response()->json(['success' => true]);
             }
 
-            if (strpos($data, 'site_fe_') === 0)
+            if (strpos($data, 'site_ne_') === 0)
             {
-                $siteNameFe = substr($data, 8);
-                $response = self::searchSiteByName($siteNameFe);
+                $siteNe = substr($data, 8);
+                $response = self::searchSiteByName($siteNe);
                 self::sendResponse($tokenBot, $chat_id, $thread_id, $messageID, $response, $keyboard);
                 return response()->json(['success' => true]);
             }
@@ -258,11 +258,11 @@ class TelegramController extends Controller
 
                     if ($thread_id)
                     {
-                        TelegramModel::sendMessageReplyThread($tokenBot, $chat_id, $thread_id, '🔖 Silakan masukkan Nama Site NE', $messageID);
+                        TelegramModel::sendMessageReplyThread($tokenBot, $chat_id, $thread_id, '🔖 Silakan masukkan Site NE', $messageID);
                     }
                     else
                     {
-                        TelegramModel::sendMessageReply($tokenBot, $chat_id, '🔖 Silakan masukkan Nama Site NE', $messageID);
+                        TelegramModel::sendMessageReply($tokenBot, $chat_id, '🔖 Silakan masukkan Site NE', $messageID);
                     }
                     return response()->json(['success' => true]);
                 }
@@ -337,22 +337,24 @@ class TelegramController extends Controller
             $siteName = trim($siteName);
             if (empty($siteName))
             {
-                return "Silakan masukkan nama site yang valid.";
+                return "Silakan masukkan site NE yang valid.";
             }
 
             $data = DB::table('tb_source_mitratel')
-                ->where('site_name_ne', 'LIKE', "%$siteName%")
+                ->where('site_ne', 'LIKE', "%$siteName%")
                 ->first();
 
             if (!$data)
             {
-                return "Nama Site <b>$siteName</b> tidak ditemukan.";
+                return "Site NE <b>$siteName</b> tidak ditemukan.";
             }
 
             $message  = "📋 <b>Informasi Site</b>\n\n";
             $message .= "<code>";
             $message .= "Ring ID       : " . ($data->ring_id ?? 'NULL') . "\n";
+            $message .= "Site NE       : " . ($data->site_ne ?? 'NULL') . "\n";
             $message .= "Site Name NE  : " . ($data->site_name_ne ?? 'NULL') . "\n";
+            $message .= "Site FE       : " . ($data->site_fe ?? 'NULL') . "\n";
             $message .= "Site Name FE  : " . ($data->site_name_fe ?? 'NULL') . "\n";
             $message .= "Panjang Kabel : " . ($data->real_kabel ?? 'NULL') . " m\n";
             $message .= "Jumlah Closure: NULL\n";
@@ -433,7 +435,7 @@ class TelegramController extends Controller
 
             $sites = DB::table('tb_source_mitratel')
                 ->where('ring_id', 'LIKE', "%$ringId%")
-                ->select('site_name_ne')
+                ->select('site_ne', 'site_name_ne', 'site_fe', 'site_name_fe')
                 ->distinct()
                 ->get();
 
@@ -443,30 +445,23 @@ class TelegramController extends Controller
             }
 
             $buttons = [];
-            $row = [];
             $count = 0;
 
             foreach ($sites as $site)
             {
-                if (!empty($site->site_name_ne))
+                if (!empty($site->site_ne))
                 {
-                    $row[] = [
-                        'text' => $site->site_name_ne,
-                        'callback_data' => 'site_fe_' . $site->site_name_ne
+                    $buttonText = $site->site_ne . ' ' . ($site->site_name_ne ?? '') . ' <> ' . ($site->site_fe ?? '') . ' ' . ($site->site_name_fe ?? '');
+                    $buttonText = trim($buttonText);
+
+                    $buttons[] = [
+                        [
+                            'text' => $buttonText,
+                            'callback_data' => 'site_ne_' . $site->site_ne
+                        ]
                     ];
                     $count++;
-
-                    if ($count % 2 == 0)
-                    {
-                        $buttons[] = $row;
-                        $row = [];
-                    }
                 }
-            }
-
-            if (!empty($row))
-            {
-                $buttons[] = $row;
             }
 
             $keyboard = [
@@ -474,7 +469,7 @@ class TelegramController extends Controller
             ];
 
             return [
-                'message' => "🔍 Ditemukan <b>" . count($sites) . "</b> site untuk Ring ID <b>$ringId</b>\n\nSilakan Pilih Site (site_name_ne) :",
+                'message' => "🔍 Ditemukan <b>" . count($sites) . "</b> site untuk Ring ID <b>$ringId</b>\n\nSilakan Pilih Site :",
                 'keyboard' => $keyboard
             ];
         }
