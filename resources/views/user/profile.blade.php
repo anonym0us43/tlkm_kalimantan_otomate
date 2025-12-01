@@ -1,6 +1,6 @@
 @extends('layouts')
 
-@include('styles')
+@section('styles')
 @endsection
 
 @section('title', 'Profile')
@@ -8,5 +8,5 @@
 @section('content')
 @endsection
 
-@include('scripts')
+@section('scripts')
 @endsection

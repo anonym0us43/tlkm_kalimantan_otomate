@@ -6,10 +6,7 @@ use Illuminate\Http\Request;
 
 date_default_timezone_set('Asia/Jakarta');
 
-class HomeController extends Controller
+class AjaxController extends Controller
 {
-    public function index()
-    {
-        return view('home.index');
-    }
+    //
 }

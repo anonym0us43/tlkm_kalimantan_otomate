@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
 
+date_default_timezone_set('Asia/Jakarta');
+
 class AuthController extends Controller
 {
     public static function login()

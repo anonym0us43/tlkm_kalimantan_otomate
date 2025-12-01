@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 
 date_default_timezone_set('Asia/Jakarta');
 
-class HomeModel extends Model
+class UserModel extends Model
 {
     //
 }

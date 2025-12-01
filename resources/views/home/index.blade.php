@@ -1,12 +1,12 @@
 @extends('layouts')
 
-@include('styles')
+@section('styles')
 @endsection
 
-@section('title', 'Profile')
+@section('title', 'Home')
 
 @section('content')
 @endsection
 
-@include('scripts')
+@section('scripts')
 @endsection
