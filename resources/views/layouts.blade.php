@@ -305,8 +305,8 @@
 											class="{{ Request::is('dashboard/monitoring') ? 'active' : '' }}">Monitoring</a>
 									</li>
 									<li>
-										<a href="{{ route('dashboard.listing') }}"
-											class="{{ Request::is('dashboard/listing') ? 'active' : '' }}">Listing</a>
+										<a href="{{ route('dashboard.rekoncile') }}"
+											class="{{ Request::is('dashboard/rekoncile') ? 'active' : '' }}">Rekonsiliasi</a>
 									</li>
 								</ul>
 							</li>

@@ -39,11 +39,11 @@
 			<input type="text" id="date-range" class="form-input" placeholder="Filter: Pilih Rentang Tanggal" readonly>
 		</div>
 		<div class="table-responsive">
-			<table class="table table-bordered table-hover detail-table mt-4">
+			<table class="table table-bordered table-hover detail-table mt-4" id="monitoring-table">
 				<thead>
 					<tr>
 						<th rowspan="2">WITEL</th>
-						<th rowspan="2">INDIKASI</th>
+						<th rowspan="2">IDLE<br />ORDER</th>
 						<th colspan="5">TEMPORER</th>
 						<th colspan="3">PERMANENISASI</th>
 						<th rowspan="3">REKON</th>
@@ -60,61 +60,9 @@
 						<th>DONE</th>
 					</tr>
 				</thead>
-				<tbody>
-					@php
-						$witel = ['BALIKPAPAN', 'SAMARINDA', 'TARAKAN', 'BANJARMASIN', 'PALANGKARAYA', 'PONTIANAK'];
-						$dummy = [
-						    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-						    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-						    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-						    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-						    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-						    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-						];
-					@endphp
-					@foreach ($witel as $i => $w)
-						@php
-							$row = $dummy[$i];
-							$total = array_sum($row);
-						@endphp
-						<tr>
-							<td>{{ $w }}</td>
-							<td>{{ $row[0] }}</td>
-							<td>{{ $row[1] }}</td>
-							<td>{{ $row[2] }}</td>
-							<td>{{ $row[3] }}</td>
-							<td>{{ $row[4] }}</td>
-							<td>{{ $row[5] }}</td>
-							<td>{{ $row[6] }}</td>
-							<td>{{ $row[7] }}</td>
-							<td>{{ $row[8] }}</td>
-							<td>{{ $row[9] }}</td>
-							<td class="font-bold">{{ $total }}</td>
-						</tr>
-					@endforeach
-					<tr class="font-bold">
-						<td>TOTAL</td>
-						@php
-							$colTotals = [];
-							for ($c = 1; $c <= 10; $c++) {
-							    $col = array_map(function ($row) use ($c) {
-							        return $row[$c];
-							    }, $dummy);
-							    $colTotals[$c] = array_sum($col);
-							}
-							$grandTotal = array_sum($colTotals);
-						@endphp
-						<td>{{ $colTotals[1] }}</td>
-						<td>{{ $colTotals[2] }}</td>
-						<td>{{ $colTotals[3] }}</td>
-						<td>{{ $colTotals[4] }}</td>
-						<td>{{ $colTotals[5] }}</td>
-						<td>{{ $colTotals[6] }}</td>
-						<td>{{ $colTotals[7] }}</td>
-						<td>{{ $colTotals[8] }}</td>
-						<td>{{ $colTotals[9] }}</td>
-						<td>{{ $colTotals[10] }}</td>
-						<td>{{ $grandTotal }}</td>
+				<tbody id="monitoring-tbody">
+					<tr>
+						<td colspan="12">Loading...</td>
 					</tr>
 				</tbody>
 			</table>
@@ -125,6 +73,68 @@
 @section('scripts')
 	<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 	<script>
+		function renderMonitoringTable(data) {
+			const tbody = document.getElementById('monitoring-tbody');
+			tbody.innerHTML = '';
+			if (!data || data.length === 0) {
+				tbody.innerHTML = '<tr><td colspan="12">Tidak ada data</td></tr>';
+				return;
+			}
+
+			let colTotals = Array(11).fill(0); // 11 columns to sum
+			data.forEach(row => {
+				// Map data fields to columns
+				// Adjust field names as per your API result
+				const cells = [
+					row.witel_name || '-',
+					row.idle_order || 0,
+					row.under3d_order || 0,
+					row.under7d_order || 0,
+					row.under14d_order || 0,
+					row.under30d_order || 0,
+					row.upper30d_order || 0,
+					row.reject_ta || 0,
+					row.approval_ta || 0,
+					row.done_mtel || 0,
+					row.reconcile_mtel || 0
+				];
+				// Calculate total for this row
+				const total = cells.slice(1).reduce((a, b) => a + Number(b), 0);
+				let html = '<tr>';
+				cells.forEach((c, i) => {
+					html += `<td>${c}</td>`;
+					if (i > 0) colTotals[i] += Number(c);
+				});
+				html += `<td class="font-bold">${total}</td></tr>`;
+				tbody.innerHTML += html;
+			});
+			// Render total row
+			let totalRow = '<tr class="font-bold"><td>TOTAL</td>';
+			for (let i = 1; i < colTotals.length; i++) {
+				totalRow += `<td>${colTotals[i]}</td>`;
+			}
+			totalRow += `<td>${colTotals.slice(1).reduce((a, b) => a + b, 0)}</td></tr>`;
+			tbody.innerHTML += totalRow;
+		}
+
+		function fetchMonitoringData(startDate, endDate) {
+			const params = new URLSearchParams({
+				regional_id: 'ALL',
+				witel_id: 'ALL',
+				start_date: startDate,
+				end_date: endDate
+			});
+			const url = `/ajax/dashboard/monitoring?${params.toString()}`;
+			const tbody = document.getElementById('monitoring-tbody');
+			tbody.innerHTML = '<tr><td colspan="12">Loading...</td></tr>';
+			fetch(url)
+				.then(res => res.json())
+				.then(data => renderMonitoringTable(data))
+				.catch(() => {
+					tbody.innerHTML = '<tr><td colspan="12">Gagal memuat data</td></tr>';
+				});
+		}
+
 		document.addEventListener('DOMContentLoaded', function() {
 			flatpickr("#date-range", {
 				mode: "range",
@@ -132,8 +142,22 @@
 				allowInput: true,
 				locale: {
 					firstDayOfWeek: 1
+				},
+				onClose: function(selectedDates, dateStr, instance) {
+					if (selectedDates.length === 2) {
+						const start = instance.formatDate(selectedDates[0], 'Y-m-d');
+						const end = instance.formatDate(selectedDates[1], 'Y-m-d');
+						fetchMonitoringData(start, end);
+					}
 				}
 			});
+			// Load today by default
+			const today = new Date();
+			const yyyy = today.getFullYear();
+			const mm = String(today.getMonth() + 1).padStart(2, '0');
+			const dd = String(today.getDate()).padStart(2, '0');
+			const todayStr = `${yyyy}-${mm}-${dd}`;
+			fetchMonitoringData(todayStr, todayStr);
 		});
 	</script>
 @endsection

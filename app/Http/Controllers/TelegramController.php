@@ -340,7 +340,7 @@ class TelegramController extends Controller
                 return "Silakan masukkan site NE yang valid.";
             }
 
-            $data = DB::table('tb_source_mitratel')
+            $data = DB::table('tb_source_diginav_mtel')
                 ->where('site_ne', 'LIKE', "%$siteName%")
                 ->first();
 
@@ -433,7 +433,7 @@ class TelegramController extends Controller
                 return "Silakan masukkan Ring ID yang valid.";
             }
 
-            $sites = DB::table('tb_source_mitratel')
+            $sites = DB::table('tb_source_diginav_mtel')
                 ->where('ring_id', 'LIKE', "%$ringId%")
                 ->select('site_ne', 'site_name_ne', 'site_fe', 'site_name_fe')
                 ->distinct()
