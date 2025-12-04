@@ -16,6 +16,8 @@ class TelegramController extends Controller
         {
             $tokenBot = env('TELEGRAM_BOT_TOKEN');
 
+            dd($tokenBot);
+
             if (!$tokenBot)
             {
                 return response()->json(['error' => 'Bot token not configured'], 500);
