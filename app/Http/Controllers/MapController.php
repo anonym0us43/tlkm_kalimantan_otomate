@@ -20,4 +20,12 @@ class MapController extends Controller
 
         return view('map.site-to-site', compact('site_from', 'site_to'));
     }
+
+    public function coordiate_to_coordinate()
+    {
+        $coordinate_from = request()->get('coordinate_from');
+        $coordinate_to   = request()->get('coordinate_to');
+
+        return view('map.coordinate-to-coordinate', compact('coordinate_from', 'coordinate_to'));
+    }
 }

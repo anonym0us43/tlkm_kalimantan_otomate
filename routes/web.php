@@ -6,6 +6,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AjaxController;
+use App\Http\Controllers\MapController;
 
 Route::get('login', [AuthController::class, 'login'])->name('login');
 Route::post('login', [AuthController::class, 'login_post'])->name('login.post');
@@ -29,6 +30,9 @@ Route::middleware(['guest'])->group(function ()
 
     Route::prefix('map')->group(function ()
     {
+        Route::get('/', [MapController::class, 'index'])->name('map.index');
+        Route::get('site-to-site', [MapController::class, 'site_to_site'])->name('map.site.to.site');
+        Route::get('coordinate-to-coordinate', [MapController::class, 'coordiate_to_coordinate'])->name('map.coordinate.to.coordinate');
     });
 
     Route::prefix('ajax')->group(function ()
