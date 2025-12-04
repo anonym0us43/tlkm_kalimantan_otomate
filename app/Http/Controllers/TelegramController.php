@@ -254,30 +254,65 @@ class TelegramController extends Controller
             {
                 if (strpos($text, '/id_site') === 0)
                 {
-                    self::setUserState($chat_id, ['step' => 'input_id_site', 'thread_id' => $thread_id, 'message_id' => $messageID]);
-
-                    if ($thread_id)
+                    $parts = explode(' ', $text, 2);
+                    if (isset($parts[1]) && !empty(trim($parts[1])))
                     {
-                        TelegramModel::sendMessageReplyThread($tokenBot, $chat_id, $thread_id, '🔖 Silakan masukkan Site NE', $messageID);
+                        $siteNe = trim($parts[1]);
+                        $response = self::searchSiteByName($siteNe);
+                        self::sendResponse($tokenBot, $chat_id, $thread_id, $messageID, $response, $keyboard);
                     }
                     else
                     {
-                        TelegramModel::sendMessageReply($tokenBot, $chat_id, '🔖 Silakan masukkan Site NE', $messageID);
+                        self::setUserState($chat_id, ['step' => 'input_id_site', 'thread_id' => $thread_id, 'message_id' => $messageID]);
+
+                        if ($thread_id)
+                        {
+                            TelegramModel::sendMessageReplyThread($tokenBot, $chat_id, $thread_id, '🔖 Silakan masukkan Site NE', $messageID);
+                        }
+                        else
+                        {
+                            TelegramModel::sendMessageReply($tokenBot, $chat_id, '🔖 Silakan masukkan Site NE', $messageID);
+                        }
                     }
                     return response()->json(['success' => true]);
                 }
 
                 if (strpos($text, '/id_ring') === 0)
                 {
-                    self::setUserState($chat_id, ['step' => 'input_id_ring', 'thread_id' => $thread_id, 'message_id' => $messageID]);
-
-                    if ($thread_id)
+                    $parts = explode(' ', $text, 2);
+                    if (isset($parts[1]) && !empty(trim($parts[1])))
                     {
-                        TelegramModel::sendMessageReplyThread($tokenBot, $chat_id, $thread_id, '🔖 Silakan masukkan Ring ID', $messageID);
+                        $ringId = trim($parts[1]);
+                        $response = self::searchSiteByRing($ringId, $tokenBot, $chat_id);
+
+                        if (is_array($response) && isset($response['keyboard']))
+                        {
+                            if ($thread_id)
+                            {
+                                TelegramModel::sendMessageThreadWithMarkup($tokenBot, $chat_id, $thread_id, $response['message'], $response['keyboard'], $messageID);
+                            }
+                            else
+                            {
+                                TelegramModel::sendMessageReplyMarkupButton($tokenBot, $chat_id, $response['message'], $response['keyboard'], $messageID);
+                            }
+                        }
+                        else
+                        {
+                            self::sendResponse($tokenBot, $chat_id, $thread_id, $messageID, $response, $keyboard);
+                        }
                     }
                     else
                     {
-                        TelegramModel::sendMessageReply($tokenBot, $chat_id, '🔖 Silakan masukkan Ring ID', $messageID);
+                        self::setUserState($chat_id, ['step' => 'input_id_ring', 'thread_id' => $thread_id, 'message_id' => $messageID]);
+
+                        if ($thread_id)
+                        {
+                            TelegramModel::sendMessageReplyThread($tokenBot, $chat_id, $thread_id, '🔖 Silakan masukkan Ring ID', $messageID);
+                        }
+                        else
+                        {
+                            TelegramModel::sendMessageReply($tokenBot, $chat_id, '🔖 Silakan masukkan Ring ID', $messageID);
+                        }
                     }
                     return response()->json(['success' => true]);
                 }
