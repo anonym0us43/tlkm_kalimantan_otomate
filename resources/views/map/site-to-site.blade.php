@@ -48,12 +48,67 @@
 			box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 			z-index: 1000;
 			min-width: 280px;
+			transition: all 0.3s ease;
+		}
+
+		.distance-search-panel.minimized {
+			min-width: auto;
+			padding: 8px 12px;
+		}
+
+		.distance-search-panel.minimized .panel-content {
+			display: none;
 		}
 
 		.distance-search-panel h6 {
 			margin: 0 0 10px 0;
 			font-size: 14px;
 			font-weight: bold;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+		}
+
+		.minimize-btn {
+			background: none;
+			border: none;
+			cursor: pointer;
+			font-size: 18px;
+			padding: 0;
+			color: #333;
+		}
+
+		.minimize-btn:hover {
+			color: #2196F3;
+		}
+
+		.direction-toggle {
+			display: flex;
+			gap: 8px;
+			margin-bottom: 10px;
+			align-items: center;
+		}
+
+		.direction-btn {
+			flex: 1;
+			padding: 8px;
+			border: 2px solid #ddd;
+			border-radius: 4px;
+			background-color: white;
+			cursor: pointer;
+			font-size: 13px;
+			font-weight: 500;
+			transition: all 0.3s ease;
+		}
+
+		.direction-btn.active {
+			background-color: #2196F3;
+			color: white;
+			border-color: #2196F3;
+		}
+
+		.direction-btn:hover {
+			border-color: #2196F3;
 		}
 
 		.distance-input-group {
@@ -107,14 +162,23 @@
 	<div class="panel mt-6">
 		<div style="position: relative;">
 			<div id="map"></div>
-			<div class="distance-search-panel">
-				<h6>🔍 Cari Titik Berdasarkan Jarak</h6>
-				<div class="distance-input-group">
-					<input type="number" id="distanceInput" placeholder="Jarak (meter)" min="0" step="1">
-					<button onclick="findPointByDistance()">Cari</button>
-				</div>
-				<div class="distance-info" id="distanceInfo">
-					Masukkan jarak dari titik A untuk mencari lokasi di jalur
+			<div class="distance-search-panel" id="searchPanel">
+				<h6>
+					<span>🔍 Cari Titik Berdasarkan Jarak</span>
+					<button class="minimize-btn" onclick="toggleMinimize()" id="minimizeBtn" title="Minimize">−</button>
+				</h6>
+				<div class="panel-content">
+					<div class="direction-toggle">
+						<button class="direction-btn active" onclick="setDirection('A-B')" id="dirAB">A → B</button>
+						<button class="direction-btn" onclick="setDirection('B-A')" id="dirBA">B → A</button>
+					</div>
+					<div class="distance-input-group">
+						<input type="number" id="distanceInput" placeholder="Jarak (meter)" min="0" step="1">
+						<button onclick="findPointByDistance()">Cari</button>
+					</div>
+					<div class="distance-info" id="distanceInfo">
+						Masukkan jarak dari titik A untuk mencari lokasi di jalur
+					</div>
 				</div>
 			</div>
 		</div>
@@ -132,17 +196,19 @@
 		let kmzLayer;
 		let markerA, markerB;
 		let resultMarker;
+		let userLocationMarker;
 		let routeCoordinates = [];
+		let currentDirection = 'A-B';
 
 		document.addEventListener('DOMContentLoaded', function() {
 			const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-				attribution: '© OpenStreetMap contributors',
+				attribution: '',
 				maxZoom: 19
 			});
 
 			const esriSat = L.tileLayer(
 				'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-					attribution: 'Tiles © Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+					attribution: '',
 					maxZoom: 19
 				});
 
@@ -161,6 +227,31 @@
 				collapsed: false,
 				position: 'bottomleft'
 			}).addTo(map);
+
+			if (navigator.geolocation) {
+				navigator.geolocation.getCurrentPosition(function(position) {
+					const userLat = position.coords.latitude;
+					const userLng = position.coords.longitude;
+
+					userLocationMarker = L.marker([userLat, userLng], {
+						icon: L.divIcon({
+							className: 'custom-div-icon',
+							html: `<div class="custom-marker" style="background-color: #4CAF50; color: white; border-color: #2E7D32;">👤</div>`,
+							iconSize: [40, 40],
+							iconAnchor: [20, 40],
+							popupAnchor: [0, -40]
+						})
+					}).addTo(map);
+
+					userLocationMarker.bindPopup(`
+						<strong>Lokasi Anda</strong><br>
+						Lat: ${userLat.toFixed(6)}<br>
+						Lng: ${userLng.toFixed(6)}
+					`);
+				}, function(error) {
+					console.log('Geolocation permission denied or unavailable:', error);
+				});
+			}
 
 			function createCustomIcon(letter, cssClass) {
 				return L.divIcon({
@@ -198,11 +289,17 @@
 						icon: createCustomIcon('A', 'marker-a')
 					}).addTo(map);
 					markerA.bindPopup(`<strong>Point A</strong><br>${'{{ $site_from }}'}`);
+					markerA.on('click', function() {
+						map.setView([startPoint[1], startPoint[0]], 17);
+					});
 
 					markerB = L.marker([endPoint[1], endPoint[0]], {
 						icon: createCustomIcon('B', 'marker-b')
 					}).addTo(map);
 					markerB.bindPopup(`<strong>Point B</strong><br>${'{{ $site_to }}'}`);
+					markerB.on('click', function() {
+						map.setView([endPoint[1], endPoint[0]], 17);
+					});
 
 					const totalDistance = calculateTotalDistance(routeCoordinates);
 					updateDistanceInfo(`Total jarak: ${totalDistance.toFixed(2)} meter`);
@@ -286,12 +383,14 @@
 				return;
 			}
 
+			const coords = currentDirection === 'B-A' ? [...routeCoordinates].reverse() : routeCoordinates;
+
 			let accumulatedDistance = 0;
 			let foundPoint = null;
 
-			for (let i = 0; i < routeCoordinates.length - 1; i++) {
-				const from = turf.point(routeCoordinates[i]);
-				const to = turf.point(routeCoordinates[i + 1]);
+			for (let i = 0; i < coords.length - 1; i++) {
+				const from = turf.point(coords[i]);
+				const to = turf.point(coords[i + 1]);
 				const segmentDistance = turf.distance(from, to, {
 					units: 'meters'
 				});
@@ -300,7 +399,7 @@
 					const remainingDistance = targetDistance - accumulatedDistance;
 					const fraction = remainingDistance / segmentDistance;
 
-					const line = turf.lineString([routeCoordinates[i], routeCoordinates[i + 1]]);
+					const line = turf.lineString([coords[i], coords[i + 1]]);
 					foundPoint = turf.along(line, remainingDistance / 1000, {
 						units: 'kilometers'
 					});
@@ -311,13 +410,16 @@
 			}
 
 			if (foundPoint) {
-				const coords = foundPoint.geometry.coordinates;
+				const pointCoords = foundPoint.geometry.coordinates;
 
 				if (resultMarker) {
 					map.removeLayer(resultMarker);
 				}
 
-				resultMarker = L.marker([coords[1], coords[0]], {
+				const directionLabel = currentDirection === 'A-B' ? 'dari A' : 'dari B';
+				const startPoint = currentDirection === 'A-B' ? 'A' : 'B';
+
+				resultMarker = L.marker([pointCoords[1], pointCoords[0]], {
 					icon: L.divIcon({
 						className: 'custom-div-icon',
 						html: `<div class=\"custom-marker result-marker\">📍</div>`,
@@ -329,19 +431,54 @@
 
 				resultMarker.bindPopup(`
 					<strong>Titik Ditemukan</strong><br>
-					Jarak dari A: ${targetDistance.toFixed(2)} meter<br>
-					Lat: ${coords[1].toFixed(6)}<br>
-					Lng: ${coords[0].toFixed(6)}
+					Jarak ${directionLabel}: ${targetDistance.toFixed(2)} meter<br>
+					Lat: ${pointCoords[1].toFixed(6)}<br>
+					Lng: ${pointCoords[0].toFixed(6)}
 				`).openPopup();
 
-				map.setView([coords[1], coords[0]], 17);
+				resultMarker.on('click', function() {
+					map.setView([pointCoords[1], pointCoords[0]], 17);
+				});
 
-				updateDistanceInfo(`✓ Titik ditemukan pada jarak ${targetDistance.toFixed(2)} meter dari A`);
+				map.setView([pointCoords[1], pointCoords[0]], 17);
+
+				updateDistanceInfo(`✓ Titik ditemukan pada jarak ${targetDistance.toFixed(2)} meter ${directionLabel}`);
 			}
+		}
+
+		function setDirection(direction) {
+			currentDirection = direction;
+
+			document.getElementById('dirAB').classList.toggle('active', direction === 'A-B');
+			document.getElementById('dirBA').classList.toggle('active', direction === 'B-A');
+
+			if (resultMarker) {
+				map.removeLayer(resultMarker);
+				resultMarker = null;
+			}
+
+			const directionText = direction === 'A-B' ? 'Masukkan jarak dari titik A' : 'Masukkan jarak dari titik B';
+			updateDistanceInfo(directionText);
+			document.getElementById('distanceInput').value = '';
 		}
 
 		function updateDistanceInfo(text) {
 			document.getElementById('distanceInfo').textContent = text;
+		}
+
+		function toggleMinimize() {
+			const panel = document.getElementById('searchPanel');
+			const btn = document.getElementById('minimizeBtn');
+
+			panel.classList.toggle('minimized');
+
+			if (panel.classList.contains('minimized')) {
+				btn.textContent = '+';
+				btn.title = 'Expand';
+			} else {
+				btn.textContent = '−';
+				btn.title = 'Minimize';
+			}
 		}
 	</script>
 @endsection
