@@ -444,7 +444,10 @@ class TelegramController extends Controller
                             [
                                 'text' => '🗺️ Rute Google Maps',
                                 'url' => "https://www.google.com/maps/dir/{$lat_ne},{$long_ne}/{$lat_fe},{$long_fe}"
-                            ],
+                            ]
+
+                        ],
+                        [
                             [
                                 'text' => '📍 Ukur Jarak Titik',
                                 'url' => "https://otomate.telkomakses-borneo.id/map/site-to-site?site_from={$site->site_ne}&site_to={$site->site_fe}"

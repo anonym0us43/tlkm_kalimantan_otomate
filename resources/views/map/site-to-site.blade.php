@@ -274,8 +274,6 @@
 			kmzLayer.addTo(map);
 
 			kmzLayer.on('load', function(e) {
-				console.log('KMZ loaded successfully');
-
 				const layer = e.layer;
 				const bounds = layer.getBounds();
 
@@ -347,8 +345,6 @@
 					});
 				}
 			});
-
-			console.log('Extracted coordinates:', routeCoordinates.length);
 		}
 
 		function calculateTotalDistance(coords) {
