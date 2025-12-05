@@ -14,7 +14,7 @@ class TelegramController extends Controller
     {
         try
         {
-            $tokenBot = env('TELEGRAM_BOT_TOKEN') ?? '7584436866:AAELFhZd8Eh6gWFHQCFqm24FKOGyYHf4OBY';
+            $tokenBot = env('TELEGRAM_BOT_TOKEN');
 
             if (!$tokenBot)
             {
@@ -94,7 +94,7 @@ class TelegramController extends Controller
     {
         try
         {
-            $tokenBot = env('TELEGRAM_BOT_TOKEN') ?? '7584436866:AAELFhZd8Eh6gWFHQCFqm24FKOGyYHf4OBY';
+            $tokenBot = env('TELEGRAM_BOT_TOKEN');
 
             if (!$tokenBot)
             {

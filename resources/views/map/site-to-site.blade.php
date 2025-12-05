@@ -38,6 +38,102 @@
 			border-color: #1565C0;
 		}
 
+		.site-input-panel {
+			position: absolute;
+			top: 10px;
+			left: 10px;
+			background: white;
+			padding: 15px;
+			border-radius: 8px;
+			box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+			z-index: 1000;
+			min-width: 300px;
+		}
+
+		.site-input-panel h6 {
+			margin: 0 0 12px 0;
+			font-size: 14px;
+			font-weight: bold;
+			color: #333;
+		}
+
+		.input-group {
+			margin-bottom: 10px;
+		}
+
+		.input-group label {
+			display: block;
+			font-size: 12px;
+			font-weight: 500;
+			margin-bottom: 4px;
+			color: #666;
+		}
+
+		.input-group input {
+			width: 100%;
+			padding: 8px;
+			border: 1px solid #ddd;
+			border-radius: 4px;
+			font-size: 13px;
+			box-sizing: border-box;
+		}
+
+		.input-group input:focus {
+			outline: none;
+			border-color: #2196F3;
+		}
+
+		.load-btn {
+			width: 100%;
+			padding: 10px;
+			background-color: #4CAF50;
+			color: white;
+			border: none;
+			border-radius: 4px;
+			cursor: pointer;
+			font-size: 13px;
+			font-weight: 600;
+			margin-top: 8px;
+		}
+
+		.load-btn:hover {
+			background-color: #45a049;
+		}
+
+		.load-btn:disabled {
+			background-color: #ccc;
+			cursor: not-allowed;
+		}
+
+		.status-message {
+			font-size: 12px;
+			padding: 8px;
+			border-radius: 4px;
+			margin-top: 10px;
+			display: none;
+		}
+
+		.status-message.error {
+			background-color: #ffebee;
+			color: #c62828;
+			border: 1px solid #ef9a9a;
+			display: block;
+		}
+
+		.status-message.success {
+			background-color: #e8f5e9;
+			color: #2e7d32;
+			border: 1px solid #a5d6a7;
+			display: block;
+		}
+
+		.status-message.info {
+			background-color: #e3f2fd;
+			color: #1565c0;
+			border: 1px solid #90caf9;
+			display: block;
+		}
+
 		.distance-search-panel {
 			position: absolute;
 			top: 10px;
@@ -58,6 +154,11 @@
 
 		.distance-search-panel.minimized .panel-content {
 			display: none;
+		}
+
+		.distance-search-panel.disabled {
+			opacity: 0.6;
+			pointer-events: none;
 		}
 
 		.distance-search-panel h6 {
@@ -162,7 +263,22 @@
 	<div class="panel mt-6">
 		<div style="position: relative;">
 			<div id="map"></div>
-			<div class="distance-search-panel" id="searchPanel">
+
+			<div class="site-input-panel">
+				<h6>📍 Load Site Route</h6>
+				<div class="input-group">
+					<label for="siteFromInput">Site From:</label>
+					<input type="text" id="siteFromInput" placeholder="Masukkan nama site asal" value="{{ $site_from ?? '' }}">
+				</div>
+				<div class="input-group">
+					<label for="siteToInput">Site To:</label>
+					<input type="text" id="siteToInput" placeholder="Masukkan nama site tujuan" value="{{ $site_to ?? '' }}">
+				</div>
+				<button class="load-btn" onclick="loadKMZRoute()">Load Route</button>
+				<div class="status-message" id="statusMessage"></div>
+			</div>
+
+			<div class="distance-search-panel disabled" id="searchPanel">
 				<h6>
 					<span>🔍 Cari Titik Berdasarkan Jarak</span>
 					<button class="minimize-btn" onclick="toggleMinimize()" id="minimizeBtn" title="Minimize">−</button>
@@ -199,6 +315,8 @@
 		let userLocationMarker;
 		let routeCoordinates = [];
 		let currentDirection = 'A-B';
+		let currentSiteFrom = '';
+		let currentSiteTo = '';
 
 		document.addEventListener('DOMContentLoaded', function() {
 			const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -253,17 +371,73 @@
 				});
 			}
 
-			function createCustomIcon(letter, cssClass) {
-				return L.divIcon({
-					className: 'custom-div-icon',
-					html: `<div class="custom-marker ${cssClass}">${letter}</div>`,
-					iconSize: [40, 40],
-					iconAnchor: [20, 40],
-					popupAnchor: [0, -40]
-				});
+			const siteFrom = '{{ $site_from ?? '' }}';
+			const siteTo = '{{ $site_to ?? '' }}';
+			if (siteFrom && siteTo) {
+				setTimeout(() => loadKMZRoute(), 500);
+			}
+		});
+
+		function createCustomIcon(letter, cssClass) {
+			return L.divIcon({
+				className: 'custom-div-icon',
+				html: `<div class="custom-marker ${cssClass}">${letter}</div>`,
+				iconSize: [40, 40],
+				iconAnchor: [20, 40],
+				popupAnchor: [0, -40]
+			});
+		}
+
+		function showStatus(message, type) {
+			const statusEl = document.getElementById('statusMessage');
+			statusEl.textContent = message;
+			statusEl.className = `status-message ${type}`;
+
+			if (type === 'success') {
+				setTimeout(() => {
+					statusEl.style.display = 'none';
+				}, 5000);
+			}
+		}
+
+		function clearRoute() {
+			if (kmzLayer) {
+				map.removeLayer(kmzLayer);
+			}
+			if (markerA) {
+				map.removeLayer(markerA);
+				markerA = null;
+			}
+			if (markerB) {
+				map.removeLayer(markerB);
+				markerB = null;
+			}
+			if (resultMarker) {
+				map.removeLayer(resultMarker);
+				resultMarker = null;
+			}
+			routeCoordinates = [];
+		}
+
+		function loadKMZRoute() {
+			const siteFrom = document.getElementById('siteFromInput').value.trim();
+			const siteTo = document.getElementById('siteToInput').value.trim();
+
+			if (!siteFrom || !siteTo) {
+				showStatus('Harap isi Site From dan Site To', 'error');
+				return;
 			}
 
-			const kmzPath = '/kmz-site-to-site/{{ $site_from }}_{{ $site_to }}.kmz';
+			currentSiteFrom = siteFrom;
+			currentSiteTo = siteTo;
+
+			clearRoute();
+
+			document.getElementById('searchPanel').classList.add('disabled');
+
+			showStatus('Memuat route...', 'info');
+
+			const kmzPath = `/kmz-site-to-site/${siteFrom}_${siteTo}.kmz`;
 
 			kmzLayer = L.kmzLayer(null, {
 				ballon: true,
@@ -286,7 +460,7 @@
 					markerA = L.marker([startPoint[1], startPoint[0]], {
 						icon: createCustomIcon('A', 'marker-a')
 					}).addTo(map);
-					markerA.bindPopup(`<strong>Point A</strong><br>${'{{ $site_from }}'}`);
+					markerA.bindPopup(`<strong>Point A</strong><br>${currentSiteFrom}`);
 					markerA.on('click', function() {
 						map.setView([startPoint[1], startPoint[0]], 17);
 					});
@@ -294,13 +468,17 @@
 					markerB = L.marker([endPoint[1], endPoint[0]], {
 						icon: createCustomIcon('B', 'marker-b')
 					}).addTo(map);
-					markerB.bindPopup(`<strong>Point B</strong><br>${'{{ $site_to }}'}`);
+					markerB.bindPopup(`<strong>Point B</strong><br>${currentSiteTo}`);
 					markerB.on('click', function() {
 						map.setView([endPoint[1], endPoint[0]], 17);
 					});
 
 					const totalDistance = calculateTotalDistance(routeCoordinates);
 					updateDistanceInfo(`Total jarak: ${totalDistance.toFixed(2)} meter`);
+
+					showStatus(`Route berhasil dimuat! Total jarak: ${totalDistance.toFixed(2)} meter`, 'success');
+
+					document.getElementById('searchPanel').classList.remove('disabled');
 				}
 
 				if (bounds && bounds.isValid()) {
@@ -311,13 +489,14 @@
 
 			kmzLayer.on('error', function(e) {
 				console.error('Error loading KMZ file:', e);
-				alert('Error: Tidak dapat memuat file KMZ. Pastikan file ada di: ' + kmzPath);
+				showStatus(`File KMZ tidak ditemukan: ${siteFrom}_${siteTo}.kmz`, 'error');
+				clearRoute();
 			});
 
 			fetch(kmzPath)
 				.then(response => {
 					if (!response.ok) {
-						throw new Error('File KMZ tidak ditemukan: ' + response.status);
+						throw new Error(`File KMZ tidak ditemukan (${response.status})`);
 					}
 					return response.blob();
 				})
@@ -327,9 +506,10 @@
 				})
 				.catch(error => {
 					console.error('Error fetching KMZ:', error);
-					alert('Error: ' + error.message);
+					showStatus(error.message, 'error');
+					clearRoute();
 				});
-		});
+		}
 
 		function extractRouteCoordinates(layer) {
 			routeCoordinates = [];
@@ -337,7 +517,6 @@
 			layer.eachLayer(function(subLayer) {
 				if (subLayer instanceof L.Polyline && !(subLayer instanceof L.Polygon)) {
 					const latlngs = subLayer.getLatLngs();
-
 					const coords = Array.isArray(latlngs[0]) ? latlngs[0] : latlngs;
 
 					coords.forEach(function(latlng) {
@@ -393,8 +572,6 @@
 
 				if (accumulatedDistance + segmentDistance >= targetDistance) {
 					const remainingDistance = targetDistance - accumulatedDistance;
-					const fraction = remainingDistance / segmentDistance;
-
 					const line = turf.lineString([coords[i], coords[i + 1]]);
 					foundPoint = turf.along(line, remainingDistance / 1000, {
 						units: 'kilometers'
@@ -413,12 +590,11 @@
 				}
 
 				const directionLabel = currentDirection === 'A-B' ? 'dari A' : 'dari B';
-				const startPoint = currentDirection === 'A-B' ? 'A' : 'B';
 
 				resultMarker = L.marker([pointCoords[1], pointCoords[0]], {
 					icon: L.divIcon({
 						className: 'custom-div-icon',
-						html: `<div class=\"custom-marker result-marker\">📍</div>`,
+						html: `<div class="custom-marker result-marker">📍</div>`,
 						iconSize: [40, 40],
 						iconAnchor: [20, 40],
 						popupAnchor: [0, -40]
