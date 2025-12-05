@@ -12,15 +12,15 @@ class TelegramController extends Controller
 {
     public static function webhookOtomateBot()
     {
-        $tokenBot = env('TELEGRAM_BOT_TOKEN');
-
-        if (!$tokenBot)
-        {
-            return response()->json(['error' => 'Bot token not configured'], 500);
-        }
-
         try
         {
+            $tokenBot = config('services.telegram.bot_token');
+
+            if (!$tokenBot)
+            {
+                return response()->json(['error' => 'Bot token not configured'], 500);
+            }
+
             $curl = curl_init();
 
             curl_setopt_array($curl, [
@@ -92,15 +92,15 @@ class TelegramController extends Controller
 
     public static function otomateBot()
     {
-        $tokenBot = env('TELEGRAM_BOT_TOKEN');
-
-        if (!$tokenBot)
-        {
-            return response()->json(['error' => 'Bot token not configured'], 500);
-        }
-
         try
         {
+            $tokenBot = config('services.telegram.bot_token');
+
+            if (!$tokenBot)
+            {
+                return response()->json(['error' => 'Bot token not configured'], 500);
+            }
+
             $input = file_get_contents('php://input');
             if (!$input)
             {
