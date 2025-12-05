@@ -450,7 +450,7 @@ class TelegramController extends Controller
                         [
                             [
                                 'text' => '📍 Ukur Jarak Titik',
-                                'url' => "https://otomate.telkomakses-borneo.id/map/site-to-site?site_from={$site->site_ne}&site_to={$site->site_fe}"
+                                'url' => "https://otomate.telkomakses-borneo.id/map/site-to-site?site_from={$data->site_ne}&site_to={$data->site_fe}"
                             ]
                         ]
                     ]
