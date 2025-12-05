@@ -12,15 +12,15 @@ class TelegramController extends Controller
 {
     public static function webhookOtomateBot()
     {
+        $tokenBot = env('TELEGRAM_BOT_TOKEN');
+
+        if (!$tokenBot)
+        {
+            return response()->json(['error' => 'Bot token not configured'], 500);
+        }
+
         try
         {
-            $tokenBot = env('TELEGRAM_BOT_TOKEN');
-
-            if (!$tokenBot)
-            {
-                return response()->json(['error' => 'Bot token not configured'], 500);
-            }
-
             $curl = curl_init();
 
             curl_setopt_array($curl, [
@@ -92,15 +92,15 @@ class TelegramController extends Controller
 
     public static function otomateBot()
     {
+        $tokenBot = env('TELEGRAM_BOT_TOKEN');
+
+        if (!$tokenBot)
+        {
+            return response()->json(['error' => 'Bot token not configured'], 500);
+        }
+
         try
         {
-            $tokenBot = env('TELEGRAM_BOT_TOKEN');
-
-            if (!$tokenBot)
-            {
-                return response()->json(['error' => 'Bot token not configured'], 500);
-            }
-
             $input = file_get_contents('php://input');
             if (!$input)
             {
@@ -393,7 +393,7 @@ class TelegramController extends Controller
             $message .= "Site Name FE  : " . ($data->site_name_fe ?? 'NULL') . "\n";
             $message .= "Panjang Kabel : " . ($data->real_kabel ?? 'NULL') . " m\n";
             $message .= "Jumlah Closure: NULL\n";
-            $message .= "Maincore      : NULL\n";
+            $message .= "Maincore      : T.1 C.1\n";
             $message .= "Cek RSL       : NULL\n";
             $message .= "Jenis Link    : NULL\n";
             $message .= "</code>";
@@ -408,7 +408,7 @@ class TelegramController extends Controller
                 $locations['ne'] = [
                     'latitude' => $data->site_lat_ne,
                     'longitude' => $data->site_long_ne,
-                    'title' => 'Lokasi Site NE'
+                    'title' => 'Lokasi Site ' . $data->site_ne
                 ];
             }
 
@@ -420,7 +420,7 @@ class TelegramController extends Controller
                 $locations['fe'] = [
                     'latitude' => $data->site_lat_fe,
                     'longitude' => $data->site_long_fe,
-                    'title' => 'Lokasi Site FE'
+                    'title' => 'Lokasi Site ' . $data->site_fe
                 ];
             }
 
@@ -440,13 +440,6 @@ class TelegramController extends Controller
 
                 $result['inline_button'] = [
                     'inline_keyboard' => [
-                        [
-                            [
-                                'text' => '🗺️ Rute Google Maps',
-                                'url' => "https://www.google.com/maps/dir/{$lat_ne},{$long_ne}/{$lat_fe},{$long_fe}"
-                            ]
-
-                        ],
                         [
                             [
                                 'text' => '📍 Ukur Jarak Titik',

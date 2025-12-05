@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\DashboardModel;
+use App\Models\MapModel;
 
 date_default_timezone_set('Asia/Jakarta');
 
@@ -30,6 +31,20 @@ class AjaxController extends Controller
         $status      = request()->input('status') ?? 'ALL';
 
         $data        = DashboardModel::get_monitoring_detail($regional_id, $witel_id, $start_date, $end_date, $status);
+
+        return response()->json($data);
+    }
+
+    public function map_get_sites()
+    {
+        $data = MapModel::get_all_sites();
+
+        return response()->json($data);
+    }
+
+    public function map_get_site_by_id($site_id)
+    {
+        $data = MapModel::get_site_by_id($site_id);
 
         return response()->json($data);
     }
