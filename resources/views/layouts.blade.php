@@ -274,7 +274,7 @@
 						</div>
 						<ul
 							class="perfect-scrollbar relative h-[calc(100vh-80px)] space-y-0.5 overflow-y-auto overflow-x-hidden p-4 py-0 font-semibold"
-							x-data="{ activeDropdown: 'dashboard' }">
+							x-data="{ activeDropdown: (window.location.pathname.startsWith('/dashboard') ? 'dashboard' : null) }">
 							<li class="menu nav-item">
 								<button type="button" class="nav-link group" :class="{ 'active': activeDropdown === 'dashboard' }"
 									@click="activeDropdown === 'dashboard' ? activeDropdown = null : activeDropdown = 'dashboard'">
