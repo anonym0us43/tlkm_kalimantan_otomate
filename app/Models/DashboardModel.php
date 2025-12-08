@@ -25,13 +25,12 @@ class DashboardModel extends Model
             }
         }
 
-        $query = DB::table('tb_source_tacc_ticket_mtel AS tstm')
-            ->leftJoin('tb_assign_orders AS tao', 'tstm.tt_site_id', '=', 'tao.order_id')
+        $query = DB::table('tb_source_tacc_ticket_alita AS tstta')
+            ->leftJoin('tb_assign_orders AS tao', 'tstta.tt_site_id', '=', 'tao.order_id')
             ->leftJoin('tb_project AS tp', 'tao.project_id', '=', 'tp.id')
             ->leftJoin('tb_report_orders AS tro', 'tao.id', '=', 'tro.assign_order_id')
-            ->leftJoin('tb_report_qc AS trq', 'tro.id', '=', 'trq.report_order_id')
-            ->leftJoin('tb_status_qc AS tsq', 'trq.status_qc_id', '=', 'tsq.id')
-            ->leftJoin('tb_witel AS tw', 'tstm.witel', '=', 'tw.name')
+            ->leftJoin('tb_status_qc AS tsq', 'tro.status_qc_id', '=', 'tsq.id')
+            ->leftJoin('tb_witel AS tw', 'tstta.witel', '=', 'tw.name')
             ->leftJoin('tb_regional AS tr', 'tr.id', '=', 'tw.regional_id')
             ->select(DB::raw('
                 tr.id AS regional_id,
@@ -41,26 +40,27 @@ class DashboardModel extends Model
                 tw.name AS witel_name,
 
                 SUM(CASE WHEN tao.order_id IS NULL THEN 1 ELSE 0 END) AS idle_order,
-                SUM(CASE WHEN tao.order_id IS NOT NULL AND (TIMESTAMPDIFF(MINUTE, tstm.tiket_terima, NOW()) > 0
-                    AND TIMESTAMPDIFF(MINUTE, tstm.tiket_terima, NOW()) <= 4320) THEN 1 ELSE 0 END) AS under3d_order,
-                SUM(CASE WHEN tao.order_id IS NOT NULL AND (TIMESTAMPDIFF(MINUTE, tstm.tiket_terima, NOW()) > 4320
-                    AND TIMESTAMPDIFF(MINUTE, tstm.tiket_terima, NOW()) <= 10080) THEN 1 ELSE 0 END) AS under7d_order,
-                SUM(CASE WHEN tao.order_id IS NOT NULL AND (TIMESTAMPDIFF(MINUTE, tstm.tiket_terima, NOW()) > 10080
-                    AND TIMESTAMPDIFF(MINUTE, tstm.tiket_terima, NOW()) <= 20160) THEN 1 ELSE 0 END) AS under14d_order,
-                SUM(CASE WHEN tao.order_id IS NOT NULL AND (TIMESTAMPDIFF(MINUTE, tstm.tiket_terima, NOW()) > 20160
-                    AND TIMESTAMPDIFF(MINUTE, tstm.tiket_terima, NOW()) <= 43200) THEN 1 ELSE 0 END) AS under30d_order,
-                SUM(CASE WHEN tao.order_id IS NOT NULL AND (TIMESTAMPDIFF(MINUTE, tstm.tiket_terima, NOW()) > 43200) THEN 1 ELSE 0 END) AS upper30d_order,
-                SUM(CASE WHEN tsq.name = "Reject TA" THEN 1 ELSE 0 END) AS reject_ta,
-                SUM(CASE WHEN tsq.name = "Approval TA" THEN 1 ELSE 0 END) AS approval_ta,
-                SUM(CASE WHEN tsq.name = "Reject MTEL" THEN 1 ELSE 0 END) AS reject_mtel,
-                SUM(CASE WHEN tsq.name = "Done" THEN 1 ELSE 0 END) AS done_mtel,
-                SUM(CASE WHEN tsq.name = "Rekoncile" THEN 1 ELSE 0 END) AS reconcile_mtel
+                SUM(CASE WHEN tsq.name = "Planning_Need_Approve_MTEL" THEN 1 ELSE 0 END) AS planning_need_approve_mtel,
+                SUM(CASE WHEN tsq.name = "Planning_Reject_TA" THEN 1 ELSE 0 END) AS planning_reject_ta,
+                SUM(CASE WHEN tsq.name = "Planning_Need_Approve_TA" THEN 1 ELSE 0 END) AS planning_need_approve_ta,
 
+                SUM(CASE WHEN tao.order_id IS NOT NULL AND (TIMESTAMPDIFF(MINUTE, tstta.tiket_terima, NOW()) > 0
+                    AND TIMESTAMPDIFF(MINUTE, tstta.tiket_terima, NOW()) <= 1440) THEN 1 ELSE 0 END) AS age_under1d,
+                SUM(CASE WHEN tao.order_id IS NOT NULL AND (TIMESTAMPDIFF(MINUTE, tstta.tiket_terima, NOW()) > 1440
+                    AND TIMESTAMPDIFF(MINUTE, tstta.tiket_terima, NOW()) <= 4320) THEN 1 ELSE 0 END) AS age_1d_to_3d,
+                SUM(CASE WHEN tao.order_id IS NOT NULL AND (TIMESTAMPDIFF(MINUTE, tstta.tiket_terima, NOW()) > 4320
+                    AND TIMESTAMPDIFF(MINUTE, tstta.tiket_terima, NOW()) <= 10080) THEN 1 ELSE 0 END) AS age_3d_to_7d,
+                SUM(CASE WHEN tao.order_id IS NOT NULL AND (TIMESTAMPDIFF(MINUTE, tstta.tiket_terima, NOW()) > 10080) THEN 1 ELSE 0 END) AS age_upper7d,
+
+                SUM(CASE WHEN tsq.name = "Permanenisasi_Need_Approve_TA" THEN 1 ELSE 0 END) AS permanenisasi_need_approve_ta,
+                SUM(CASE WHEN tsq.name = "Permanenisasi_Reject_TA" THEN 1 ELSE 0 END) AS permanenisasi_reject_ta,
+                SUM(CASE WHEN tsq.name = "Permanenisasi_Need_Approve_MTEL" THEN 1 ELSE 0 END) AS permanenisasi_need_approve_mtel,
+                SUM(CASE WHEN tsq.name = "Permaneninsasi_Rekon" THEN 1 ELSE 0 END) AS permanenisasi_rekon
             '))
-            ->whereRaw('DATE(tstm.tiket_terima) BETWEEN ? AND ?', [$start_date, $end_date])
+            ->whereRaw('DATE(tstta.tiket_terima) BETWEEN ? AND ?', [$start_date, $end_date])
             ->when(!empty($witel), function ($query) use ($witel)
             {
-                return $query->whereIn('tstm.witel', $witel);
+                return $query->whereIn('tstta.witel', $witel);
             });
 
         return $query->groupBy('tr.id', 'tw.id')->get();
@@ -82,69 +82,83 @@ class DashboardModel extends Model
             }
         }
 
-        $query = DB::table('tb_source_tacc_ticket_mtel AS tstm')
-            ->leftJoin('tb_assign_orders AS tao', 'tstm.tt_site_id', '=', 'tao.order_id')
+        $query = DB::table('tb_source_tacc_ticket_alita AS tstta')
+            ->leftJoin('tb_assign_orders AS tao', 'tstta.tt_site_id', '=', 'tao.order_id')
             ->leftJoin('tb_project AS tp', 'tao.project_id', '=', 'tp.id')
             ->leftJoin('tb_report_orders AS tro', 'tao.id', '=', 'tro.assign_order_id')
-            ->leftJoin('tb_report_qc AS trq', 'tro.id', '=', 'trq.report_order_id')
-            ->leftJoin('tb_status_qc AS tsq', 'trq.status_qc_id', '=', 'tsq.id')
-            ->leftJoin('tb_witel AS tw', 'tstm.witel', '=', 'tw.name')
+            ->leftJoin('tb_status_qc AS tsq', 'tro.status_qc_id', '=', 'tsq.id')
+            ->leftJoin('tb_witel AS tw', 'tstta.witel', '=', 'tw.name')
             ->leftJoin('tb_regional AS tr', 'tr.id', '=', 'tw.regional_id')
-            ->select('tstm.*', 'tp.project_name', 'tao.order_id', 'tro.id AS report_order_id', 'tsq.name AS status_qc_name')
-            ->whereRaw('DATE(tstm.tiket_terima) BETWEEN ? AND ?', [$start_date, $end_date])
+            ->select(
+                'tr.name AS regional_name',
+                'tw.name AS witel_name',
+                'tstta.start_time AS tiket_start_time',
+                'tstta.tt_site',
+                'tstta.site_down',
+                'tstta.site_name_down',
+                'tstta.latitude_site_down',
+                'tstta.longitude_site_down',
+                'tstta.site_detect',
+                'tstta.site_name_detect',
+                'tstta.tiket_terima'
+            )
+            ->whereRaw('DATE(tstta.tiket_terima) BETWEEN ? AND ?', [$start_date, $end_date])
             ->when(!empty($witel), function ($query) use ($witel)
             {
-                return $query->whereIn('tstm.witel', $witel);
+                return $query->whereIn('tstta.witel', $witel);
             });
 
         if ($status == 'idle_order')
         {
             $query->whereNull('tao.order_id');
         }
-        elseif ($status == 'under3d_order')
+        elseif ($status == 'age_under1d')
         {
             $query->whereNotNull('tao.order_id')
-                ->whereRaw('TIMESTAMPDIFF(MINUTE, tstm.tiket_terima, NOW()) > 0 AND TIMESTAMPDIFF(MINUTE, tstm.tiket_terima, NOW()) <= 4320');
+                ->whereRaw('TIMESTAMPDIFF(MINUTE, tstta.tiket_terima, NOW()) > 0 AND TIMESTAMPDIFF(MINUTE, tstta.tiket_terima, NOW()) <= 1440');
         }
-        elseif ($status == 'under7d_order')
+        elseif ($status == 'age_1d_to_3d')
         {
             $query->whereNotNull('tao.order_id')
-                ->whereRaw('TIMESTAMPDIFF(MINUTE, tstm.tiket_terima, NOW()) > 4320 AND TIMESTAMPDIFF(MINUTE, tstm.tiket_terima, NOW()) <= 10080');
+                ->whereRaw('TIMESTAMPDIFF(MINUTE, tstta.tiket_terima, NOW()) > 1440 AND TIMESTAMPDIFF(MINUTE, tstta.tiket_terima, NOW()) <= 4320');
         }
-        elseif ($status == 'under14d_order')
+        elseif ($status == 'age_3d_to_7d')
         {
             $query->whereNotNull('tao.order_id')
-                ->whereRaw('TIMESTAMPDIFF(MINUTE, tstm.tiket_terima, NOW()) > 10080 AND TIMESTAMPDIFF(MINUTE, tstm.tiket_terima, NOW()) <= 20160');
+                ->whereRaw('TIMESTAMPDIFF(MINUTE, tstta.tiket_terima, NOW()) > 4320 AND TIMESTAMPDIFF(MINUTE, tstta.tiket_terima, NOW()) <= 10080');
         }
-        elseif ($status == 'under30d_order')
+        elseif ($status == 'age_upper7d')
         {
             $query->whereNotNull('tao.order_id')
-                ->whereRaw('TIMESTAMPDIFF(MINUTE, tstm.tiket_terima, NOW()) > 20160 AND TIMESTAMPDIFF(MINUTE, tstm.tiket_terima, NOW()) <= 43200');
+                ->whereRaw('TIMESTAMPDIFF(MINUTE, tstta.tiket_terima, NOW()) > 10080');
         }
-        elseif ($status == 'upper30d_order')
+        elseif ($status == 'planning_need_approve_ta')
         {
-            $query->whereNotNull('tao.order_id')
-                ->whereRaw('TIMESTAMPDIFF(MINUTE, tstm.tiket_terima, NOW()) > 43200');
+            $query->where('tsq.name', 'Planning_Need_Approve_TA');
         }
-        elseif ($status == 'reject_ta')
+        elseif ($status == 'planning_reject_ta')
         {
-            $query->where('tsq.name', 'Reject TA');
+            $query->where('tsq.name', 'Planning_Reject_TA');
         }
-        elseif ($status == 'approval_ta')
+        elseif ($status == 'planning_need_approve_mtel')
         {
-            $query->where('tsq.name', 'Approval TA');
+            $query->where('tsq.name', 'Planning_Need_Approve_MTEL');
         }
-        elseif ($status == 'reject_mtel')
+        elseif ($status == 'permanenisasi_need_approve_ta')
         {
-            $query->where('tsq.name', 'Reject MTEL');
+            $query->where('tsq.name', 'Permanenisasi_Need_Approve_TA');
         }
-        elseif ($status == 'done_mtel')
+        elseif ($status == 'permanenisasi_reject_ta')
         {
-            $query->where('tsq.name', 'Done');
+            $query->where('tsq.name', 'Permanenisasi_Reject_TA');
         }
-        elseif ($status == 'reconcile_mtel')
+        elseif ($status == 'permanenisasi_need_approve_mtel')
         {
-            $query->where('tsq.name', 'Rekoncile');
+            $query->where('tsq.name', 'Permanenisasi_Need_Approve_MTEL');
+        }
+        elseif ($status == 'permanenisasi_rekon')
+        {
+            $query->where('tsq.name', 'Permaneninsasi_Rekon');
         }
 
         return $query->get();

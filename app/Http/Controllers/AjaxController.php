@@ -14,7 +14,7 @@ class AjaxController extends Controller
     {
         $regional_id = request()->input('regional_id') ?? session('regional_id');
         $witel_id    = request()->input('witel_id') ?? session('witel_id');
-        $start_date  = request()->input('start_date') ?? date('Y-m-d');
+        $start_date  = request()->input('start_date') ?? date('Y-m-01');
         $end_date    = request()->input('end_date') ?? date('Y-m-d');
 
         $data        = DashboardModel::get_monitoring($regional_id, $witel_id, $start_date, $end_date);
@@ -24,11 +24,20 @@ class AjaxController extends Controller
 
     public function dashboard_monitoring_detail()
     {
-        $regional_id = request()->input('regional_id') ?? session('regional_id');
-        $witel_id    = request()->input('witel_id') ?? session('witel_id');
-        $start_date  = request()->input('start_date') ?? date('Y-m-d');
+        $regional_id = request()->input('regional_id');
+        $witel_id    = request()->input('witel_id');
+        $start_date  = request()->input('start_date') ?? date('Y-m-01');
         $end_date    = request()->input('end_date') ?? date('Y-m-d');
         $status      = request()->input('status') ?? 'ALL';
+
+        if (empty($regional_id))
+        {
+            $regional_id = 'ALL';
+        }
+        if (empty($witel_id))
+        {
+            $witel_id = 'ALL';
+        }
 
         $data        = DashboardModel::get_monitoring_detail($regional_id, $witel_id, $start_date, $end_date, $status);
 
