@@ -13,6 +13,11 @@ class DashboardController extends Controller
         return view('dashboard.monitoring');
     }
 
+    public function monitoring_detail()
+    {
+        return view('dashboard.monitoring-detail');
+    }
+
     public function rekoncile()
     {
         return view('dashboard.rekoncile');

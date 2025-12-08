@@ -25,6 +25,7 @@ Route::middleware(['guest'])->group(function ()
     Route::prefix('dashboard')->group(function ()
     {
         Route::get('monitoring', [DashboardController::class, 'monitoring'])->name('dashboard.monitoring');
+        Route::get('monitoring-detail', [DashboardController::class, 'monitoring_detail'])->name('dashboard.monitoring.detail');
         Route::get('rekoncile', [DashboardController::class, 'rekoncile'])->name('dashboard.rekoncile');
     });
 
