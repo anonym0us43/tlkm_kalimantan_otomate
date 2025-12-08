@@ -50,11 +50,4 @@ class AjaxController extends Controller
 
         return response()->json($data);
     }
-
-    public function map_get_site_by_id($site_id)
-    {
-        $data = MapModel::get_site_by_id($site_id);
-
-        return response()->json($data);
-    }
 }

@@ -32,7 +32,6 @@ Route::middleware(['guest'])->group(function ()
     {
         Route::get('/', [MapController::class, 'index'])->name('map.index');
         Route::get('site-to-site', [MapController::class, 'site_to_site'])->name('map.site.to.site');
-        Route::get('coordinate-to-coordinate', [MapController::class, 'coordiate_to_coordinate'])->name('map.coordinate.to.coordinate');
     });
 
     Route::prefix('ajax')->group(function ()

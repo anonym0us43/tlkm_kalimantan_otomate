@@ -1,153 +1,60 @@
 @extends('layouts')
 
 @section('styles')
-	<link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
 	<style>
-		.listing-table th,
-		.listing-table td {
-			text-align: center;
+		.detail-table th,
+		.detail-table td {
+			text-align: center !important;
 			vertical-align: middle !important;
 			padding: 8px !important;
 			font-size: 13px !important;
-			border: 1px solid #ddd;
 		}
 
-		.listing-table th {
-			font-weight: 600;
-		}
-
-		.listing-table {
-			border-collapse: collapse;
-			width: 100%;
-		}
-
-		.listing-table tbody tr:hover {
-			background-color: #f5f5f5 !important;
-			transition: background 0.2s;
+		.detail-table th {
+			font-weight: 600 !important;
 		}
 	</style>
 @endsection
 
-@section('title', 'Dashboard Listing')
+@section('title', 'Dashboard Rekonsiliasi')
 
 @section('content')
 	<div class="panel mt-6">
-		<h5 class="text-lg font-semibold dark:text-white-light mb-4">Dashboard Listing</h5>
+		<h5 class="text-lg font-semibold dark:text-white-light mb-4">Dashboard Rekonsiliasi</h5>
 		<div class="table-responsive">
-			<table class="listing-table" id="listingTable">
+			<table class="table table-bordered table-hover detail-table mt-4" id="rekoncile-table">
 				<thead>
 					<tr>
-						<th>Start</th>
-						<th>IT Open</th>
-						<th>Tiket</th>
-						<th>Witel</th>
-						<th>Site Down ID</th>
-						<th>Site Down Name</th>
-						<th>Site Detector ID</th>
-						<th>Site Detector Koordinat</th>
-						<th>Jenis Perbaikan</th>
-						<th>Segment</th>
-						<th>Sub Segment</th>
+						<th rowspan="3">WITEL</th>
+						<th colspan="3">PLANNING</th>
+						<th rowspan="2" colspan="4">UMUR</th>
+						<th colspan="3">PERMANENISASI</th>
+						<th rowspan="3">REKON</th>
+						<th rowspan="3">TOTAL</th>
+					</tr>
+					<tr>
+						<th colspan="2">TL TA</th>
+						<th colspan="1">MTEL</th>
+						<th colspan="2">TL TA</th>
+						<th colspan="1">MTEL</th>
+					</tr>
+					<tr>
+						<th>NEED APPROVE</th>
+						<th>REJECT</th>
+						<th>NEED APPROVE</th>
+						<th>&lt;1 HARI</th>
+						<th>&gt; 1 HARI</th>
+						<th>&gt; 3 HARI</th>
+						<th>&gt; 7 HARI</th>
+						<th>NEED APPROVE</th>
+						<th>REJECT</th>
+						<th>NEED APPROVE</th>
 					</tr>
 				</thead>
-				<tbody>
-					@php
-						$data = [
-						    [
-						        '2025-11-01',
-						        'INC-20251101-0009227',
-						        'SAMARINDA',
-						        '23BLCO062',
-						        'SEGUMBANG1_PL',
-						        '23BLCO042',
-						        'BERINGIN_B - 3.51076542',
-						        'ODC',
-						        'ODC',
-						        'Distribusi',
-						        'FO Cut Kabel',
-						    ],
-						    [
-						        '2025-11-01',
-						        'INC-20251101-0008189',
-						        'SAMARINDA',
-						        '22SMR0002',
-						        'EKONOMI_LOA_BUAH_PL',
-						        '22SMR0008',
-						        'LOA_BUAH_PL -0.56477785',
-						        'Temporer',
-						        'Distribusi',
-						        'FO Cut Kabel',
-						        'FO Cut Kabel',
-						    ],
-						    [
-						        '2025-11-01',
-						        'INC-20251101-0007696',
-						        'SAMARINDA',
-						        '22SMR0002',
-						        'EKONOMI_LOA_BUAH_PL',
-						        '22SMR0007',
-						        'LOA_BUAH_PL -0.56477365',
-						        'Temporer',
-						        'Distribusi',
-						        'FO Cut Kabel',
-						        'FO Cut Kabel',
-						    ],
-						    [
-						        '2025-11-01',
-						        'INC-20251101-0001577',
-						        'BALIKPAPAN',
-						        '23BP00156',
-						        'PROJAKAL_AMPAR_BPP_PL',
-						        '23BP00156',
-						        'GIRI_REO_T -1.19463,116.852',
-						        'Hasil pengukuran di site',
-						        'Distribusi',
-						        'FO Cut Kabel',
-						        'FO Cut Kabel',
-						    ],
-						    [
-						        '2025-11-01',
-						        'INC-20251101-0001985',
-						        'BANJARMASIN',
-						        '23ITL0078',
-						        'SUNGAL_BULUH_CM',
-						        '23ITL0011',
-						        'PAWARINGIN -2.2574362281058,115.3',
-						        'Hasil pengukuran di site',
-						        'Distribusi',
-						        'FO Cut Kabel',
-						        'FO Cut Kabel',
-						    ],
-						    [
-						        '2025-11-01',
-						        'INC-20251101-0001984',
-						        'PONTIANAK',
-						        '20PTK1050',
-						        'TRI_STORE',
-						        '20PTK1096',
-						        'PERUM_PERI -0.06333750',
-						        'Permanen',
-						        'ODC',
-						        'ODC',
-						        'ODC',
-						    ],
-						];
-					@endphp
-					@foreach ($data as $row)
-						<tr>
-							<td>{{ $row[0] }}</td>
-							<td>{{ $row[1] }}</td>
-							<td>{{ $row[2] }}</td>
-							<td>{{ $row[3] }}</td>
-							<td>{{ $row[4] }}</td>
-							<td>{{ $row[5] }}</td>
-							<td>{{ $row[6] }}</td>
-							<td>{{ $row[7] }}</td>
-							<td>{{ $row[8] }}</td>
-							<td>{{ $row[9] }}</td>
-							<td>{{ $row[10] }}</td>
-						</tr>
-					@endforeach
+				<tbody id="rekoncile-tbody">
+					<tr>
+						<td colspan="13">Loading...</td>
+					</tr>
 				</tbody>
 			</table>
 		</div>
@@ -155,11 +62,72 @@
 @endsection
 
 @section('scripts')
-	<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-	<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
 	<script>
-		$(document).ready(function() {
-			$('#listingTable').DataTable({});
+		function formatRupiah(value) {
+			return new Intl.NumberFormat('id-ID', {
+				style: 'currency',
+				currency: 'IDR',
+				minimumFractionDigits: 0,
+				maximumFractionDigits: 0
+			}).format(value);
+		}
+
+		function generateDummyData() {
+			const witels = [
+				'BALIKPAPAN',
+				'SAMARINDA',
+				'TARAKAN',
+				'BANJARMASIN',
+				'PALANGKARAYA',
+				'PONTIANAK'
+			];
+
+			const tbody = document.getElementById('rekoncile-tbody');
+			tbody.innerHTML = '';
+
+			let grandTotal = 0;
+			const columnTotals = Array(11).fill(0);
+
+			witels.forEach((witel) => {
+				const values = [
+					Math.floor(Math.random() * 5000000000) + 1000000000,
+					Math.floor(Math.random() * 3000000000) + 500000000,
+					Math.floor(Math.random() * 4000000000) + 800000000,
+					Math.floor(Math.random() * 2000000000) + 500000000,
+					Math.floor(Math.random() * 3000000000) + 1000000000,
+					Math.floor(Math.random() * 2500000000) + 800000000,
+					Math.floor(Math.random() * 1500000000) + 300000000,
+					Math.floor(Math.random() * 3000000000) + 1000000000,
+					Math.floor(Math.random() * 2000000000) + 500000000,
+					Math.floor(Math.random() * 4000000000) + 1000000000,
+					Math.floor(Math.random() * 2000000000) + 500000000
+				];
+
+				const rowTotal = values.reduce((a, b) => a + b, 0);
+
+				let row = `<tr>
+					<td>${witel}</td>`;
+
+				values.forEach((val, idx) => {
+					row += `<td>${formatRupiah(val)}</td>`;
+					columnTotals[idx] += val;
+				});
+
+				row += `<td class="font-bold">${formatRupiah(rowTotal)}</td></tr>`;
+				tbody.innerHTML += row;
+				grandTotal += rowTotal;
+			});
+
+			let totalRow = '<tr class="font-bold bg-gray-100 dark:bg-gray-800"><td>TOTAL</td>';
+			columnTotals.forEach((total) => {
+				totalRow += `<td>${formatRupiah(total)}</td>`;
+			});
+			totalRow += `<td>${formatRupiah(grandTotal)}</td></tr>`;
+			tbody.innerHTML += totalRow;
+		}
+
+		document.addEventListener('DOMContentLoaded', function() {
+			generateDummyData();
 		});
 	</script>
 @endsection
