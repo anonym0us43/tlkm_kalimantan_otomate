@@ -90,6 +90,7 @@ class DashboardModel extends Model
             ->leftJoin('tb_witel AS tw', 'tstta.witel', '=', 'tw.name')
             ->leftJoin('tb_regional AS tr', 'tr.id', '=', 'tw.regional_id')
             ->select(
+                'tstta.id AS row_id',
                 'tr.name AS regional_name',
                 'tw.name AS witel_name',
                 'tstta.start_time AS tiket_start_time',

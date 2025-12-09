@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\DashboardModel;
 use App\Models\MapModel;
+use App\Models\SettingModel;
+use App\Models\DashboardModel;
+use App\Models\OrderModel;
 
 date_default_timezone_set('Asia/Jakarta');
 
@@ -47,6 +48,22 @@ class AjaxController extends Controller
     public function map_get_sites()
     {
         $data = MapModel::get_all_sites();
+
+        return response()->json($data);
+    }
+
+    public function designator_khs()
+    {
+        $data = SettingModel::get_designator();
+
+        return response()->json($data);
+    }
+
+    public function tacc_ticket_alita_detail()
+    {
+        $id   = request()->input('id');
+
+        $data = OrderModel::get_ticket_alita_detail($id);
 
         return response()->json($data);
     }

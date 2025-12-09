@@ -37,6 +37,11 @@ Route::middleware(['guest'])->group(function ()
 
     Route::prefix('ajax')->group(function ()
     {
+        Route::prefix('order')->group(function ()
+        {
+            Route::get('tacc-ticket-alita-detail', [AjaxController::class, 'tacc_ticket_alita_detail'])->name('ajax.order.tacc.ticket.alita.detail');
+        });
+
         Route::prefix('dashboard')->group(function ()
         {
             Route::prefix('monitoring')->group(function ()
@@ -53,6 +58,11 @@ Route::middleware(['guest'])->group(function ()
                 Route::get('/', [AjaxController::class, 'map_get_sites'])->name('ajax.map.sites');
                 Route::get('{site_id}', [AjaxController::class, 'map_get_site_by_id'])->name('ajax.map.site.by.id');
             });
+        });
+
+        Route::prefix('setting')->group(function ()
+        {
+            Route::get('designator-khs', [AjaxController::class, 'designator_khs'])->name('ajax.setting.designator.khs');
         });
     });
 });
