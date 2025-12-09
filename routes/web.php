@@ -56,7 +56,7 @@ Route::middleware(['guest'])->group(function ()
             Route::prefix('sites')->group(function ()
             {
                 Route::get('/', [AjaxController::class, 'map_get_sites'])->name('ajax.map.sites');
-                Route::get('{site_id}', [AjaxController::class, 'map_get_site_by_id'])->name('ajax.map.site.by.id');
+                Route::get('site-to-site', [AjaxController::class, 'map_get_site_to_site'])->name('ajax.map.site.to.site');
             });
         });
 

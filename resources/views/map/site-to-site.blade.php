@@ -25,8 +25,23 @@
 			box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 			white-space: nowrap;
 			max-width: 150px;
-			overflow: hidden;
+			overflow: visible;
 			text-overflow: ellipsis;
+			position: relative;
+		}
+
+		.custom-marker::after {
+			content: '';
+			position: absolute;
+			bottom: -8px;
+			left: 50%;
+			transform: translateX(-50%);
+			width: 0;
+			height: 0;
+			border-left: 8px solid transparent;
+			border-right: 8px solid transparent;
+			border-top: 8px solid;
+			border-top-color: inherit;
 		}
 
 		.marker-a {
@@ -35,10 +50,18 @@
 			border-color: #2E7D32;
 		}
 
+		.marker-a::after {
+			border-top-color: #4CAF50;
+		}
+
 		.marker-b {
 			background-color: #2196F3;
 			color: white;
 			border-color: #1565C0;
+		}
+
+		.marker-b::after {
+			border-top-color: #2196F3;
 		}
 
 		.site-input-panel {

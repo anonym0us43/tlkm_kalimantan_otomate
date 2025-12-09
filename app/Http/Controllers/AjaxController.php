@@ -52,6 +52,16 @@ class AjaxController extends Controller
         return response()->json($data);
     }
 
+    public function map_get_site_to_site()
+    {
+        $site_from = request()->input('site_from');
+        $site_to   = request()->input('site_to');
+
+        $data = MapModel::get_site_to_site($site_from, $site_to);
+
+        return response()->json($data);
+    }
+
     public function designator_khs()
     {
         $data = SettingModel::get_designator();
