@@ -172,15 +172,92 @@
 
 		.material-row {
 			background: #fff;
-			padding: 12px;
-			border-radius: 6px;
+			padding: 16px;
+			border-radius: 8px;
 			border: 1px solid #e5e7eb;
 			transition: all 0.2s ease;
+			margin-bottom: 12px;
 		}
 
 		.material-row:hover {
 			border-color: #4361ee;
 			box-shadow: 0 2px 4px rgba(67, 97, 238, 0.1);
+		}
+
+		.material-main-row {
+			display: flex;
+			align-items: flex-end;
+			gap: 16px;
+			margin-bottom: 12px;
+		}
+
+		.material-field-group {
+			flex: 1;
+			min-width: 0;
+			display: flex;
+			flex-direction: column;
+		}
+
+		.material-field-label {
+			font-size: 12px;
+			font-weight: 600;
+			color: #6b7280;
+			margin-bottom: 6px;
+			display: block;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+			height: 18px;
+		}
+
+		.material-select-wrapper {
+			width: 100%;
+		}
+
+		.material-select-wrapper .select2-container {
+			width: 100% !important;
+		}
+
+		.material-select-wrapper .select2-container .select2-selection--single {
+			height: 42px !important;
+			display: flex;
+			align-items: center;
+		}
+
+		.material-select-wrapper .select2-container .select2-selection__rendered {
+			line-height: 42px !important;
+			padding-left: 12px !important;
+		}
+
+		.material-select-wrapper .select2-container .select2-selection__arrow {
+			height: 40px !important;
+		}
+
+		.qty-field-group {
+			flex: 0 0 auto;
+			min-width: 180px;
+			display: flex;
+			flex-direction: column;
+		}
+
+		.qty-field-group .form-input {
+			height: 42px;
+		}
+
+		.material-actions {
+			flex: 0 0 auto;
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			height: 42px;
+		}
+
+		.material-actions .btn {
+			height: 42px;
+			width: 42px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			padding: 0;
 		}
 
 		.material-header {
@@ -205,14 +282,84 @@
 			border-radius: 0 6px 6px 0;
 		}
 
-		.qty-input {
-			width: 100px !important;
-			text-align: center;
-			font-weight: 600;
+		.qty-wrapper {
+			width: 100%;
 		}
 
 		.select2-container {
 			font-size: 14px;
+		}
+
+		@media (max-width: 768px) {
+			.material-main-row {
+				flex-direction: column;
+				gap: 12px;
+			}
+
+			.qty-field-group {
+				min-width: 100%;
+			}
+
+			.material-actions {
+				padding-top: 0;
+				justify-content: flex-end;
+			}
+		}
+
+		.coordinate-input-group {
+			margin-top: 8px;
+			display: none;
+			padding: 8px 12px;
+			background: #f0f4ff;
+			border-radius: 6px;
+			border: 1px solid #c7d2fe;
+		}
+
+		.coordinate-input-group.show {
+			display: block;
+		}
+
+		.coordinate-inputs {
+			margin-top: 8px;
+		}
+
+		.coordinate-label {
+			font-size: 12px;
+			font-weight: 600;
+			color: #4338ca;
+			margin-bottom: 4px;
+			display: flex;
+			align-items: center;
+			gap: 4px;
+		}
+
+		.coordinate-input {
+			width: 100%;
+			padding: 6px 10px;
+			border: 1px solid #c7d2fe;
+			border-radius: 4px;
+			font-size: 13px;
+		}
+
+		.coordinate-input:focus {
+			border-color: #4361ee;
+			outline: none;
+			box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.1);
+		}
+
+		.dark .coordinate-input-group {
+			background: #1e3a8a;
+			border-color: #3730a3;
+		}
+
+		.dark .coordinate-label {
+			color: #a5b4fc;
+		}
+
+		.dark .coordinate-input {
+			background: #1e293b;
+			border-color: #475569;
+			color: #e5e7eb;
 		}
 
 		.empty-state {
@@ -379,148 +526,6 @@
 
 		.photo-modal-close:hover {
 			background: rgba(255, 255, 255, 0.3);
-		}
-
-		.drag-drop-area {
-			border: 2px dashed #d1d5db;
-			border-radius: 8px;
-			padding: 32px 16px;
-			text-align: center;
-			cursor: pointer;
-			transition: all 0.3s ease;
-			background: #fafafa;
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			justify-content: center;
-		}
-
-		.drag-drop-area:hover {
-			border-color: #4361ee;
-			background: #f0f4ff;
-		}
-
-		.drag-drop-area.dragover {
-			border-color: #4361ee;
-			background: #f0f4ff;
-			box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
-		}
-
-		.drag-drop-area svg {
-			width: 32px;
-			height: 32px;
-			color: #9ca3af;
-			margin: 0 auto 8px;
-		}
-
-		.drag-drop-area p {
-			margin: 0;
-			color: #6b7280;
-			font-size: 14px;
-		}
-
-		.drag-drop-area .drag-drop-highlight {
-			color: #4361ee;
-			font-weight: 500;
-		}
-
-		.drag-drop-area small {
-			display: block;
-			color: #9ca3af;
-			font-size: 12px;
-			margin-top: 4px;
-		}
-
-		.single-photo-container {
-			position: relative;
-		}
-
-		.single-photo-preview {
-			position: relative;
-			width: 100%;
-			aspect-ratio: 16/9;
-			border-radius: 8px;
-			overflow: hidden;
-			border: 1px solid #e5e7eb;
-			background: #f9fafb;
-		}
-
-		.single-photo-preview.active {
-			display: block !important;
-		}
-
-		.single-photo-preview .preview-img {
-			width: 100%;
-			height: 100%;
-			object-fit: cover;
-			display: block;
-		}
-
-		.single-photo-preview .clear-photo-btn {
-			position: absolute;
-			top: 8px;
-			right: 8px;
-			background: rgba(220, 38, 38, 0.9);
-			color: white;
-			border: none;
-			padding: 8px 12px;
-			border-radius: 6px;
-			cursor: pointer;
-			font-size: 13px;
-			font-weight: 500;
-			transition: all 0.2s ease;
-		}
-
-		.single-photo-preview .clear-photo-btn:hover {
-			background: rgba(220, 38, 38, 1);
-		}
-
-		.photo-preview {
-			display: grid;
-			grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-			gap: 12px;
-			margin-top: 12px;
-		}
-
-		.photo-preview-item {
-			position: relative;
-			aspect-ratio: 1;
-			border-radius: 6px;
-			overflow: hidden;
-			border: 1px solid #e5e7eb;
-			background: #f9fafb;
-		}
-
-		.photo-preview-item img {
-			width: 100%;
-			height: 100%;
-			object-fit: cover;
-		}
-
-		.photo-preview-item .remove-photo {
-			position: absolute;
-			top: 4px;
-			right: 4px;
-			background: rgba(220, 38, 38, 0.9);
-			color: white;
-			border: none;
-			width: 24px;
-			height: 24px;
-			border-radius: 4px;
-			cursor: pointer;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			font-size: 14px;
-			transition: all 0.2s ease;
-		}
-
-		.photo-preview-item .remove-photo:hover {
-			background: rgba(220, 38, 38, 1);
-		}
-
-		.drag-drop-input {
-			display: none;
 		}
 
 		.modal-backdrop .select2-dropdown {
@@ -992,7 +997,7 @@
 											</label>
 											<div class="flex gap-2 mb-2">
 												<input type="text" name="coordinate" class="form-input flex-1"
-													placeholder="Contoh: -6.200000, 106.816666" required>
+													placeholder="Contoh: -1.2563759829104284, 116.86768575387761" required>
 												<button type="button" class="btn btn-primary btn-sm" data-modal-id="${modalId}" title="Ambil lokasi dari GPS">
 													<i class="bi bi-geo-alt-fill"></i>
 												</button>
@@ -1128,7 +1133,6 @@
 			const renderSinglePoint = (lat, lng) => {
 				const singleMap = L.map(`mapContainer-${rowId}`).setView([lat, lng], 15);
 				L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-					attribution: '&copy; OpenStreetMap contributors',
 					maxZoom: 19
 				}).addTo(singleMap);
 				L.marker([lat, lng], {
@@ -1148,7 +1152,6 @@
 			const renderMapOnly = () => {
 				const emptyMap = L.map(`mapContainer-${rowId}`).setView([null, null], 5);
 				L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-					attribution: '&copy; OpenStreetMap contributors',
 					maxZoom: 19
 				}).addTo(emptyMap);
 				window[`map_${modalId}`] = emptyMap;
@@ -1176,7 +1179,6 @@
 
 					const map = L.map(`mapContainer-${rowId}`).setView([fromLat, fromLng], 13);
 					L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-						attribution: '&copy; OpenStreetMap contributors',
 						maxZoom: 19
 					}).addTo(map);
 
@@ -1228,25 +1230,45 @@
 			const materialRows = modal.querySelector('.material-rows');
 
 			const rowDiv = document.createElement('div');
-			rowDiv.className = 'material-row flex items-center gap-3';
+			rowDiv.className = 'material-row';
 			rowDiv.innerHTML = `
-				<div class="flex-1">
-					<select name="materials[]" class="form-select material-select w-full" required>
-						<option value="">Pilih material...</option>
-						${materialsData.map(m => `<option value="${m.id}" data-description="${m.item_description || ''}">${m.item_designator}</option>`).join('')}
-					</select>
+			<div class="material-main-row">
+				<div class="material-field-group">
+					<label class="material-field-label">Material</label>
+					<div class="material-select-wrapper">
+						<select name="materials[]" class="form-select material-select w-full" required>
+							<option value="">Pilih material...</option>
+							${materialsData.map(m => `<option value="${m.id}" data-designator="${m.item_designator}" data-description="${m.item_description || ''}">${m.item_designator}</option>`).join('')}
+						</select>
+					</div>
 				</div>
-				<div class="flex items-center gap-2">
-					<span class="text-sm text-gray-600 font-medium">Qty:</span>
-					<input type="number" name="material_qty[]" class="form-input qty-input" min="1" value="1" required>
+				<div class="qty-field-group">
+					<label class="material-field-label">Qty</label>
+					<div class="qty-wrapper">
+						<input type="number" name="material_qty[]" class="form-input" min="1" value="1" required>
+					</div>
 				</div>
-				<button type="button" class="btn btn-sm btn-outline-danger remove-material-btn">
+				<div class="material-actions">
+					<button type="button" class="btn btn-sm btn-outline-danger remove-material-btn">
+						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+						</svg>
+					</button>
+				</div>
+			</div>
+			<div class="coordinate-input-group">
+				<div class="coordinate-label">
 					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
 					</svg>
-				</button>
-			`;
-
+					Koordinat Material (Latitude, Longitude)
+				</div>
+				<div class="coordinate-inputs">
+					<input type="text" name="material_coordinate[]" class="coordinate-input" placeholder="-6.200000, 106.816666">
+				</div>
+			</div>
+		`;
 			materialRows.appendChild(rowDiv);
 
 			const newSelect = rowDiv.querySelector('.material-select');
@@ -1276,6 +1298,26 @@
 					return null;
 				}
 			});
+
+			$(newSelect).on('change', function() {
+				const selectedOption = $(this).find('option:selected');
+				const designator = selectedOption.data('designator') || '';
+				const coordinateGroup = $(this).closest('.material-row').find('.coordinate-input-group');
+				const coordinateInputs = coordinateGroup.find('.coordinate-input');
+
+				const requiresCoordinate = designator.includes('SC-OF-SM') || designator.includes('PU-S');
+
+				if (requiresCoordinate) {
+					coordinateGroup.addClass('show');
+					coordinateInputs.prop('required', true);
+				} else {
+					coordinateGroup.removeClass('show');
+					coordinateInputs.prop('required', false);
+					coordinateInputs.val('');
+				}
+			});
+
+
 		}
 
 		function initializeMaterialRows(modalId) {
@@ -1315,10 +1357,29 @@
 							return null;
 						}
 					});
+
+					$(select).on('change', function() {
+						const selectedOption = $(this).find('option:selected');
+						const designator = selectedOption.data('designator') || '';
+						const coordinateGroup = $(this).closest('.material-row').find(
+							'.coordinate-input-group');
+						const coordinateInputs = coordinateGroup.find('.coordinate-input');
+
+						const requiresCoordinate = designator.includes('SC-OF-SM') || designator.includes(
+							'PU-S');
+
+						if (requiresCoordinate) {
+							coordinateGroup.addClass('show');
+							coordinateInputs.prop('required', true);
+						} else {
+							coordinateGroup.removeClass('show');
+							coordinateInputs.prop('required', false);
+							coordinateInputs.val('');
+						}
+					});
 				});
 			}
 		}
-
 		document.addEventListener('DOMContentLoaded', function() {
 			fetch('/ajax/setting/designator-khs')
 				.then(res => res.json())
