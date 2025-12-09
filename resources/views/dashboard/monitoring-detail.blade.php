@@ -77,6 +77,8 @@
 		@media (max-width: 768px) {
 			.modal-content {
 				margin: 0;
+				max-width: 100%;
+				width: 100%;
 			}
 
 			.modal-backdrop {
@@ -88,30 +90,121 @@
 				gap: 12px;
 			}
 
-			.material-row .flex-1 {
-				width: 100%;
+			.grid.grid-cols-2 {
+				grid-template-columns: 1fr;
 			}
 
-			.material-row .flex.items-center {
-				width: 100%;
-				justify-content: space-between;
+			.form-section {
+				padding: 12px;
+				margin-bottom: 16px;
 			}
 
-			.qty-input {
-				width: 80px !important;
+			.info-grid {
+				grid-template-columns: 1fr;
+			}
+
+			.maps-container {
+				height: 300px;
+			}
+
+			.photos-grid {
+				grid-template-columns: repeat(2, 1fr);
+			}
+
+			.material-main-row {
+				flex-direction: column;
+				align-items: stretch;
+			}
+
+			.material-field-group {
+				flex: 1 !important;
+			}
+
+			.qty-field-group {
+				flex: 1 !important;
+				min-width: 100% !important;
+			}
+
+			.material-actions {
+				width: 100%;
+				justify-content: flex-start;
+			}
+
+			.material-actions .btn {
+				flex: 1;
+			}
+
+			.upload-box {
+				height: 200px;
+			}
+
+			.modal-header {
+				padding: 12px;
+				flex-wrap: wrap;
 			}
 
 			.modal-header h5 {
 				font-size: 16px;
 			}
 
-			.form-section {
-				padding: 12px;
+			.flex.gap-2 {
+				flex-direction: column;
 			}
 
-			.info-grid {
-				grid-template-columns: 1fr !important;
+			.flex.gap-2 button {
+				width: 100%;
 			}
+
+			.action-area {
+				flex-direction: column;
+			}
+
+			.action-area button {
+				width: 100%;
+			}
+
+			.flex.justify-end {
+				flex-direction: column;
+				gap: 8px;
+			}
+
+			.flex.justify-end button {
+				width: 100%;
+			}
+
+			.material-header {
+				flex-direction: column;
+				gap: 12px;
+			}
+
+			.material-header button {
+				width: 100%;
+			}
+		}
+
+		.material-row .flex-1 {
+			width: 100%;
+		}
+
+		.material-row .flex.items-center {
+			width: 100%;
+			justify-content: space-between;
+		}
+
+		.qty-input {
+			width: 80px !important;
+		}
+
+		.modal-header h5 {
+			font-size: 16px;
+		}
+
+		.form-section {
+			padding: 10px;
+		}
+
+		.info-grid {
+			grid-template-columns: 1fr !important;
 		}
 
 		@keyframes fadeIn {
@@ -140,10 +233,12 @@
 			background: #f9fafb;
 			padding: 16px;
 			border-radius: 8px;
-			margin-bottom: 20px;
+			margin-bottom: 12px;
 			border: 1px solid #e5e7eb;
 			overflow: visible;
 			position: relative;
+			width: 100%;
+			box-sizing: border-box;
 		}
 
 		.form-label {
@@ -161,6 +256,8 @@
 			padding: 10px 12px;
 			font-size: 14px;
 			transition: all 0.2s ease;
+			width: 100%;
+			box-sizing: border-box;
 		}
 
 		.form-input:focus,
@@ -176,7 +273,7 @@
 			border-radius: 8px;
 			border: 1px solid #e5e7eb;
 			transition: all 0.2s ease;
-			margin-bottom: 12px;
+			margin-bottom: 8px;
 		}
 
 		.material-row:hover {
@@ -188,7 +285,7 @@
 			display: flex;
 			align-items: flex-end;
 			gap: 16px;
-			margin-bottom: 12px;
+			margin-bottom: 8px;
 		}
 
 		.material-field-group {
@@ -230,6 +327,14 @@
 
 		.material-select-wrapper .select2-container .select2-selection__arrow {
 			height: 40px !important;
+		}
+
+		.material-select-wrapper .select2-container .select2-selection__clear {
+			position: absolute !important;
+			right: 30px !important;
+			top: 50% !important;
+			transform: translateY(-50%) !important;
+			margin: 0 !important;
 		}
 
 		.qty-field-group {
@@ -290,20 +395,11 @@
 			font-size: 14px;
 		}
 
-		@media (max-width: 768px) {
-			.material-main-row {
-				flex-direction: column;
-				gap: 12px;
-			}
-
-			.qty-field-group {
-				min-width: 100%;
-			}
-
-			.material-actions {
-				padding-top: 0;
-				justify-content: flex-end;
-			}
+		.material-rows {
+			width: 100%;
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
 		}
 
 		.coordinate-input-group {
@@ -313,6 +409,8 @@
 			background: #f0f4ff;
 			border-radius: 6px;
 			border: 1px solid #c7d2fe;
+			width: 100%;
+			box-sizing: border-box;
 		}
 
 		.coordinate-input-group.show {
@@ -321,6 +419,7 @@
 
 		.coordinate-inputs {
 			margin-top: 8px;
+			width: 100%;
 		}
 
 		.coordinate-label {
@@ -331,6 +430,46 @@
 			display: flex;
 			align-items: center;
 			gap: 4px;
+		}
+
+		.coordinate-input {
+			width: 100%;
+			padding: 6px 10px;
+			border: 1px solid #c7d2fe;
+			border-radius: 4px;
+			font-size: 13px;
+			box-sizing: border-box;
+		}
+
+		.coordinate-input:focus {
+			border-color: #4361ee;
+			outline: none;
+			box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.1);
+		}
+
+		@media (max-width: 768px) {
+			.material-main-row {
+				flex-direction: column;
+				gap: 12px;
+			}
+
+			.qty-field-group {
+				min-width: 100%;
+				flex: 1 !important;
+			}
+
+			.material-field-group {
+				flex: 1 !important;
+			}
+
+			.material-actions {
+				width: 100%;
+				justify-content: flex-start;
+			}
+
+			.material-actions .btn {
+				flex: 1;
+			}
 		}
 
 		.coordinate-input {
@@ -370,29 +509,37 @@
 		}
 
 		.info-grid {
-			display: grid;
-			grid-template-columns: repeat(2, 1fr);
-			gap: 12px;
+			width: 100%;
+			border-collapse: collapse;
+			margin-top: 6px;
+			font-size: 11px;
 		}
 
-		.info-item {
-			display: flex;
-			flex-direction: column;
-			gap: 4px;
-		}
+		.info-item {}
 
 		.info-label {
 			font-size: 11px;
 			font-weight: 600;
 			color: #6b7280;
 			text-transform: uppercase;
-			letter-spacing: 0.5px;
+			padding: 2px 6px;
+			white-space: nowrap;
+			border: none;
+			background: transparent;
+		}
+
+		.info-label::after {
+			content: ':';
+			margin-left: 2px;
 		}
 
 		.info-value {
-			font-size: 12px;
+			font-size: 11px;
 			font-weight: 500;
 			color: #1f2937;
+			padding: 2px 6px;
+			border: none;
+			background: transparent;
 			word-break: break-word;
 		}
 
@@ -429,6 +576,8 @@
 			grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
 			gap: 12px;
 			margin-top: 12px;
+			width: 100%;
+			box-sizing: border-box;
 		}
 
 		.photo-item {
@@ -439,6 +588,7 @@
 			border: 1px solid #e5e7eb;
 			transition: all 0.2s ease;
 			cursor: pointer;
+			width: 100%;
 		}
 
 		.photo-item:hover {
@@ -897,44 +1047,46 @@
 												</svg>
 												Information Order
 											</span>
-											<div class="info-grid">
-												<div class="info-item">
-													<span class="info-label">Start Time</span>
-													<span class="info-value">${rowData.startTime}</span>
-												</div>
-												<div class="info-item">
-													<span class="info-label">TT Site</span>
-													<span class="info-value">${rowData.ttSite}</span>
-												</div>
-												<div class="info-item">
-													<span class="info-label">Site Down</span>
-													<span class="info-value">${rowData.siteDown}</span>
-												</div>
-												<div class="info-item">
-													<span class="info-label">Site Name Down</span>
-													<span class="info-value">${rowData.siteNameDown}</span>
-												</div>
-												<div class="info-item">
-													<span class="info-label">Latitude Site Down</span>
-													<span class="info-value">${rowData.latitudeSiteDown}</span>
-												</div>
-												<div class="info-item">
-													<span class="info-label">Longitude Site Down</span>
-													<span class="info-value">${rowData.longitudeSiteDown}</span>
-												</div>
-												<div class="info-item">
-													<span class="info-label">Site Detect</span>
-													<span class="info-value">${rowData.siteDetect}</span>
-												</div>
-												<div class="info-item">
-													<span class="info-label">Site Name Detect</span>
-													<span class="info-value">${rowData.siteNameDetect}</span>
-												</div>
-												<div class="info-item">
-													<span class="info-label">Tiket Terima</span>
-													<span class="info-value">${rowData.tiketTerima}</span>
-												</div>
-											</div>
+											<table class="info-grid">
+												<tbody>
+													<tr class="info-item">
+														<td class="info-label">Start Time</td>
+														<td class="info-value">${rowData.startTime}</td>
+													</tr>
+													<tr class="info-item">
+														<td class="info-label">TT Site</td>
+														<td class="info-value">${rowData.ttSite}</td>
+													</tr>
+													<tr class="info-item">
+														<td class="info-label">Site Down</td>
+														<td class="info-value">${rowData.siteDown}</td>
+													</tr>
+													<tr class="info-item">
+														<td class="info-label">Site Name Down</td>
+														<td class="info-value">${rowData.siteNameDown}</td>
+													</tr>
+													<tr class="info-item">
+														<td class="info-label">Latitude Site Down</td>
+														<td class="info-value">${rowData.latitudeSiteDown}</td>
+													</tr>
+													<tr class="info-item">
+														<td class="info-label">Longitude Site Down</td>
+														<td class="info-value">${rowData.longitudeSiteDown}</td>
+													</tr>
+													<tr class="info-item">
+														<td class="info-label">Site Detect</td>
+														<td class="info-value">${rowData.siteDetect}</td>
+													</tr>
+													<tr class="info-item">
+														<td class="info-label">Site Name Detect</td>
+														<td class="info-value">${rowData.siteNameDetect}</td>
+													</tr>
+													<tr class="info-item">
+														<td class="info-label">Tiket Terima</td>
+														<td class="info-value">${rowData.tiketTerima}</td>
+													</tr>
+												</tbody>
+											</table>
 
 											<div class="maps-section">
 												<span class="info-label block mb-2 flex items-center gap-2">
