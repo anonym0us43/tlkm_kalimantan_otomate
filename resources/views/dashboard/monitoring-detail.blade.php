@@ -1124,10 +1124,6 @@
 
 			let fallbackLat = parseFloat(mapContainer.getAttribute('data-lat'));
 			let fallbackLng = parseFloat(mapContainer.getAttribute('data-lng'));
-			if (!fallbackLat || !fallbackLng || isNaN(fallbackLat) || isNaN(fallbackLng)) {
-				fallbackLat = -6.2088;
-				fallbackLng = 106.8456;
-			}
 
 			const renderSinglePoint = (lat, lng) => {
 				const singleMap = L.map(`mapContainer-${rowId}`).setView([lat, lng], 15);
@@ -1149,6 +1145,15 @@
 				setTimeout(() => singleMap.invalidateSize(), 300);
 			};
 
+			const renderMapOnly = () => {
+				const emptyMap = L.map(`mapContainer-${rowId}`).setView([null, null], 5);
+				L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+					attribution: '&copy; OpenStreetMap contributors',
+					maxZoom: 19
+				}).addTo(emptyMap);
+				window[`map_${modalId}`] = emptyMap;
+				setTimeout(() => emptyMap.invalidateSize(), 300);
+			};
 			fetch(
 					`/ajax/map/sites/site-to-site?site_from=${encodeURIComponent(siteDown)}&site_to=${encodeURIComponent(siteDetect)}`
 				)
@@ -1161,6 +1166,10 @@
 
 					if ([fromLat, fromLng, toLat, toLng].some(v => v === undefined || v === null || isNaN(parseFloat(
 							v)))) {
+						if (!fallbackLat || !fallbackLng || isNaN(fallbackLat) || isNaN(fallbackLng)) {
+							renderMapOnly();
+							return;
+						}
 						renderSinglePoint(fallbackLat, fallbackLng);
 						return;
 					}
@@ -1206,6 +1215,10 @@
 					setTimeout(() => map.invalidateSize(), 300);
 				})
 				.catch(() => {
+					if (!fallbackLat || !fallbackLng || isNaN(fallbackLat) || isNaN(fallbackLng)) {
+						renderMapOnly();
+						return;
+					}
 					renderSinglePoint(fallbackLat, fallbackLng);
 				});
 		}
