@@ -98,9 +98,9 @@
 
 		const columnStatusMap = {
 			1: 'idle_order',
-			2: 'planning_need_approve_mtel',
+			2: 'planning_need_approve_ta',
 			3: 'planning_reject_ta',
-			4: 'planning_need_approve_ta',
+			4: 'planning_need_approve_mtel',
 			5: 'age_under1d',
 			6: 'age_1d_to_3d',
 			7: 'age_3d_to_7d',
@@ -124,9 +124,9 @@
 				const cells = [
 					row.witel_name || '-',
 					row.idle_order || 0,
-					row.planning_need_approve_mtel || 0,
-					row.planning_reject_ta || 0,
 					row.planning_need_approve_ta || 0,
+					row.planning_reject_ta || 0,
+					row.planning_need_approve_mtel || 0,
 					row.age_under1d || 0,
 					row.age_1d_to_3d || 0,
 					row.age_3d_to_7d || 0,

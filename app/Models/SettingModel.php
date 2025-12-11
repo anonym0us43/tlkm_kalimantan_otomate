@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
+date_default_timezone_set('Asia/Jakarta');
+
 class SettingModel extends Model
 {
     public static function get_designator()

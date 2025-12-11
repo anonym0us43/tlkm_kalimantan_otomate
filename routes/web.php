@@ -1,12 +1,14 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\MapController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AjaxController;
-use App\Http\Controllers\MapController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\SettingController;
+use App\Http\Controllers\DashboardController;
 
 Route::get('login', [AuthController::class, 'login'])->name('login');
 Route::post('login', [AuthController::class, 'login_post'])->name('login.post');
@@ -20,6 +22,12 @@ Route::middleware(['guest'])->group(function ()
     {
         Route::get('/', [UserController::class, 'profile'])->name('profile');
         Route::post('{id}', [UserController::class, 'profile_post'])->name('profile.post');
+    });
+
+    Route::prefix('order')->group(function ()
+    {
+        Route::get('/', [OrderController::class, 'index'])->name('order.index');
+        Route::post('planning', [OrderController::class, 'planning_post'])->name('order.planning.post');
     });
 
     Route::prefix('dashboard')->group(function ()

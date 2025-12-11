@@ -514,6 +514,9 @@
 		<script defer src="/assets/js/alpine-focus.min.js"></script>
 		<script defer src="/assets/js/alpine.min.js"></script>
 		<script src="/assets/js/custom.js"></script>
+
+		@include('partial.alerts')
+
 		@yield('scripts')
 		<script>
 			document.addEventListener('alpine:init', () => {

@@ -692,10 +692,13 @@
 
 		.select2-dropdown {
 			z-index: 99999 !important;
-			background-color: white;
 			border: 1px solid #d1d5db;
 			border-radius: 6px;
 			box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+		}
+
+		.select2-container--default .select2-selection--single {
+			background-color: #ffffff00 !important;
 		}
 
 		.upload-box {
@@ -707,7 +710,6 @@
 			display: flex;
 			justify-content: center;
 			align-items: center;
-			background-color: #f8f9fa;
 			overflow: hidden;
 			transition: all 0.2s ease;
 			position: relative;
@@ -715,7 +717,6 @@
 
 		.upload-box:hover {
 			border-color: #4361ee;
-			background-color: #f0f4ff;
 		}
 
 		.upload-box img {
@@ -848,6 +849,22 @@
 
 		<h5 class="text-lg font-semibold dark:text-white-light mb-4" id="pageTitle">Detail Monitoring</h5>
 
+		@if (session('success'))
+			<script>
+				document.addEventListener('DOMContentLoaded', function() {
+					showSuccessMessage('{{ session('success') }}');
+				});
+			</script>
+		@endif
+
+		@if (session('error'))
+			<script>
+				document.addEventListener('DOMContentLoaded', function() {
+					showErrorMessage('{{ session('error') }}');
+				});
+			</script>
+		@endif
+
 		<div class="table-responsive">
 			<table class="table table-bordered table-hover detail-table" id="detailTable">
 				<thead>
@@ -935,27 +952,27 @@
 			data.forEach((row, index) => {
 				const tr = document.createElement('tr');
 				tr.innerHTML = `
-					<td>${index + 1}</td>
-					<td>${row.tiket_start_time || '-'}</td>
-					<td>${row.tt_site || '-'}</td>
-					<td>${row.site_down || '-'}</td>
-					<td>${row.site_name_down || '-'}</td>
-					<td>${row.latitude_site_down || '-'}</td>
-					<td>${row.longitude_site_down || '-'}</td>
-					<td>${row.site_detect || '-'}</td>
-					<td>${row.site_name_detect || '-'}</td>
-					<td>${row.tiket_terima || '-'}</td>
-					<td>
-						<button type="button" class="btn btn-sm btn-primary planning-btn"
-							data-row-id="${row.row_id || ''}"
-							data-tt-site="${row.tt_site || '-'}">
-							Planning
-						</button>
-					</td>
-				`;
+				<td>${index + 1}</td>
+				<td>${row.tiket_start_time || '-'}</td>
+				<td>${row.tt_site || '-'}</td>
+				<td>${row.site_down || '-'}</td>
+				<td>${row.site_name_down || '-'}</td>
+				<td>${row.latitude_site_down || '-'}</td>
+				<td>${row.longitude_site_down || '-'}</td>
+				<td>${row.site_detect || '-'}</td>
+				<td>${row.site_name_detect || '-'}</td>
+				<td>${row.tiket_terima || '-'}</td>
+				<td>
+					<button type="button" class="btn btn-sm btn-primary planning-btn"
+						data-row-id="${row.row_id || ''}"
+						data-tt-site-id="${row.tt_site_id || ''}"
+						data-tt-site="${row.tt_site || '-'}">
+						Planning
+					</button>
+				</td>
+			`;
 				tbody.appendChild(tr);
 			});
-
 			detailDatatable = $('#detailTable').DataTable({
 				dom: 'Bfrtip',
 				buttons: [{
@@ -1035,9 +1052,11 @@
 								</button>
 							</div>
 							<div class="p-6">
-								<form class="planning-form" data-row-id="${rowId}">
+								<form class="planning-form" data-row-id="${rowId}" action="{{ route('order.planning.post') }}" method="POST" enctype="multipart/form-data">
+                                    @csrf
 									<input type="hidden" name="row_id" value="${rowId}">
-									<input type="hidden" name="tt_site" value="${rowData.ttSite}">
+									<input type="hidden" name="order_id" value="${rowData.ttSiteId}">
+									<input type="hidden" name="order_code" value="${rowData.ttSite}">
 
 									<div class="grid grid-cols-2 gap-6">
 										<div class="form-section">
@@ -1144,20 +1163,18 @@
 										</div>
 									</div>
                                     <div class="mb-6">
-											<label class="form-label text-sm mb-2">
-												Koordinat Titik Putus
-											</label>
-											<div class="flex gap-2 mb-2">
-												<input type="text" name="coordinate" class="form-input flex-1"
-													placeholder="Contoh: -1.2563759829104284, 116.86768575387761" required>
-												<button type="button" class="btn btn-primary btn-sm" data-modal-id="${modalId}" title="Ambil lokasi dari GPS">
-													<i class="bi bi-geo-alt-fill"></i>
-												</button>
-											</div>
-											<small class="text-gray-500 text-xs block mb-4">Format: latitude, longitude</small>
-										</div>
-
-										<div>
+									<label class="form-label text-sm mb-2">
+										Koordinat Titik Putus
+									</label>
+									<div class="flex gap-2 mb-2">
+										<input type="text" name="coordinates_site" class="form-input flex-1"
+											placeholder="Contoh: -1.2563759829104284, 116.86768575387761" required>
+										<button type="button" class="btn btn-primary btn-sm get-coordinate-btn" data-target="coordinates_site" data-modal-id="${modalId}" title="Ambil lokasi dari GPS">
+											<i class="bi bi-geo-alt-fill"></i>
+										</button>
+									</div>
+									<small class="text-gray-500 text-xs block mb-4">Format: latitude, longitude</small>
+								</div>										<div>
 											<div class="material-header">
 												<label class="form-label mb-0 text-sm">
 													Material
@@ -1383,12 +1400,13 @@
 
 			const rowDiv = document.createElement('div');
 			rowDiv.className = 'material-row';
+			const index = materialRows.children.length;
 			rowDiv.innerHTML = `
 			<div class="material-main-row">
 				<div class="material-field-group">
 					<label class="material-field-label">Material</label>
 					<div class="material-select-wrapper">
-						<select name="materials[]" class="form-select material-select w-full" required>
+						<select name="materials[${index}][designator_id]" class="form-select material-select w-full" required>
 							<option value="">Pilih material...</option>
 							${materialsData.map(m => `<option value="${m.id}" data-designator="${m.item_designator}" data-description="${m.item_description || ''}">${m.item_designator}</option>`).join('')}
 						</select>
@@ -1397,7 +1415,7 @@
 				<div class="qty-field-group">
 					<label class="material-field-label">Qty</label>
 					<div class="qty-wrapper">
-						<input type="number" name="material_qty[]" class="form-input" min="1" value="1" required>
+						<input type="number" name="materials[${index}][qty]" class="form-input" min="1" value="1" required>
 					</div>
 				</div>
 				<div class="material-actions">
@@ -1417,7 +1435,12 @@
 					Koordinat Material (Latitude, Longitude)
 				</div>
 				<div class="coordinate-inputs">
-					<input type="text" name="material_coordinate[]" class="coordinate-input" placeholder="-6.200000, 106.816666">
+					<div class="flex gap-2">
+						<input type="text" name="materials[${index}][coordinates_material]" class="coordinate-input flex-1" placeholder="-6.200000, 106.816666">
+						<button type="button" class="btn btn-primary btn-sm get-coordinate-btn" data-target="materials[${index}][coordinates_material]" title="Ambil lokasi dari GPS">
+							<i class="bi bi-geo-alt-fill"></i>
+						</button>
+					</div>
 				</div>
 			</div>
 		`;
@@ -1549,11 +1572,13 @@
 			if (e.target.classList.contains('planning-btn') || e.target.closest('.planning-btn')) {
 				const btn = e.target.classList.contains('planning-btn') ? e.target : e.target.closest('.planning-btn');
 				const rowId = btn.getAttribute('data-row-id');
+				const ttSiteId = btn.getAttribute('data-tt-site-id');
 				const ttSite = btn.getAttribute('data-tt-site');
 
 				const row = btn.closest('tr');
 				const cells = row.querySelectorAll('td');
 				const rowData = {
+					ttSiteId: ttSiteId,
 					startTime: cells[1]?.textContent || '-',
 					ttSite: cells[2]?.textContent || '-',
 					siteDown: cells[3]?.textContent || '-',
@@ -1564,7 +1589,6 @@
 					siteNameDetect: cells[8]?.textContent || '-',
 					tiketTerima: cells[9]?.textContent || '-'
 				};
-
 				const modalId = `modal-${rowId}`;
 				const container = document.getElementById('planningModalContainer');
 				if (!document.getElementById(modalId)) {
@@ -1610,6 +1634,12 @@
 				addMaterialRow(modalId);
 			}
 
+			if (e.target.classList.contains('get-coordinate-btn') || e.target.closest('.get-coordinate-btn')) {
+				const btn = e.target.classList.contains('get-coordinate-btn') ? e.target : e.target.closest(
+					'.get-coordinate-btn');
+				getCoordinateFromLocation(btn);
+			}
+
 			if (e.target.classList.contains('modal-backdrop')) {
 				const modalId = e.target.getAttribute('data-modal-id');
 				closeModal(modalId);
@@ -1634,9 +1664,18 @@
 					const coordinate = `${lat}, ${lon}`;
 
 					const form = btn.closest('form');
-					const coordinateInput = form.querySelector('input[name="coordinate"]');
-					if (coordinateInput) {
-						coordinateInput.value = coordinate;
+					const targetName = btn.getAttribute('data-target');
+
+					if (targetName) {
+						const coordinateInput = form.querySelector(`input[name="${targetName}"]`);
+						if (coordinateInput) {
+							coordinateInput.value = coordinate;
+						}
+					} else {
+						const coordinateInput = form.querySelector('input[name="coordinates_site"]');
+						if (coordinateInput) {
+							coordinateInput.value = coordinate;
+						}
 					}
 
 					btn.classList.remove('loading');
@@ -1745,36 +1784,30 @@
 			if (e.target.classList.contains('planning-form')) {
 				e.preventDefault();
 
-				const formData = new FormData(e.target);
+				const form = e.target;
+				const formData = new FormData(form);
 				const rowId = formData.get('row_id');
-				const ttSite = formData.get('tt_site');
-				const coordinate = formData.get('coordinate');
-				const materials = formData.getAll('materials[]');
-				const materialQty = formData.getAll('material_qty[]');
 
-				if (materials.length === 0 || materials.some(m => !m)) {
+				const materialRows = form.querySelectorAll('.material-row');
+				if (materialRows.length === 0) {
 					alert('Mohon pilih minimal satu material');
 					return;
 				}
 
-				const modalId = `modal-${rowId}`;
-				const uploadedFile = window[`photoFile_${modalId}`];
+				let hasEmptyMaterial = false;
+				materialRows.forEach((row, index) => {
+					const designator = formData.get(`materials[${index}][designator_id]`);
+					if (!designator) {
+						hasEmptyMaterial = true;
+					}
+				});
 
-				const planningData = {
-					row_id: rowId,
-					tt_site: ttSite,
-					coordinate: coordinate,
-					photo: uploadedFile,
-					materials: materials.map((mat, idx) => ({
-						id: mat,
-						qty: materialQty[idx]
-					}))
-				};
+				if (hasEmptyMaterial) {
+					alert('Mohon pilih material untuk semua baris');
+					return;
+				}
 
-				console.log('Planning Data:', planningData);
-
-				closeModal(modalId);
-				alert('Planning berhasil disimpan!');
+				form.submit();
 			}
 		});
 	</script>

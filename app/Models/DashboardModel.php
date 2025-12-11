@@ -39,23 +39,24 @@ class DashboardModel extends Model
                 tw.id AS witel_id,
                 tw.name AS witel_name,
 
-                SUM(CASE WHEN tao.order_id IS NULL THEN 1 ELSE 0 END) AS idle_order,
-                SUM(CASE WHEN tsq.name = "Planning_Need_Approve_MTEL" THEN 1 ELSE 0 END) AS planning_need_approve_mtel,
-                SUM(CASE WHEN tsq.name = "Planning_Reject_TA" THEN 1 ELSE 0 END) AS planning_reject_ta,
-                SUM(CASE WHEN tsq.name = "Planning_Need_Approve_TA" THEN 1 ELSE 0 END) AS planning_need_approve_ta,
+                COUNT(DISTINCT CASE WHEN tao.order_id IS NULL THEN tstta.tt_site_id END) AS idle_order,
+                COUNT(DISTINCT CASE WHEN tro.status_qc_id = 1 THEN tstta.tt_site_id END) AS planning_need_approve_ta,
+                COUNT(DISTINCT CASE WHEN tro.status_qc_id = 2 THEN tstta.tt_site_id END) AS planning_reject_ta,
+                COUNT(DISTINCT CASE WHEN tro.status_qc_id = 3 THEN tstta.tt_site_id END) AS planning_need_approve_mtel,
 
-                SUM(CASE WHEN tao.order_id IS NOT NULL AND (TIMESTAMPDIFF(MINUTE, tstta.tiket_terima, NOW()) > 0
-                    AND TIMESTAMPDIFF(MINUTE, tstta.tiket_terima, NOW()) <= 1440) THEN 1 ELSE 0 END) AS age_under1d,
-                SUM(CASE WHEN tao.order_id IS NOT NULL AND (TIMESTAMPDIFF(MINUTE, tstta.tiket_terima, NOW()) > 1440
-                    AND TIMESTAMPDIFF(MINUTE, tstta.tiket_terima, NOW()) <= 4320) THEN 1 ELSE 0 END) AS age_1d_to_3d,
-                SUM(CASE WHEN tao.order_id IS NOT NULL AND (TIMESTAMPDIFF(MINUTE, tstta.tiket_terima, NOW()) > 4320
-                    AND TIMESTAMPDIFF(MINUTE, tstta.tiket_terima, NOW()) <= 10080) THEN 1 ELSE 0 END) AS age_3d_to_7d,
-                SUM(CASE WHEN tao.order_id IS NOT NULL AND (TIMESTAMPDIFF(MINUTE, tstta.tiket_terima, NOW()) > 10080) THEN 1 ELSE 0 END) AS age_upper7d,
+                COUNT(DISTINCT CASE WHEN tao.order_id IS NOT NULL AND (TIMESTAMPDIFF(MINUTE, tstta.tiket_terima, NOW()) > 0
+                    AND TIMESTAMPDIFF(MINUTE, tstta.tiket_terima, NOW()) <= 1440) THEN tstta.tt_site_id END) AS age_under1d,
+                COUNT(DISTINCT CASE WHEN tao.order_id IS NOT NULL AND (TIMESTAMPDIFF(MINUTE, tstta.tiket_terima, NOW()) > 1440
+                    AND TIMESTAMPDIFF(MINUTE, tstta.tiket_terima, NOW()) <= 4320) THEN tstta.tt_site_id END) AS age_1d_to_3d,
+                COUNT(DISTINCT CASE WHEN tao.order_id IS NOT NULL AND (TIMESTAMPDIFF(MINUTE, tstta.tiket_terima, NOW()) > 4320
+                    AND TIMESTAMPDIFF(MINUTE, tstta.tiket_terima, NOW()) <= 10080) THEN tstta.tt_site_id END) AS age_3d_to_7d,
+                COUNT(DISTINCT CASE WHEN tao.order_id IS NOT NULL AND (TIMESTAMPDIFF(MINUTE, tstta.tiket_terima, NOW()) > 10080) THEN tstta.tt_site_id END) AS age_upper7d,
 
-                SUM(CASE WHEN tsq.name = "Permanenisasi_Need_Approve_TA" THEN 1 ELSE 0 END) AS permanenisasi_need_approve_ta,
-                SUM(CASE WHEN tsq.name = "Permanenisasi_Reject_TA" THEN 1 ELSE 0 END) AS permanenisasi_reject_ta,
-                SUM(CASE WHEN tsq.name = "Permanenisasi_Need_Approve_MTEL" THEN 1 ELSE 0 END) AS permanenisasi_need_approve_mtel,
-                SUM(CASE WHEN tsq.name = "Permaneninsasi_Rekon" THEN 1 ELSE 0 END) AS permanenisasi_rekon
+                COUNT(DISTINCT CASE WHEN tro.status_qc_id = 4 THEN tstta.tt_site_id END) AS permanenisasi_need_approve_ta,
+                COUNT(DISTINCT CASE WHEN tro.status_qc_id = 5 THEN tstta.tt_site_id END) AS permanenisasi_reject_ta,
+                COUNT(DISTINCT CASE WHEN tro.status_qc_id = 6 THEN tstta.tt_site_id END) AS permanenisasi_need_approve_mtel,
+
+                COUNT(DISTINCT CASE WHEN tro.status_qc_id = 7 THEN tstta.tt_site_id END) AS permanenisasi_rekon
             '))
             ->whereRaw('DATE(tstta.tiket_terima) BETWEEN ? AND ?', [$start_date, $end_date])
             ->when(!empty($witel), function ($query) use ($witel)
@@ -91,6 +92,7 @@ class DashboardModel extends Model
             ->leftJoin('tb_regional AS tr', 'tr.id', '=', 'tw.regional_id')
             ->select(
                 'tstta.id AS row_id',
+                'tstta.tt_site_id',
                 'tr.name AS regional_name',
                 'tw.name AS witel_name',
                 'tstta.start_time AS tiket_start_time',
@@ -135,33 +137,33 @@ class DashboardModel extends Model
         }
         elseif ($status == 'planning_need_approve_ta')
         {
-            $query->where('tsq.name', 'Planning_Need_Approve_TA');
+            $query->where('tro.status_qc_id', 1);
         }
         elseif ($status == 'planning_reject_ta')
         {
-            $query->where('tsq.name', 'Planning_Reject_TA');
+            $query->where('tro.status_qc_id', 2);
         }
         elseif ($status == 'planning_need_approve_mtel')
         {
-            $query->where('tsq.name', 'Planning_Need_Approve_MTEL');
+            $query->where('tro.status_qc_id', 3);
         }
         elseif ($status == 'permanenisasi_need_approve_ta')
         {
-            $query->where('tsq.name', 'Permanenisasi_Need_Approve_TA');
+            $query->where('tro.status_qc_id', 4);
         }
         elseif ($status == 'permanenisasi_reject_ta')
         {
-            $query->where('tsq.name', 'Permanenisasi_Reject_TA');
+            $query->where('tro.status_qc_id', 5);
         }
         elseif ($status == 'permanenisasi_need_approve_mtel')
         {
-            $query->where('tsq.name', 'Permanenisasi_Need_Approve_MTEL');
+            $query->where('tro.status_qc_id', 6);
         }
         elseif ($status == 'permanenisasi_rekon')
         {
-            $query->where('tsq.name', 'Permaneninsasi_Rekon');
+            $query->where('tro.status_qc_id', 7);
         }
 
-        return $query->get();
+        return $query->groupBy('tstta.tt_site_id')->get();
     }
 }

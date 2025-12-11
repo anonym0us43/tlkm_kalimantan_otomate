@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-date_default_timezone_set('Asia/Makassar');
+date_default_timezone_set('Asia/Jakarta');
 
 class TelegramModel extends Model
 {

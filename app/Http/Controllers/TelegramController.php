@@ -6,7 +6,7 @@ use App\Models\TelegramModel;
 use Illuminate\Support\Facades\DB;
 use Exception;
 
-date_default_timezone_set('Asia/Makassar');
+date_default_timezone_set('Asia/Jakarta');
 
 class TelegramController extends Controller
 {
