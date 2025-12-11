@@ -43,7 +43,7 @@ class OrderModel extends Model
 
     public static function planning_post($request)
     {
-        $order_id = $request->input('order_id');
+        $order_id   = $request->input('order_id');
         $order_code = $request->input('order_code');
 
         $existingRecord = DB::table('tb_assign_orders')
@@ -58,36 +58,55 @@ class OrderModel extends Model
             DB::table('tb_assign_orders')
                 ->where('id', $id)
                 ->update([
-                    'team_id'        => 0,
-                    'project_id'     => 0,
+                    'team_id'        => $request->input('team_id'),
+                    'project_id'     => $request->input('project_id'),
                     'order_id'       => $order_id,
                     'order_code'     => $order_code,
                     'order_date'     => now(),
-                    'order_headline' => null,
+                    'order_headline' => $request->input('order_headline'),
                     'updated_by'     => session('nik') ?? 0,
                     'updated_at'     => now()
                 ]);
 
-            DB::table('tb_report_orders')
-                ->where('assign_order_id', $id)
-                ->delete();
+            DB::table('tb_assign_orders_log')
+                ->insert([
+                    'team_id'        => $request->input('team_id'),
+                    'project_id'     => $request->input('project_id'),
+                    'order_id'       => $order_id,
+                    'order_code'     => $order_code,
+                    'order_date'     => now(),
+                    'order_headline' => $request->input('order_headline'),
+                    'created_by'     => session('nik') ?? 0,
+                    'created_at'     => now()
+                ]);
 
             DB::table('tb_report_orders')
-                ->insert([
+                ->where('assign_order_id', $id)
+                ->update([
                     'assign_order_id'  => $id,
                     'status_qc_id'     => 1,
-                    'notes'            => null,
+                    'notes'            => $request->input('notes'),
                     'coordinates_site' => $request->input('coordinates_site'),
                     'created_by'       => session('nik') ?? 0,
                     'created_at'       => now()
                 ]);
 
-            DB::table('tb_report_materials')
-                ->where('assign_order_id', $id)
-                ->delete();
+            DB::table('tb_report_orders_log')
+                ->insert([
+                    'assign_order_id'  => $id,
+                    'status_qc_id'     => 1,
+                    'notes'            => $request->input('notes'),
+                    'coordinates_site' => $request->input('coordinates_site'),
+                    'created_by'       => session('nik') ?? 0,
+                    'created_at'       => now()
+                ]);
 
             if ($request->has('materials'))
             {
+                DB::table('tb_report_materials')
+                    ->where('assign_order_id', $id)
+                    ->delete();
+
                 foreach ($request->input('materials') as $material)
                 {
                     DB::table('tb_report_materials')
@@ -106,12 +125,24 @@ class OrderModel extends Model
         {
             $id = DB::table('tb_assign_orders')
                 ->insertGetId([
-                    'team_id'        => 0,
-                    'project_id'     => 0,
+                    'team_id'        => $request->input('team_id'),
+                    'project_id'     => $request->input('project_id'),
                     'order_id'       => $order_id,
                     'order_code'     => $order_code,
                     'order_date'     => now(),
-                    'order_headline' => null,
+                    'order_headline' => $request->input('order_headline'),
+                    'created_by'     => session('nik') ?? 0,
+                    'created_at'     => now()
+                ]);
+
+            DB::table('tb_assign_orders_log')
+                ->insert([
+                    'team_id'        => $request->input('team_id'),
+                    'project_id'     => $request->input('project_id'),
+                    'order_id'       => $order_id,
+                    'order_code'     => $order_code,
+                    'order_date'     => now(),
+                    'order_headline' => $request->input('order_headline'),
                     'created_by'     => session('nik') ?? 0,
                     'created_at'     => now()
                 ]);
@@ -120,7 +151,17 @@ class OrderModel extends Model
                 ->insert([
                     'assign_order_id'  => $id,
                     'status_qc_id'     => 1,
-                    'notes'            => null,
+                    'notes'            => $request->input('notes'),
+                    'coordinates_site' => $request->input('coordinates_site'),
+                    'created_by'       => session('nik') ?? 0,
+                    'created_at'       => now()
+                ]);
+
+            DB::table('tb_report_orders_log')
+                ->insert([
+                    'assign_order_id'  => $id,
+                    'status_qc_id'     => 1,
+                    'notes'            => $request->input('notes'),
                     'coordinates_site' => $request->input('coordinates_site'),
                     'created_by'       => session('nik') ?? 0,
                     'created_at'       => now()
@@ -143,27 +184,20 @@ class OrderModel extends Model
             }
         }
 
-        if ($request->has('photos'))
+        if ($request->hasFile('photos'))
         {
-            $photos = [];
-            if (File::exists(public_path('upload/evidence/' . $id)))
+            $uploadPath = public_path('upload/' . $id);
+
+            if (!File::exists($uploadPath))
             {
-                $files = File::files(public_path('upload/evidence/' . $id));
-                foreach ($files as $file)
-                {
-                    $fileName = $file->getFilename();
-                    $nameWithoutExt = pathinfo($fileName, PATHINFO_FILENAME);
-                    $parts = explode('_', $nameWithoutExt);
-                    if (count($parts) >= 2)
-                    {
-                        $fileId = end($parts);
-                        $photoType = implode('_', array_slice($parts, 0, -1));
-                        if ($fileId == $id)
-                        {
-                            $photos[$photoType] = $file->getPathname();
-                        }
-                    }
-                }
+                File::makeDirectory($uploadPath, 0755, true);
+            }
+
+            $photoFile = $request->file('photos');
+            if ($photoFile && $photoFile->isValid())
+            {
+                $fileName = 'Foto_Titik_Putus.jpg';
+                $photoFile->move($uploadPath, $fileName);
             }
         }
     }

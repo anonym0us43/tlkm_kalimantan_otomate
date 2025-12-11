@@ -1787,6 +1787,7 @@
 				const form = e.target;
 				const formData = new FormData(form);
 				const rowId = formData.get('row_id');
+				const modalId = `modal-${rowId}`;
 
 				const materialRows = form.querySelectorAll('.material-row');
 				if (materialRows.length === 0) {
@@ -1807,7 +1808,26 @@
 					return;
 				}
 
-				form.submit();
+				const photoFile = window[`photoFile_${modalId}`];
+				if (photoFile) {
+					formData.append('photos', photoFile);
+				}
+
+				fetch(form.action, {
+						method: 'POST',
+						body: formData
+					})
+					.then(response => {
+						if (response.ok) {
+							location.reload();
+						} else {
+							alert('Gagal menyimpan data');
+						}
+					})
+					.catch(error => {
+						console.error('Error:', error);
+						alert('Terjadi kesalahan');
+					});
 			}
 		});
 	</script>
