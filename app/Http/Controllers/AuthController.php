@@ -26,7 +26,7 @@ class AuthController extends Controller
             'password' => 'required|string',
             'captcha'  => 'required|captcha',
         ], [
-            'captcha.captcha' => 'Captcha yang dimasukkan salah.',
+            'captcha.captcha' => 'Incorrect captcha entered.',
         ]);
 
         $user = AuthModel::identity($request->nik);
@@ -35,11 +35,11 @@ class AuthController extends Controller
         {
             if ($user->is_active == 0)
             {
-                return back()->withErrors(['register' => 'User tidak aktif!']);
+                return back()->withErrors(['register' => 'User is not active!']);
             }
             else if ($user->is_active == 3)
             {
-                return back()->withErrors(['register' => 'User ditangguhkan!']);
+                return back()->withErrors(['register' => 'User is suspended!']);
             }
 
             Auth::login($user);
@@ -149,11 +149,11 @@ class AuthController extends Controller
 
         if ($user)
         {
-            return back()->withErrors(['register' => 'NIK sudah terdaftar!']);
+            return back()->withErrors(['register' => 'NIK is already registered!']);
         }
 
         AuthModel::register($request);
 
-        return redirect()->route('login')->with('success', 'Pendaftaran berhasil!');
+        return redirect()->route('login')->with('success', 'Registration successful!');
     }
 }

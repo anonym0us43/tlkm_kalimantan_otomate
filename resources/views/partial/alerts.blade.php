@@ -1,3 +1,37 @@
+@if ($errors->any())
+	<script>
+		document.addEventListener('DOMContentLoaded', function() {
+			@if ($errors->has('login'))
+				showErrorMessage('{{ $errors->first('login') }}', 5000);
+			@endif
+
+			@if ($errors->has('register'))
+				showErrorMessage('{{ $errors->first('register') }}', 5000);
+			@endif
+
+			@if ($errors->has('captcha'))
+				showErrorMessage('{{ $errors->first('captcha') }}', 5000);
+			@endif
+
+			@if ($errors->has('nik'))
+				showErrorMessage('{{ $errors->first('nik') }}', 5000);
+			@endif
+
+			@if ($errors->has('password'))
+				showErrorMessage('{{ $errors->first('password') }}', 5000);
+			@endif
+		});
+	</script>
+@endif
+
+@if (session('success'))
+	<script>
+		document.addEventListener('DOMContentLoaded', function() {
+			showSuccessMessage('{{ session('success') }}', 5000);
+		});
+	</script>
+@endif
+
 <script>
 	showMessage = (msg = 'Example notification text.', position = 'top', showCloseButton = true, closeButtonHtml = '',
 		duration = 3000) => {

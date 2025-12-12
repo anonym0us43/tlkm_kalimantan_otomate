@@ -9,12 +9,15 @@ use App\Http\Controllers\AjaxController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\DashboardController;
+use Mews\Captcha\Captcha;
 
 Route::get('login', [AuthController::class, 'login'])->name('login');
 Route::post('login', [AuthController::class, 'login_post'])->name('login.post');
 Route::get('logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::middleware(['guest'])->group(function ()
+Route::get('captcha', [Captcha::class, 'create'])->name('captcha');
+
+Route::middleware(['auth'])->group(function ()
 {
     Route::get('/', [HomeController::class, 'index'])->name('home');
 

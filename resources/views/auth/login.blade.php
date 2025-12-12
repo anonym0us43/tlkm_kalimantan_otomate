@@ -19,6 +19,8 @@
 		<script defer src="/assets/js/sweetalert.min.js"></script>
 	</head>
 
+	@include('partial.alerts')
+
 	<body x-data="main" class="relative overflow-x-hidden font-nunito text-sm font-normal antialiased"
 		:class="[$store.app.sidebar ? 'toggle-sidebar' : '', $store.app.theme === 'dark' || $store.app.isDarkMode ? 'dark' : '',
 		    $store.app.menu, $store.app.layout, $store.app.rtlClass
@@ -96,12 +98,14 @@
 									<h1 class="text-3xl font-extrabold uppercase !leading-snug text-primary md:text-4xl">Sign in</h1>
 									<p class="text-base font-bold leading-normal text-white-dark">Enter your NIK and password to login</p>
 								</div>
-								<form class="space-y-5 dark:text-white" @submit.prevent="window.location='index.html'">
+								<form method="POST" action="{{ route('login.post') }}" class="space-y-5 dark:text-white">
+									@csrf
 									<div>
-										<label for="NIK">NIK</label>
+										<label for="nik">NIK</label>
 										<div class="relative text-white-dark">
-											<input id="nik" type="text" placeholder="Enter NIK"
-												class="form-input ps-10 placeholder:text-white-dark" />
+											<input id="nik" type="text" name="nik" placeholder="Enter NIK"
+												class="form-input ps-10 placeholder:text-white-dark @error('nik') border-red-500 @enderror"
+												value="{{ old('nik') }}" />
 											<span class="absolute start-4 top-1/2 -translate-y-1/2">
 												<svg width="18" height="18" viewBox="0 0 18 18" fill="none">
 													<path opacity="0.5"
@@ -113,12 +117,15 @@
 												</svg>
 											</span>
 										</div>
+										@error('nik')
+											<p class="mt-1 text-xs text-red-500">{{ $message }}</p>
+										@enderror
 									</div>
 									<div>
-										<label for="Password">Password</label>
+										<label for="password">Password</label>
 										<div class="relative text-white-dark">
-											<input id="Password" type="password" placeholder="Enter Password"
-												class="form-input ps-10 placeholder:text-white-dark" />
+											<input id="password" type="password" name="password" placeholder="Enter Password"
+												class="form-input ps-10 placeholder:text-white-dark @error('password') border-red-500 @enderror" />
 											<span class="absolute start-4 top-1/2 -translate-y-1/2">
 												<svg width="18" height="18" viewBox="0 0 18 18" fill="none">
 													<path opacity="0.5"
@@ -139,13 +146,53 @@
 												</svg>
 											</span>
 										</div>
+										@error('password')
+											<p class="mt-1 text-xs text-red-500">{{ $message }}</p>
+										@enderror
+									</div>
+									<div>
+										<div class="flex items-center justify-between mb-2">
+											<label for="captcha">Captcha</label>
+											<span id="captcha-timer" class="text-xs font-semibold text-primary">
+												Refresh in <span id="countdown">60</span>s
+											</span>
+										</div>
+										<div class="flex gap-3">
+											<div class="flex-1">
+												<img id="captcha-img" src="{{ route('captcha') }}" alt="Captcha"
+													class="w-full rounded border border-gray-300 dark:border-gray-600" />
+											</div>
+											<button type="button" id="refresh-captcha" class="btn btn-outline-primary px-4 py-2"
+												title="Refresh Captcha">
+												<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+													stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+													<path d="M3 12a9 9 0 0 1 15-6.7L21 5M21 12a9 9 0 0 1-15 6.7L3 19M9 22h6M9 2h6" />
+												</svg>
+											</button>
+										</div>
+									</div>
+									<div>
+										<label for="captcha_input">Enter Captcha</label>
+										<div class="relative text-white-dark">
+											<input id="captcha_input" type="text" name="captcha" placeholder="Enter the captcha above"
+												class="form-input ps-4 placeholder:text-white-dark @error('captcha') border-red-500 @enderror" />
+										</div>
+										@error('captcha')
+											<p class="mt-1 text-xs text-red-500">{{ $message }}</p>
+										@enderror
 									</div>
 									<div>
 										<label class="flex cursor-pointer items-center">
-											<input type="checkbox" class="form-checkbox bg-white dark:bg-black" />
+											<input type="checkbox" name="remember" class="form-checkbox bg-white dark:bg-black" />
 											<span class="text-white-dark">Remember Me</span>
 										</label>
 									</div>
+									@if ($errors->has('login') || $errors->has('register'))
+										<div
+											class="rounded-lg border border-red-500 bg-red-50 p-3 text-red-700 dark:bg-red-900/20 dark:text-red-300">
+											{{ $errors->first('login') ?? $errors->first('register') }}
+										</div>
+									@endif
 									<button type="submit"
 										class="btn btn-gradient !mt-6 w-full border-0 uppercase shadow-[0_10px_20px_-10px_rgba(67,97,238,0.44)]">
 										Sign in
@@ -195,6 +242,51 @@
 				}));
 
 				Alpine.data('auth', () => ({}));
+			});
+
+			let captchaCountdown = 60;
+			let captchaTimer = null;
+
+			function startCaptchaTimer() {
+				captchaCountdown = 60;
+				updateCountdownDisplay();
+
+				if (captchaTimer) clearInterval(captchaTimer);
+
+				captchaTimer = setInterval(() => {
+					captchaCountdown--;
+					updateCountdownDisplay();
+
+					if (captchaCountdown <= 0) {
+						clearInterval(captchaTimer);
+						refreshCaptcha();
+						startCaptchaTimer();
+					}
+				}, 1000);
+			}
+
+			function updateCountdownDisplay() {
+				const countdownEl = document.getElementById('countdown');
+				if (countdownEl) {
+					countdownEl.textContent = captchaCountdown;
+				}
+			}
+
+			function refreshCaptcha() {
+				const captchaImg = document.getElementById('captcha-img');
+				captchaImg.src = '{{ route('captcha') }}?' + new Date().getTime();
+				document.getElementById('captcha_input').value = '';
+				document.getElementById('captcha_input').focus();
+			}
+
+			document.getElementById('refresh-captcha').addEventListener('click', function(e) {
+				e.preventDefault();
+				refreshCaptcha();
+				startCaptchaTimer();
+			});
+
+			window.addEventListener('load', () => {
+				startCaptchaTimer();
 			});
 		</script>
 	</body>

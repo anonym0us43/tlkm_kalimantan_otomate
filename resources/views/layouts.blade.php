@@ -433,7 +433,7 @@
 												</div>
 												<div class="truncate ltr:pl-4 rtl:pr-4">
 													<h4 class="text-base">
-														{{ session('full_name') }}
+														{{ session('first_name') }} {{ session('last_name') }}
 													</h4>
 													<a class="text-black/60 hover:text-primary dark:text-dark-light/60 dark:hover:text-white"
 														href="javascript:;">{{ session('nik') }}</a>
