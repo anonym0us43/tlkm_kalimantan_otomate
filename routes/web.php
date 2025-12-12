@@ -40,12 +40,6 @@ Route::middleware(['auth'])->group(function ()
         Route::get('rekoncile', [DashboardController::class, 'rekoncile'])->name('dashboard.rekoncile');
     });
 
-    Route::prefix('map')->group(function ()
-    {
-        Route::get('/', [MapController::class, 'index'])->name('map.index');
-        Route::get('site-to-site', [MapController::class, 'site_to_site'])->name('map.site.to.site');
-    });
-
     Route::prefix('ajax')->group(function ()
     {
         Route::prefix('order')->group(function ()
@@ -62,6 +56,23 @@ Route::middleware(['auth'])->group(function ()
             });
         });
 
+        Route::prefix('setting')->group(function ()
+        {
+            Route::get('designator-khs', [AjaxController::class, 'designator_khs'])->name('ajax.setting.designator.khs');
+        });
+    });
+});
+
+Route::middleware(['guest'])->group(function ()
+{
+    Route::prefix('map')->group(function ()
+    {
+        Route::get('/', [MapController::class, 'index'])->name('map.index');
+        Route::get('site-to-site', [MapController::class, 'site_to_site'])->name('map.site.to.site');
+    });
+
+    Route::prefix('ajax')->group(function ()
+    {
         Route::prefix('map')->group(function ()
         {
             Route::prefix('sites')->group(function ()
@@ -69,11 +80,6 @@ Route::middleware(['auth'])->group(function ()
                 Route::get('/', [AjaxController::class, 'map_get_sites'])->name('ajax.map.sites');
                 Route::get('site-to-site', [AjaxController::class, 'map_get_site_to_site'])->name('ajax.map.site.to.site');
             });
-        });
-
-        Route::prefix('setting')->group(function ()
-        {
-            Route::get('designator-khs', [AjaxController::class, 'designator_khs'])->name('ajax.setting.designator.khs');
         });
     });
 });
