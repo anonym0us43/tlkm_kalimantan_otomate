@@ -2,27 +2,31 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AuthModel;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
+use App\Models\AuthModel;
+use App\Models\UserModel;
 
 date_default_timezone_set('Asia/Jakarta');
 
 class AuthController extends Controller
 {
-    public static function login()
+    public function login()
     {
         return view('auth.login');
     }
 
-    public static function login_post(Request $request)
+    public function login_post(Request $request)
     {
         $request->validate([
             'nik'      => 'required|numeric',
             'password' => 'required|string',
+            'captcha'  => 'required|captcha',
+        ], [
+            'captcha.captcha' => 'Captcha yang dimasukkan salah.',
         ]);
 
         $user = AuthModel::identity($request->nik);
@@ -31,17 +35,14 @@ class AuthController extends Controller
         {
             if ($user->is_active == 0)
             {
-                return back()->withErrors(['login' => 'User Not Active.']);
+                return back()->withErrors(['register' => 'User tidak aktif!']);
             }
-
-            if ($user->is_active == 2)
+            else if ($user->is_active == 3)
             {
-                return back()->withErrors(['login' => 'Your account is still awaiting activation by the Administrator. Please contact the Administrator for more information.']);
+                return back()->withErrors(['register' => 'User ditangguhkan!']);
             }
 
-            $remember = $request->has('remember');
-
-            Auth::login($user, $remember);
+            Auth::login($user);
 
             $token = Str::random(60);
 
@@ -78,33 +79,37 @@ class AuthController extends Controller
 
             AuthModel::set_token($request->nik, $token, $ip_address);
 
-            $profile = AuthModel::profile($user->id);
+            $profile = UserModel::profile($user->id);
 
             Session::put([
-                'employee_id'    => $profile->id,
-                'regional_id'    => $profile->regional_id,
-                'regional_name'  => $profile->regional_name,
-                'witel_id'       => $profile->witel_id,
-                'witel_name'     => $profile->witel_name,
-                'witel_alias'    => $profile->witel_alias,
-                'mitra_id'       => $profile->mitra_id,
-                'mitra_name'     => $profile->mitra_name,
-                'sub_unit_id'    => $profile->sub_unit_id,
-                'sub_unit_name'  => $profile->sub_unit_name,
-                'sub_group_id'   => $profile->sub_group_id,
-                'sub_group_name' => $profile->sub_group_name,
-                'role_id'        => $profile->role_id,
-                'role_name'      => $profile->role_name,
-                'nik'            => $profile->nik,
-                'full_name'      => $profile->full_name,
-                'chat_id'        => $profile->chat_id,
-                'number_phone'   => $profile->number_phone,
-                'home_address'   => $profile->home_address,
-                'gender'         => $profile->gender,
-                'date_of_birth'  => $profile->date_of_birth,
-                'place_of_birth' => $profile->place_of_birth,
-                'remember_token' => $token,
-                'is_logged_in'   => true,
+                'employee_id'     => $profile->id,
+                'regional_id'     => $profile->regional_id,
+                'regional_name'   => $profile->regional_name,
+                'regional_alias'  => $profile->regional_alias,
+                'regional_alias2' => $profile->regional_alias2,
+                'witel_id'        => $profile->witel_id,
+                'witel_name'      => $profile->witel_name,
+                'witel_alias'     => $profile->witel_alias,
+                'witel_ alias2'   => $profile->witel_alias2,
+                'witel_scope'     => $profile->witel_scope,
+                'witel_chat_id'   => $profile->witel_chat_id,
+                'witel_thread_id' => $profile->witel_thread_id,
+                'partner_id'      => $profile->partner_id,
+                'partner_name'    => $profile->partner_name,
+                'partner_alias'   => $profile->partner_alias,
+                'role_id'         => $profile->role_id,
+                'role_name'       => $profile->role_name,
+                'nik'             => $profile->nik,
+                'first_name'       => $profile->first_name,
+                'last_name'       => $profile->last_name,
+                'chat_id'         => $profile->chat_id,
+                'number_phone'    => $profile->number_phone,
+                'home_address'    => $profile->home_address,
+                'gender'          => $profile->gender,
+                'date_of_birth'   => $profile->date_of_birth,
+                'place_of_birth'  => $profile->place_of_birth,
+                'remember_token'  => $token,
+                'is_logged_in'    => true,
             ]);
 
             return redirect()->route('home');
@@ -120,5 +125,35 @@ class AuthController extends Controller
         Session::flush();
 
         return redirect()->route('login');
+    }
+
+    public function register()
+    {
+        return view('auth.register');
+    }
+
+    public function register_post(Request $request)
+    {
+        $request->validate([
+            'first_name'  => 'required|string|max: 100',
+            'last_name'  => 'nullable|string|max: 100',
+            'nik'        => 'required|numeric',
+            'chat_id'    => 'nullable|numeric',
+            'password'   => 'required|string',
+            'captcha'    => 'required|captcha',
+        ], [
+            'captcha.captcha' => 'Captcha yang dimasukkan salah.',
+        ]);
+
+        $user = AuthModel::identity($request->nik);
+
+        if ($user)
+        {
+            return back()->withErrors(['register' => 'NIK sudah terdaftar!']);
+        }
+
+        AuthModel::register($request);
+
+        return redirect()->route('login')->with('success', 'Pendaftaran berhasil!');
     }
 }
