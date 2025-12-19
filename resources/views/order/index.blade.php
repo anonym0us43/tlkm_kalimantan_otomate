@@ -6,20 +6,8 @@
 	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 	<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
 	<style>
-		.back-link {
-			display: inline-flex;
-			align-items: center;
-			gap: 8px;
-			margin-bottom: 1rem;
-			color: #4361ee;
-			text-decoration: none;
-			font-weight: 500;
-			transition: all 0.2s ease;
-		}
-
-		.back-link:hover {
-			color: #3451d4;
-			gap: 12px;
+		.select2-container--default .select2-selection--single {
+			background-color: #ffffff00 !important;
 		}
 
 		.select2-container--default .select2-results__option {
@@ -30,13 +18,6 @@
 			display: block;
 			font-weight: 500;
 			color: #1f2937;
-		}
-
-		.select2-result-item-desc {
-			font-size: 12px;
-			color: #6b7280;
-			margin-top: 4px;
-			line-height: 1.4;
 		}
 
 		.form-label {
@@ -63,109 +44,6 @@
 			border-color: #4361ee;
 			box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
 			outline: none;
-		}
-
-		.material-row {
-			background: #fff;
-			padding: 16px;
-			border-radius: 8px;
-			border: 1px solid #e5e7eb;
-			transition: all 0.2s ease;
-			margin-bottom: 8px;
-		}
-
-		.material-row:hover {
-			border-color: #4361ee;
-			box-shadow: 0 2px 4px rgba(67, 97, 238, 0.1);
-		}
-
-		.material-main-row {
-			display: flex;
-			align-items: flex-end;
-			gap: 16px;
-			margin-bottom: 8px;
-		}
-
-		.material-field-group {
-			flex: 1;
-			min-width: 0;
-			display: flex;
-			flex-direction: column;
-		}
-
-		.material-field-label {
-			font-size: 12px;
-			font-weight: 600;
-			color: #6b7280;
-			margin-bottom: 6px;
-			display: block;
-			text-transform: uppercase;
-			letter-spacing: 0.5px;
-			height: 18px;
-		}
-
-		.qty-field-group {
-			flex: 0 0 auto;
-			min-width: 180px;
-			display: flex;
-			flex-direction: column;
-		}
-
-		.qty-field-group .form-input {
-			height: 42px;
-		}
-
-		.material-field-group .select2-container .select2-selection--single {
-			height: 42px !important;
-			display: flex;
-			align-items: center;
-			border-radius: 6px;
-		}
-
-		.material-field-group .select2-container .select2-selection__rendered {
-			line-height: normal;
-			padding-left: 12px;
-			padding-top: 0;
-			padding-bottom: 0;
-			padding-right: 50px;
-		}
-
-		.material-field-group .select2-container .select2-selection__arrow {
-			height: 40px;
-		}
-
-		.material-field-group .select2-container .select2-selection__clear {
-			position: absolute;
-			right: 28px;
-			top: 50%;
-			transform: translateY(-50%);
-			font-size: 18px;
-			line-height: 1;
-			margin-right: 0;
-		}
-
-		.material-actions {
-			flex: 0 0 auto;
-			display: flex;
-			align-items: center;
-			gap: 8px;
-			height: 42px;
-		}
-
-		.material-actions .btn {
-			height: 42px;
-			width: 42px;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			padding: 0;
-		}
-
-		.material-header {
-			display: flex;
-			align-items: center;
-			justify-content: space-between;
-			margin-bottom: 12px;
 		}
 
 		.coordinate-input-group {
@@ -553,16 +431,187 @@
 			padding-bottom: 0;
 		}
 
+		.material-modal {
+			position: fixed;
+			inset: 0;
+			background: rgba(0, 0, 0, 0.55);
+			display: none;
+			align-items: center;
+			justify-content: center;
+			z-index: 1100;
+			padding: 24px;
+		}
+
+		.material-modal.show {
+			display: flex;
+		}
+
+		.material-modal-content {
+			background: #fff;
+			border-radius: 12px;
+			width: min(1800px, 98vw);
+			max-height: 95vh;
+			display: flex;
+			flex-direction: column;
+			box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+			overflow: hidden;
+		}
+
+		.material-modal-header {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			padding: 16px 20px;
+			border-bottom: 1px solid #e5e7eb;
+		}
+
+		.material-modal-body {
+			padding: 16px 20px 12px;
+			overflow: auto;
+		}
+
+		.material-modal-footer {
+			display: flex;
+			justify-content: flex-end;
+			gap: 10px;
+			padding: 12px 20px 16px;
+			border-top: 1px solid #e5e7eb;
+			background: #f9fafb;
+		}
+
+		.material-modal-close {
+			background: transparent;
+			border: none;
+			font-size: 22px;
+			line-height: 1;
+			cursor: pointer;
+			color: #6b7280;
+		}
+
+		.material-table-wrapper {
+			overflow: auto;
+			border: 1px solid #e5e7eb;
+			border-radius: 8px;
+		}
+
+		.material-table {
+			width: 100%;
+			border-collapse: collapse;
+			min-width: 900px;
+		}
+
+		.material-table th,
+		.material-table td {
+			text-align: center !important;
+			vertical-align: middle !important;
+			padding: 8px !important;
+			font-size: 13px !important;
+			padding: 10px 12px;
+			border-bottom: 1px solid #e5e7eb;
+		}
+
+		.material-table th {
+			background: #f3f4f6;
+			font-weight: 700;
+			color: #374151;
+			position: sticky;
+			top: 0;
+			z-index: 1;
+		}
+
+		.material-table tfoot th {
+			background: #e5e7eb;
+			font-weight: 700;
+			color: #1f2937;
+			text-align: right;
+			padding: 12px;
+			position: static;
+		}
+
+		.material-table tfoot th:last-child {
+			text-align: center;
+			font-size: 14px;
+			color: #059669;
+		}
+
+		.material-price,
+		.material-service,
+		.material-total,
+		.material-total-service {
+			font-variant-numeric: tabular-nums;
+		}
+
+		.material-table .qty-input {
+			width: 90px;
+			text-align: center;
+			vertical-align: middle;
+		}
+
+		.material-table td:last-child {
+			text-align: center !important;
+			vertical-align: middle !important;
+		}
+
+		.material-table .remove-material-btn {
+			color: #dc2626;
+			border-color: #fca5a5;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.material-table .remove-material-btn:hover {
+			background: #fee2e2;
+		}
+
+		.material-actions-bar {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 12px;
+		}
+
+		.material-modal .select2-container--default .select2-selection--single {
+			min-height: 42px;
+			display: flex;
+			align-items: center;
+			position: relative;
+		}
+
+		.material-modal .select2-container--default .select2-selection__rendered {
+			width: 100%;
+			text-align: left;
+			padding-left: 12px;
+			padding-right: 50px;
+		}
+
+		.material-modal .select2-container--default .select2-results__option {
+			text-align: left;
+		}
+
+		.material-modal .select2-container--default .select2-selection__arrow {
+			position: absolute;
+			right: 8px;
+			top: 50%;
+			transform: translateY(-50%);
+			height: 100%;
+		}
+
+		.material-modal .select2-container--default .select2-selection__clear {
+			position: absolute;
+			right: 28px;
+			top: 50%;
+			transform: translateY(-50%);
+			font-size: 18px;
+			line-height: 1;
+			margin-right: 0;
+		}
+
+		.select2-container--open {
+			z-index: 1200 !important;
+		}
+
 		@media (max-width: 768px) {
-			.material-main-row {
-				flex-direction: column;
-				gap: 12px;
-			}
-
-			.qty-field-group {
-				min-width: 100%;
-			}
-
 			.grid.grid-cols-2 {
 				grid-template-columns: 1fr;
 			}
@@ -578,15 +627,15 @@
 
 @section('content')
 	<div class="flex items-center gap-3 mt-6 mb-6">
-		<a href="javascript:history.back()" class="btn btn-outline-secondary">
+		<a href="javascript:history.back()" class="btn btn-sm btn-outline-secondary">
 			<i class="bi bi-arrow-left"></i>
 			&nbsp; Kembali
 		</a>
-		<button type="submit" form="planningForm" class="btn btn-outline-success">
+		<button type="submit" form="planningForm" class="btn btn-sm btn-outline-success">
 			<i class="bi bi-check-circle"></i>
 			&nbsp; Simpan
 		</button>
-		<button type="button" class="btn btn-outline-info" id="qcModalOpenBtn"
+		<button type="button" class="btn btn-sm btn-outline-info" id="qcModalOpenBtn"
 			{{ empty($data->assign_order_id) ? 'disabled' : '' }}>
 			<i class="bi bi-clipboard-check"></i>
 			&nbsp; Quality Check (QC)
@@ -701,17 +750,11 @@
 								<small class="text-gray-500 text-xs block mb-4">Format: latitude, longitude</small>
 							</div>
 
-							<div>
-								<div class="material-header">
-									<label class="form-label mb-0 text-sm">
-										Material
-									</label>
-									<button type="button" class="btn btn-sm btn-primary add-material-btn">
-										<i class="bi bi-plus-circle"></i>
-										&nbsp; Tambah Material
-									</button>
-								</div>
-								<div class="material-rows space-y-3"></div>
+							<div class="flex items-center gap-2">
+								<button type="button" class="btn btn-sm btn-outline-secondary" id="materialModalOpenBtn">
+									<i class="bi bi-pencil-square"></i>
+									&nbsp; BoQ Materials
+								</button>
 							</div>
 						</div>
 					</div>
@@ -744,6 +787,64 @@
 				</div>
 			</div>
 		</div>
+
+		<div class="material-modal" id="materialModal">
+			<div class="material-modal-content">
+				<div class="material-modal-header">
+					<h5 class="text-lg font-semibold mb-0">BoQ Material</h5>
+					<button type="button" class="material-modal-close" id="materialModalCloseBtn">&times;</button>
+				</div>
+				<div class="material-modal-body">
+					<div class="material-actions-bar">
+						<div class="text-sm text-gray-600"></div>
+						<button type="button" class="btn btn-sm btn-primary add-material-btn">
+							<i class="bi bi-plus-circle"></i>
+							&nbsp; Tambah Material
+						</button>
+					</div>
+					<div class="material-table-wrapper table-responsive">
+						<table class="table table-bordered table-hover text-center material-table" style="text">
+							<thead>
+								<tr>
+									<th rowspan="2" width="15%">Designator</th>
+									<th rowspan="2">Uraian Pekerjaan</th>
+									<th rowspan="2">Satuan</th>
+									<th colspan="2">Paket</th>
+									<th rowspan="2">VLM</th>
+									<th colspan="2">Total Harga</th>
+									<th rowspan="2">Action</th>
+								</tr>
+								<tr>
+									<th>Material</th>
+									<th>Jasa</th>
+									<th>Material</th>
+									<th>Jasa</th>
+								</tr>
+							</thead>
+							<tbody class="material-rows"></tbody>
+							<tfoot>
+								<tr>
+									<th colspan="7">Total Material</th>
+									<th colspan="2" id="totalMaterial">Rp</th>
+								</tr>
+								<tr>
+									<th colspan="7">Total Jasa</th>
+									<th colspan="2" id="totalJasa">Rp</th>
+								</tr>
+								<tr>
+									<th colspan="7">Total Material + Total Jasa</th>
+									<th colspan="2" id="totalMaterialJasa">Rp</th>
+								</tr>
+							</tfoot>
+						</table>
+					</div>
+				</div>
+				<div class="material-modal-footer">
+					<button type="button" class="btn btn-outline-secondary" id="materialModalCancelBtn">Batal</button>
+					<button type="button" class="btn btn-primary" id="materialModalSaveBtn">Selesai</button>
+				</div>
+			</div>
+		</div>
 	</form>
 
 	<div class="qc-modal" id="qcModal">
@@ -759,8 +860,12 @@
 				<label class="form-label" for="qcNotes">Notes</label>
 				<textarea id="qcNotes" name="notes" class="form-input" rows="4" required>{{ $data->report_notes ?? '' }}</textarea>
 				<div class="qc-actions">
-					<button type="button" class="btn btn-outline-secondary" id="qcCancelBtn">Batal</button>
-					<button type="submit" class="btn btn-primary">Simpan QC</button>
+					<button type="submit" class="btn btn-sm btn-danger">
+						<i class="bi bi-x-circle"></i>&nbsp; Reject
+					</button>
+					<button type="submit" class="btn btn-sm btn-success">
+						<i class="bi bi-check-circle"></i>&nbsp; Approve
+					</button>
 				</div>
 			</form>
 		</div>
@@ -796,121 +901,209 @@
 
 		function formatMaterialOption(data) {
 			if (!data.id) return data.text;
-			const description = $(data.element).data('description') || '';
-			return $(`
-				<div>
-					<div class="select2-result-item-text">${data.text}</div>
-					${description ? `<div class="select2-result-item-desc">${description}</div>` : ''}
-				</div>
-			`);
+			return $(
+				`<div><div class="select2-result-item-text">${data.text}</div></div>`
+			);
 		}
 
 		function formatMaterialSelection(data) {
 			return data.text;
 		}
 
+		const formatCurrency = (value) => {
+			const number = Number(value) || 0;
+			return 'Rp ' + number.toLocaleString('id-ID');
+		};
+
+		const updateMaterialTotals = () => {
+			let totalMaterial = 0;
+			let totalJasa = 0;
+
+			const materialRows = document.querySelectorAll('.material-row');
+			materialRows.forEach(row => {
+				const select = row.querySelector('.material-select');
+				const qtyInput = row.querySelector('.qty-input');
+				const qty = Number(qtyInput?.value) || 0;
+
+				if (select && select.value) {
+					const material = findMaterialById(select.value);
+					if (material) {
+						const materialPrice = Number(material.material_price_mtel) || 0;
+						const servicePrice = Number(material.service_price_mtel) || 0;
+						totalMaterial += materialPrice * qty;
+						totalJasa += servicePrice * qty;
+					}
+				}
+			});
+
+			const totalMaterialEl = document.getElementById('totalMaterial');
+			const totalJasaEl = document.getElementById('totalJasa');
+			const totalMaterialJasaEl = document.getElementById('totalMaterialJasa');
+
+			if (totalMaterialEl) totalMaterialEl.textContent = formatCurrency(totalMaterial);
+			if (totalJasaEl) totalJasaEl.textContent = formatCurrency(totalJasa);
+			if (totalMaterialJasaEl) totalMaterialJasaEl.textContent = formatCurrency(totalMaterial + totalJasa);
+		};
+
+		const findMaterialById = (id) => {
+			if (!materialsData || !materialsData.length) return null;
+			return materialsData.find(m => String(m.id) === String(id)) || null;
+		};
+
+		const updateMaterialRowDisplay = (row, material) => {
+			const descEl = row.querySelector('.material-desc');
+			const unitEl = row.querySelector('.material-unit');
+			const priceEl = row.querySelector('.material-price');
+			const serviceEl = row.querySelector('.material-service');
+			const totalMaterialEl = row.querySelector('.material-total');
+			const totalServiceEl = row.querySelector('.material-total-service');
+			const qtyInput = row.querySelector('.qty-input');
+			const qty = Number(qtyInput?.value) || 0;
+			const coordinateRow = row.nextElementSibling;
+			const coordinateGroup = coordinateRow ? coordinateRow.querySelector('.coordinate-input-group') : null;
+			const coordInput = coordinateGroup ? coordinateGroup.querySelector('.coordinate-input') : null;
+
+			if (!material) {
+				descEl.textContent = '-';
+				unitEl.textContent = '-';
+				priceEl.textContent = 'Rp 0';
+				serviceEl.textContent = 'Rp 0';
+				totalMaterialEl.textContent = 'Rp 0';
+				totalServiceEl.textContent = 'Rp 0';
+				if (coordinateGroup) {
+					coordinateGroup.classList.remove('show');
+					if (coordInput) {
+						coordInput.required = false;
+						coordInput.value = '';
+					}
+				}
+				return;
+			}
+
+			descEl.textContent = material.item_description || '-';
+			unitEl.textContent = material.unit || '-';
+			const materialPrice = Number(material.material_price_mtel) || 0;
+			const servicePrice = Number(material.service_price_mtel) || 0;
+			priceEl.textContent = formatCurrency(materialPrice);
+			serviceEl.textContent = formatCurrency(servicePrice);
+			totalMaterialEl.textContent = formatCurrency(materialPrice * qty);
+			totalServiceEl.textContent = formatCurrency(servicePrice * qty);
+
+			const designator = material.item_designator || '';
+			const requiresCoordinate = designator.includes('SC-OF-SM') || designator.includes('PU-S');
+
+			if (coordinateGroup && coordInput) {
+				if (requiresCoordinate || coordInput.value) {
+					coordinateGroup.classList.add('show');
+					coordInput.required = true;
+				} else {
+					coordinateGroup.classList.remove('show');
+					coordInput.required = false;
+					coordInput.value = '';
+				}
+			}
+
+			updateMaterialTotals();
+		};
+
 		function addMaterialRow(existing = null) {
 			const materialRows = document.querySelector('.material-rows');
-			const rowDiv = document.createElement('div');
-			rowDiv.className = 'material-row';
-			const index = materialRows.children.length;
+			if (!materialRows) return;
 
-			rowDiv.innerHTML = `
-				<div class="material-main-row">
-					<div class="material-field-group">
-						<label class="material-field-label">Material</label>
-						<div class="material-select-wrapper">
-							<select name="materials[${index}][designator_id]" class="form-select material-select w-full" required>
-								<option value="">Pilih material...</option>
-								${materialsData.map(m => `<option value="${m.id}" data-designator="${m.item_designator}" data-description="${m.item_description || ''}">${m.item_designator}</option>`).join('')}
-							</select>
-						</div>
-					</div>
-					<div class="qty-field-group">
-						<label class="material-field-label">Qty</label>
-						<div class="qty-wrapper">
-							<input type="number" name="materials[${index}][qty]" class="form-input" min="1" value="1" required>
-						</div>
-					</div>
-					<div class="material-actions">
+			const index = document.querySelectorAll('.material-row').length;
+			const rowWrapper = document.createElement('tbody');
+			rowWrapper.innerHTML = `
+				<tr class="material-row">
+					<td>
+						<select name="materials[${index}][designator_id]" class="form-select material-select w-full" required>
+							<option value="">Pilih material...</option>
+							${materialsData.map(m => `<option value="${m.id}" data-designator="${m.item_designator}">${m.item_designator}</option>`).join('')}
+						</select>
+					</td>
+					<td><div class="material-desc">-</div></td>
+					<td class="material-unit">-</td>
+					<td class="material-price">Rp 0</td>
+					<td class="material-service">Rp 0</td>
+					<td>
+						<input type="text" name="materials[${index}][qty]" class="form-input qty-input" value="${existing?.qty || 1}" inputmode="numeric" required>
+					</td>
+					<td class="material-total">Rp 0</td>
+					<td class="material-total-service">Rp 0</td>
+					<td>
 						<button type="button" class="btn btn-sm btn-outline-danger remove-material-btn">
 							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1 1v3M4 7h16"/>
 							</svg>
 						</button>
-					</div>
-				</div>
-				<div class="coordinate-input-group">
-					<div class="coordinate-label">
-						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-						</svg>
-						Koordinat Material (Latitude, Longitude)
-					</div>
-					<div class="coordinate-inputs">
-						<div class="flex gap-2">
-							<input type="text" name="materials[${index}][coordinates_material]" class="coordinate-input flex-1" placeholder="-6.200000, 106.816666">
-							<button type="button" class="btn btn-primary btn-sm get-coordinate-btn" data-target="materials[${index}][coordinates_material]" title="Ambil lokasi dari GPS">
-								<i class="bi bi-geo-alt-fill"></i>
-							</button>
+					</td>
+				</tr>
+				<tr class="material-coordinate-row">
+					<td colspan="9">
+						<div class="coordinate-input-group">
+							<div class="coordinate-label">
+								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+								</svg>
+								Koordinat Material (Latitude, Longitude)
+							</div>
+							<div class="coordinate-inputs">
+								<div class="flex gap-2">
+									<input type="text" name="materials[${index}][coordinates_material]" class="coordinate-input flex-1" placeholder="-6.200000, 106.816666">
+									<button type="button" class="btn btn-primary btn-sm get-coordinate-btn" data-target="materials[${index}][coordinates_material]" title="Ambil lokasi dari GPS">
+										<i class="bi bi-geo-alt-fill"></i>
+									</button>
+								</div>
+							</div>
 						</div>
-					</div>
-				</div>
+					</td>
+				</tr>
 			`;
 
-			materialRows.appendChild(rowDiv);
+			const rows = Array.from(rowWrapper.children);
+			rows.forEach(r => materialRows.appendChild(r));
 
-			const newSelect = rowDiv.querySelector('.material-select');
+			const mainRow = rows[0];
+			const newSelect = mainRow.querySelector('.material-select');
 			$(newSelect).select2({
 				placeholder: 'Cari material...',
 				allowClear: true,
 				templateResult: formatMaterialOption,
 				templateSelection: formatMaterialSelection,
-				width: '100%'
+				width: '100%',
+				dropdownParent: $('#materialModal')
 			});
 
 			if (existing) {
 				$(newSelect).val(existing.designator_id).trigger('change');
-				const qtyInput = rowDiv.querySelector(`input[name="materials[${index}][qty]"]`);
-				if (qtyInput && existing.qty) {
-					qtyInput.value = existing.qty;
-				}
-
-				const coordInput = rowDiv.querySelector(`input[name="materials[${index}][coordinates_material]"]`);
+				const coordInput = mainRow.nextElementSibling?.querySelector(
+					`input[name="materials[${index}][coordinates_material]"]`);
 				if (coordInput) {
 					coordInput.value = existing.coordinates_material || '';
 				}
-
-				const selectedOption = $(newSelect).find('option:selected');
-				const designator = selectedOption.data('designator') || '';
-				const coordinateGroup = rowDiv.querySelector('.coordinate-input-group');
-				const requiresCoordinate = designator.includes('SC-OF-SM') || designator.includes('PU-S');
-				if ((coordInput && coordInput.value) || requiresCoordinate) {
-					coordinateGroup.classList.add('show');
-					if (coordInput) {
-						coordInput.required = true;
-					}
-				}
 			}
 
-			$(newSelect).on('change', function() {
-				const selectedOption = $(this).find('option:selected');
-				const designator = selectedOption.data('designator') || '';
-				const coordinateGroup = $(this).closest('.material-row').find('.coordinate-input-group');
-				const coordinateInputs = coordinateGroup.find('.coordinate-input');
+			const qtyInput = mainRow.querySelector(`input[name="materials[${index}][qty]"]`);
+			const applyUpdate = () => {
+				const material = findMaterialById(newSelect.value);
+				updateMaterialRowDisplay(rows[0], material);
+			};
 
-				const requiresCoordinate = designator.includes('SC-OF-SM') || designator.includes('PU-S');
+			$(newSelect).on('change', applyUpdate);
+			if (qtyInput) {
+				qtyInput.addEventListener('input', (e) => {
+					e.target.value = e.target.value.replace(/[^0-9]/g, '');
+					applyUpdate();
+				});
+				qtyInput.addEventListener('keydown', (e) => {
+					if (!/[0-9]/.test(e.key) && !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e
+							.key)) {
+						e.preventDefault();
+					}
+				});
+			}
 
-				if (requiresCoordinate) {
-					coordinateGroup.addClass('show');
-					coordinateInputs.prop('required', true);
-				} else {
-					coordinateGroup.removeClass('show');
-					coordinateInputs.prop('required', false);
-					coordinateInputs.val('');
-				}
-			});
+			applyUpdate();
 		}
 
 		function initializePhotoUpload() {
@@ -1205,6 +1398,7 @@
 					} else {
 						addMaterialRow();
 					}
+					updateMaterialTotals();
 				})
 				.catch(err => {
 					console.error('Error loading materials:', err);
@@ -1219,10 +1413,34 @@
 			const rowId = '{{ $id }}';
 			loadPhotos(rowId);
 
+			const materialModal = document.getElementById('materialModal');
+			const materialOpenBtn = document.getElementById('materialModalOpenBtn');
+			const materialCloseBtn = document.getElementById('materialModalCloseBtn');
+			const materialCancelBtn = document.getElementById('materialModalCancelBtn');
+			const materialSaveBtn = document.getElementById('materialModalSaveBtn');
+
+			const toggleMaterialModal = (show) => {
+				if (!materialModal) return;
+				materialModal.classList[show ? 'add' : 'remove']('show');
+			};
+
+			[materialOpenBtn, materialCloseBtn, materialCancelBtn, materialSaveBtn].forEach(btn => {
+				if (btn) {
+					btn.addEventListener('click', () => toggleMaterialModal(btn === materialOpenBtn));
+				}
+			});
+
+			if (materialModal) {
+				materialModal.addEventListener('click', (e) => {
+					if (e.target === materialModal) {
+						toggleMaterialModal(false);
+					}
+				});
+			}
+
 			const qcModal = document.getElementById('qcModal');
 			const qcOpenBtn = document.getElementById('qcModalOpenBtn');
 			const qcCloseBtn = document.getElementById('qcModalCloseBtn');
-			const qcCancelBtn = document.getElementById('qcCancelBtn');
 			const qcForm = document.getElementById('qcForm');
 			const qcNotes = document.getElementById('qcNotes');
 
@@ -1245,7 +1463,7 @@
 				});
 			}
 
-			[qcCloseBtn, qcCancelBtn].forEach(btn => {
+			[qcCloseBtn].forEach(btn => {
 				if (btn) {
 					btn.addEventListener('click', () => toggleQcModal(false));
 				}
@@ -1265,14 +1483,19 @@
 				const btn = e.target.classList.contains('remove-material-btn') ? e.target : e.target.closest(
 					'.remove-material-btn');
 				const materialRow = btn.closest('.material-row');
-				const materialRows = materialRow.parentElement;
+				const coordinateRow = materialRow ? materialRow.nextElementSibling : null;
+				const materialRowCount = document.querySelectorAll('.material-row').length;
 
-				if (materialRows.children.length > 1) {
+				if (materialRowCount > 1 && materialRow) {
 					const select = materialRow.querySelector('.material-select');
 					if ($(select).data('select2')) {
 						$(select).select2('destroy');
 					}
 					materialRow.remove();
+					if (coordinateRow && coordinateRow.classList.contains('material-coordinate-row')) {
+						coordinateRow.remove();
+					}
+					updateMaterialTotals();
 				} else {
 					alert('Minimal harus ada satu material');
 				}
@@ -1280,8 +1503,8 @@
 
 			if (e.target.classList.contains('add-material-btn') || e.target.closest('.add-material-btn')) {
 				addMaterialRow();
+				updateMaterialTotals();
 			}
-
 			if (e.target.classList.contains('get-coordinate-btn') || e.target.closest('.get-coordinate-btn')) {
 				const btn = e.target.classList.contains('get-coordinate-btn') ? e.target : e.target.closest(
 					'.get-coordinate-btn');

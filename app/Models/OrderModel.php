@@ -83,6 +83,8 @@ class OrderModel extends Model
             }
         }
 
+        $response = array_filter($response);
+
         return $response;
     }
 
@@ -129,7 +131,7 @@ class OrderModel extends Model
                 ->where('assign_order_id', $id)
                 ->update([
                     'assign_order_id'  => $id,
-                    'status_qc_id'     => $request->input('status_qc_id', 0),
+                    'status_qc_id'     => $request->input('status_qc_id', 2),
                     'notes'            => $request->input('notes'),
                     'coordinates_site' => $request->input('coordinates_site'),
                     'created_by'       => session('nik') ?? 0,
@@ -139,7 +141,7 @@ class OrderModel extends Model
             DB::table('tb_report_orders_log')
                 ->insert([
                     'assign_order_id'  => $id,
-                    'status_qc_id'     => $request->input('status_qc_id', 0),
+                    'status_qc_id'     => $request->input('status_qc_id', 2),
                     'notes'            => $request->input('notes'),
                     'coordinates_site' => $request->input('coordinates_site'),
                     'created_by'       => session('nik') ?? 0,
@@ -195,7 +197,7 @@ class OrderModel extends Model
             DB::table('tb_report_orders')
                 ->insert([
                     'assign_order_id'  => $id,
-                    'status_qc_id'     => $request->input('status_qc_id', 0),
+                    'status_qc_id'     => $request->input('status_qc_id', 2),
                     'notes'            => $request->input('notes'),
                     'coordinates_site' => $request->input('coordinates_site'),
                     'created_by'       => session('nik') ?? 0,
@@ -205,7 +207,7 @@ class OrderModel extends Model
             DB::table('tb_report_orders_log')
                 ->insert([
                     'assign_order_id'  => $id,
-                    'status_qc_id'     => $request->input('status_qc_id', 0),
+                    'status_qc_id'     => $request->input('status_qc_id', 2),
                     'notes'            => $request->input('notes'),
                     'coordinates_site' => $request->input('coordinates_site'),
                     'created_by'       => session('nik') ?? 0,
