@@ -347,6 +347,57 @@
 			background: rgba(255, 255, 255, 0.3);
 		}
 
+		.qc-modal {
+			display: none;
+			position: fixed;
+			inset: 0;
+			background: rgba(0, 0, 0, 0.55);
+			z-index: 10000;
+			align-items: center;
+			justify-content: center;
+			padding: 1rem;
+		}
+
+		.qc-modal.show {
+			display: flex;
+		}
+
+		.qc-modal-content {
+			background: #fff;
+			border-radius: 10px;
+			padding: 20px;
+			max-width: 520px;
+			width: 100%;
+			box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+		}
+
+		.qc-modal-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 12px;
+		}
+
+		.qc-modal-close {
+			background: transparent;
+			border: none;
+			font-size: 22px;
+			cursor: pointer;
+			line-height: 1;
+			color: #6b7280;
+		}
+
+		.qc-modal-close:hover {
+			color: #111827;
+		}
+
+		.qc-actions {
+			display: flex;
+			gap: 10px;
+			justify-content: flex-end;
+			margin-top: 14px;
+		}
+
 		.upload-box {
 			width: 100%;
 			min-height: 250px;
@@ -532,6 +583,11 @@
 			<i class="bi bi-check-circle"></i>
 			&nbsp; Simpan
 		</button>
+		<button type="button" class="btn btn-outline-info" id="qcModalOpenBtn"
+			{{ empty($data->assign_order_id) ? 'disabled' : '' }}>
+			<i class="bi bi-clipboard-check"></i>
+			&nbsp; Quality Check (QC)
+		</button>
 	</div>
 
 	@if (session('success'))
@@ -563,12 +619,16 @@
 						<table class="info-grid">
 							<tbody>
 								<tr class="info-item">
-									<td class="info-label">Start Time</td>
-									<td class="info-value">{{ $data->tiket_start_time }}</td>
+									<td class="info-label">Created At</td>
+									<td class="info-value">{{ $data->created_at }}</td>
 								</tr>
 								<tr class="info-item">
 									<td class="info-label">TT Site</td>
 									<td class="info-value">{{ $data->tt_site }}</td>
+								</tr>
+								<tr class="info-item">
+									<td class="info-label">Technician</td>
+									<td class="info-value">{{ $data->tacc_nama }} ({{ $data->tacc_nik }})</td>
 								</tr>
 								<tr class="info-item">
 									<td class="info-label">Site Down</td>
@@ -629,7 +689,8 @@
 								</label>
 								<div class="flex gap-2 mb-2">
 									<input type="text" name="coordinates_site" class="form-input flex-1"
-										placeholder="Contoh: -1.2563759829104284, 116.86768575387761" required>
+										placeholder="Contoh: -1.2563759829104284, 116.86768575387761" value="{{ $data->coordinates_site ?? '' }}"
+										required>
 									<button type="button" class="btn btn-primary btn-sm get-coordinate-btn" title="Ambil lokasi dari GPS">
 										<i class="bi bi-geo-alt-fill"></i>
 									</button>
@@ -681,6 +742,26 @@
 			</div>
 		</div>
 	</form>
+
+	<div class="qc-modal" id="qcModal">
+		<div class="qc-modal-content">
+			<div class="qc-modal-header">
+				<h5 class="text-lg font-semibold mb-0">Quality Check (QC)</h5>
+				<button type="button" class="qc-modal-close" id="qcModalCloseBtn">&times;</button>
+			</div>
+			<form id="qcForm" action="{{ route('order.status.post') }}" method="POST">
+				@csrf
+				<input type="hidden" name="assign_order_id" value="{{ $data->assign_order_id }}">
+				<input type="hidden" name="status_qc_id" value="{{ $data->status_qc_id ?? 0 }}">
+				<label class="form-label" for="qcNotes">Notes</label>
+				<textarea id="qcNotes" name="notes" class="form-input" rows="4" required>{{ $data->report_notes ?? '' }}</textarea>
+				<div class="qc-actions">
+					<button type="button" class="btn btn-outline-secondary" id="qcCancelBtn">Batal</button>
+					<button type="submit" class="btn btn-primary">Simpan QC</button>
+				</div>
+			</form>
+		</div>
+	</div>
 @endsection
 
 @section('scripts')
@@ -691,6 +772,8 @@
 	<script>
 		let materialsData = [];
 		let mapInstance = null;
+		const existingMaterials = @json($materials ?? []);
+		const existingPhotoUrl = @json($existingPhotoUrl ?? null);
 
 		function togglePanel(header) {
 			const content = header.nextElementSibling;
@@ -723,7 +806,7 @@
 			return data.text;
 		}
 
-		function addMaterialRow() {
+		function addMaterialRow(existing = null) {
 			const materialRows = document.querySelector('.material-rows');
 			const rowDiv = document.createElement('div');
 			rowDiv.className = 'material-row';
@@ -784,6 +867,30 @@
 				width: '100%'
 			});
 
+			if (existing) {
+				$(newSelect).val(existing.designator_id).trigger('change');
+				const qtyInput = rowDiv.querySelector(`input[name="materials[${index}][qty]"]`);
+				if (qtyInput && existing.qty) {
+					qtyInput.value = existing.qty;
+				}
+
+				const coordInput = rowDiv.querySelector(`input[name="materials[${index}][coordinates_material]"]`);
+				if (coordInput) {
+					coordInput.value = existing.coordinates_material || '';
+				}
+
+				const selectedOption = $(newSelect).find('option:selected');
+				const designator = selectedOption.data('designator') || '';
+				const coordinateGroup = rowDiv.querySelector('.coordinate-input-group');
+				const requiresCoordinate = designator.includes('SC-OF-SM') || designator.includes('PU-S');
+				if ((coordInput && coordInput.value) || requiresCoordinate) {
+					coordinateGroup.classList.add('show');
+					if (coordInput) {
+						coordInput.required = true;
+					}
+				}
+			}
+
 			$(newSelect).on('change', function() {
 				const selectedOption = $(this).find('option:selected');
 				const designator = selectedOption.data('designator') || '';
@@ -809,6 +916,13 @@
 			const cameraIcon = document.getElementById('cameraIcon');
 			const deleteBtn = document.getElementById('deleteBtn');
 			const uploadBtn = document.getElementById('uploadBtn');
+
+			if (existingPhotoUrl) {
+				previewImage.src = existingPhotoUrl;
+				previewImage.hidden = false;
+				cameraIcon.style.display = 'none';
+				deleteBtn.hidden = false;
+			}
 
 			uploadBtn.addEventListener('click', () => {
 				fileInput.click();
@@ -1083,7 +1197,11 @@
 				.then(res => res.json())
 				.then(data => {
 					materialsData = data;
-					addMaterialRow();
+					if (existingMaterials && existingMaterials.length > 0) {
+						existingMaterials.forEach(item => addMaterialRow(item));
+					} else {
+						addMaterialRow();
+					}
 				})
 				.catch(err => {
 					console.error('Error loading materials:', err);
@@ -1097,6 +1215,46 @@
 
 			const rowId = '{{ $id }}';
 			loadPhotos(rowId);
+
+			const qcModal = document.getElementById('qcModal');
+			const qcOpenBtn = document.getElementById('qcModalOpenBtn');
+			const qcCloseBtn = document.getElementById('qcModalCloseBtn');
+			const qcCancelBtn = document.getElementById('qcCancelBtn');
+			const qcForm = document.getElementById('qcForm');
+			const qcNotes = document.getElementById('qcNotes');
+
+			const toggleQcModal = (show) => {
+				if (!qcModal) return;
+				qcModal.classList[show ? 'add' : 'remove']('show');
+				if (show && qcNotes) {
+					setTimeout(() => qcNotes.focus(), 50);
+				}
+			};
+
+			if (qcOpenBtn) {
+				qcOpenBtn.addEventListener('click', () => {
+					const assignInput = qcForm ? qcForm.querySelector('input[name="assign_order_id"]') : null;
+					if (!assignInput || !assignInput.value) {
+						alert('Assign order belum tersedia untuk QC.');
+						return;
+					}
+					toggleQcModal(true);
+				});
+			}
+
+			[qcCloseBtn, qcCancelBtn].forEach(btn => {
+				if (btn) {
+					btn.addEventListener('click', () => toggleQcModal(false));
+				}
+			});
+
+			if (qcModal) {
+				qcModal.addEventListener('click', (e) => {
+					if (e.target === qcModal) {
+						toggleQcModal(false);
+					}
+				});
+			}
 		});
 
 		document.addEventListener('click', function(e) {

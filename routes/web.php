@@ -31,6 +31,7 @@ Route::middleware(['auth'])->group(function ()
     {
         Route::get('{id}', [OrderController::class, 'index'])->name('order.index');
         Route::post('planning', [OrderController::class, 'planning_post'])->name('order.planning.post');
+        Route::post('status', [OrderController::class, 'status_post'])->name('order.status.post');
     });
 
     Route::prefix('dashboard')->group(function ()

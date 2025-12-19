@@ -13,6 +13,8 @@ class OrderModel extends Model
     public static function index($id)
     {
         return DB::table('tb_source_tacc_ticket_alita AS tstta')
+            ->leftJoin('tb_assign_orders AS tao', 'tstta.tt_site_id', '=', 'tao.order_id')
+            ->leftJoin('tb_report_orders AS tro', 'tao.id', '=', 'tro.assign_order_id')
             ->leftJoin('tb_witel AS tw', 'tstta.witel', '=', 'tw.name')
             ->leftJoin('tb_regional AS tr', 'tr.id', '=', 'tw.regional_id')
             ->select(
@@ -21,17 +23,36 @@ class OrderModel extends Model
                 'tstta.tt_site',
                 'tr.name AS regional_name',
                 'tw.name AS witel_name',
-                'tstta.start_time AS tiket_start_time',
+                'tstta.created_at',
                 'tstta.site_down',
                 'tstta.site_name_down',
                 'tstta.latitude_site_down',
                 'tstta.longitude_site_down',
                 'tstta.site_detect',
                 'tstta.site_name_detect',
-                'tstta.tiket_terima'
+                'tstta.tiket_terima',
+                'tstta.tacc_nama',
+                'tstta.tacc_nik',
+                'tao.id AS assign_order_id',
+                'tro.status_qc_id',
+                'tro.coordinates_site',
+                'tro.notes AS report_notes'
             )
             ->where('tstta.id', $id)
             ->first();
+    }
+
+    public static function get_materials($assign_order_id)
+    {
+        if (empty($assign_order_id))
+        {
+            return collect();
+        }
+
+        return DB::table('tb_report_materials')
+            ->where('assign_order_id', $assign_order_id)
+            ->select('designator_id', 'qty', 'coordinates_material')
+            ->get();
     }
 
     public static function get_ticket_alita_detail($id)
@@ -108,7 +129,7 @@ class OrderModel extends Model
                 ->where('assign_order_id', $id)
                 ->update([
                     'assign_order_id'  => $id,
-                    'status_qc_id'     => 1,
+                    'status_qc_id'     => $request->input('status_qc_id', 0),
                     'notes'            => $request->input('notes'),
                     'coordinates_site' => $request->input('coordinates_site'),
                     'created_by'       => session('nik') ?? 0,
@@ -118,7 +139,7 @@ class OrderModel extends Model
             DB::table('tb_report_orders_log')
                 ->insert([
                     'assign_order_id'  => $id,
-                    'status_qc_id'     => 1,
+                    'status_qc_id'     => $request->input('status_qc_id', 0),
                     'notes'            => $request->input('notes'),
                     'coordinates_site' => $request->input('coordinates_site'),
                     'created_by'       => session('nik') ?? 0,
@@ -174,7 +195,7 @@ class OrderModel extends Model
             DB::table('tb_report_orders')
                 ->insert([
                     'assign_order_id'  => $id,
-                    'status_qc_id'     => 1,
+                    'status_qc_id'     => $request->input('status_qc_id', 0),
                     'notes'            => $request->input('notes'),
                     'coordinates_site' => $request->input('coordinates_site'),
                     'created_by'       => session('nik') ?? 0,
@@ -184,7 +205,7 @@ class OrderModel extends Model
             DB::table('tb_report_orders_log')
                 ->insert([
                     'assign_order_id'  => $id,
-                    'status_qc_id'     => 1,
+                    'status_qc_id'     => $request->input('status_qc_id', 0),
                     'notes'            => $request->input('notes'),
                     'coordinates_site' => $request->input('coordinates_site'),
                     'created_by'       => session('nik') ?? 0,
@@ -224,5 +245,29 @@ class OrderModel extends Model
                 $photoFile->move($uploadPath, $fileName);
             }
         }
+    }
+
+    public static function status_post($request)
+    {
+        $assign_order_id = $request->input('assign_order_id');
+        $status_qc_id    = $request->input('status_qc_id');
+
+        DB::table('tb_report_orders')
+            ->where('assign_order_id', $assign_order_id)
+            ->update([
+                'status_qc_id' => $status_qc_id,
+                'notes'        => $request->input('notes'),
+                'updated_by'   => session('nik') ?? 0,
+                'updated_at'   => now()
+            ]);
+
+        DB::table('tb_report_orders_log')
+            ->insert([
+                'assign_order_id' => $assign_order_id,
+                'status_qc_id'    => $status_qc_id,
+                'notes'           => $request->input('notes'),
+                'created_by'      => session('nik') ?? 0,
+                'created_at'      => now()
+            ]);
     }
 }

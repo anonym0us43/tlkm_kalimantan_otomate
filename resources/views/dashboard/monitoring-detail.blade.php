@@ -70,7 +70,7 @@
 				<thead>
 					<tr>
 						<th>No</th>
-						<th>Start Time</th>
+						<th>Created At</th>
 						<th>TT Site</th>
 						<th>Site Down</th>
 						<th>Site Name Down</th>
@@ -79,12 +79,13 @@
 						<th>Site Detect</th>
 						<th>Site Name Detect</th>
 						<th>Tiket Terima</th>
+						<th>Technician</th>
 						<th>Action</th>
 					</tr>
 				</thead>
 				<tbody id="detail-tbody">
 					<tr>
-						<td colspan="11" class="text-center">Loading...</td>
+						<td colspan="12" class="text-center">Loading...</td>
 					</tr>
 				</tbody>
 			</table>
@@ -118,7 +119,7 @@
 			const tbody = document.getElementById('detail-tbody');
 
 			if (!data || data.length === 0) {
-				tbody.innerHTML = '<tr><td colspan="11" class="text-center">Tidak ada data untuk ditampilkan</td></tr>';
+				tbody.innerHTML = '<tr><td colspan="12" class="text-center">Tidak ada data untuk ditampilkan</td></tr>';
 				return;
 			}
 
@@ -131,7 +132,7 @@
 				const tr = document.createElement('tr');
 				tr.innerHTML = `
 				<td>${index + 1}</td>
-				<td>${row.tiket_start_time || '-'}</td>
+				<td>${row.created_at || '-'}</td>
 				<td>${row.tt_site || '-'}</td>
 				<td>${row.site_down || '-'}</td>
 				<td>${row.site_name_down || '-'}</td>
@@ -140,6 +141,7 @@
 				<td>${row.site_detect || '-'}</td>
 				<td>${row.site_name_detect || '-'}</td>
 				<td>${row.tiket_terima || '-'}</td>
+				<td>${(row.tacc_nama || row.tacc_nik) ? `${row.tacc_nama || '-'}` + ' (' + `${row.tacc_nik || '-'}` + ')' : '-'}</td>
 				<td>
                     <a href="/order/${row.row_id}" class="inline-flex items-center justify-center w-8 h-8 text-primary hover:text-primary-dark transition-colors">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -212,7 +214,7 @@
 				})
 				.catch(err => {
 					const tbody = document.getElementById('detail-tbody');
-					tbody.innerHTML = '<tr><td colspan="11" class="text-center text-red-500">Gagal memuat data</td></tr>';
+					tbody.innerHTML = '<tr><td colspan="12" class="text-center text-red-500">Gagal memuat data</td></tr>';
 					console.error(err);
 				});
 		}

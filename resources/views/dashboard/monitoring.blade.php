@@ -53,7 +53,6 @@
 				<thead>
 					<tr>
 						<th rowspan="3">WITEL</th>
-						<th rowspan="3">INDIKASI</th>
 						<th colspan="3">PLANNING</th>
 						<th rowspan="2" colspan="4">UMUR</th>
 						<th colspan="3">PERMANENISASI</th>
@@ -67,7 +66,7 @@
 						<th colspan="1">MTEL</th>
 					</tr>
 					<tr>
-						<th>NEED APPROVE</th>
+						<th>INDIKASI</th>
 						<th>REJECT</th>
 						<th>NEED APPROVE</th>
 						<th>&lt;1 HARI</th>
@@ -81,7 +80,7 @@
 				</thead>
 				<tbody id="monitoring-tbody">
 					<tr>
-						<td colspan="14">Loading...</td>
+						<td colspan="13">Loading...</td>
 					</tr>
 				</tbody>
 			</table>
@@ -98,17 +97,16 @@
 
 		const columnStatusMap = {
 			1: 'idle_order',
-			2: 'planning_need_approve_ta',
-			3: 'planning_reject_ta',
-			4: 'planning_need_approve_mtel',
-			5: 'age_under1d',
-			6: 'age_1d_to_3d',
-			7: 'age_3d_to_7d',
-			8: 'age_upper7d',
-			9: 'permanenisasi_need_approve_ta',
-			10: 'permanenisasi_reject_ta',
-			11: 'permanenisasi_need_approve_mtel',
-			12: 'permanenisasi_rekon'
+			2: 'planning_reject_ta',
+			3: 'planning_need_approve_mtel',
+			4: 'age_under1d',
+			5: 'age_1d_to_3d',
+			6: 'age_3d_to_7d',
+			7: 'age_upper7d',
+			8: 'permanenisasi_need_approve_ta',
+			9: 'permanenisasi_reject_ta',
+			10: 'permanenisasi_need_approve_mtel',
+			11: 'permanenisasi_rekon'
 		};
 
 		function renderMonitoringTable(data) {
@@ -119,12 +117,11 @@
 				return;
 			}
 
-			let colTotals = Array(13).fill(0);
+			let colTotals = Array(12).fill(0);
 			data.forEach(row => {
 				const cells = [
 					row.witel_name || '-',
 					row.idle_order || 0,
-					row.planning_need_approve_ta || 0,
 					row.planning_reject_ta || 0,
 					row.planning_need_approve_mtel || 0,
 					row.age_under1d || 0,
