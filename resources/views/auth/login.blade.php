@@ -125,7 +125,7 @@
 										<label for="password">Password</label>
 										<div class="relative text-white-dark">
 											<input id="password" type="password" name="password" placeholder="Enter Password"
-												class="form-input ps-10 placeholder:text-white-dark @error('password') border-red-500 @enderror" />
+												class="form-input w-full ps-10 pr-12 placeholder:text-white-dark @error('password') border-red-500 @enderror" />
 											<span class="absolute start-4 top-1/2 -translate-y-1/2">
 												<svg width="18" height="18" viewBox="0 0 18 18" fill="none">
 													<path opacity="0.5"
@@ -145,6 +145,27 @@
 														fill="currentColor" />
 												</svg>
 											</span>
+
+											<button type="button" id="toggle-password"
+												class="absolute z-10 text-white-dark hover:text-primary focus:outline-none"
+												style="top:50%; right:0.75rem; transform: translateY(-50%);" aria-label="Toggle password visibility">
+												<span id="eye-open" aria-hidden="false">
+													<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+														stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+														<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" />
+														<circle cx="12" cy="12" r="3" />
+													</svg>
+												</span>
+												<span id="eye-closed" style="display:none;" aria-hidden="true">
+													<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+														stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+														<path d="M17.94 17.94A10.94 10.94 0 0 1 12 20C5 20 1 12 1 12a21.71 21.71 0 0 1 5.06-6.88" />
+														<path d="M22.54 11.88s-1.64-3-4.54-5.04" />
+														<path d="M14.12 14.12A3 3 0 0 1 9.88 9.88" />
+														<line x1="1" y1="1" x2="23" y2="23" />
+													</svg>
+												</span>
+											</button>
 										</div>
 										@error('password')
 											<p class="mt-1 text-xs text-red-500">{{ $message }}</p>
@@ -288,6 +309,26 @@
 			window.addEventListener('load', () => {
 				startCaptchaTimer();
 			});
+
+			(function() {
+				const pwdInput = document.getElementById('password');
+				const toggleBtn = document.getElementById('toggle-password');
+				if (pwdInput && toggleBtn) {
+					const eyeOpen = document.getElementById('eye-open');
+					const eyeClosed = document.getElementById('eye-closed');
+					toggleBtn.addEventListener('click', function() {
+						if (pwdInput.type === 'password') {
+							pwdInput.type = 'text';
+							if (eyeOpen) eyeOpen.style.display = 'none';
+							if (eyeClosed) eyeClosed.style.display = 'inline';
+						} else {
+							pwdInput.type = 'password';
+							if (eyeOpen) eyeOpen.style.display = 'inline';
+							if (eyeClosed) eyeClosed.style.display = 'none';
+						}
+					});
+				}
+			})();
 		</script>
 	</body>
 

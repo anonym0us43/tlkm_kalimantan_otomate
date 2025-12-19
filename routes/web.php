@@ -29,7 +29,7 @@ Route::middleware(['auth'])->group(function ()
 
     Route::prefix('order')->group(function ()
     {
-        Route::get('/', [OrderController::class, 'index'])->name('order.index');
+        Route::get('{id}', [OrderController::class, 'index'])->name('order.index');
         Route::post('planning', [OrderController::class, 'planning_post'])->name('order.planning.post');
     });
 

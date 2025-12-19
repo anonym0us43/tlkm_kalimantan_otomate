@@ -4,14 +4,22 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\OrderModel;
+use Illuminate\Support\Facades\DB;
 
 date_default_timezone_set('Asia/Jakarta');
 
 class OrderController extends Controller
 {
-    public function index()
+    public function index($id)
     {
-        return view('order.index');
+        $data = OrderModel::index($id);
+
+        if (!$data)
+        {
+            return redirect()->back()->with('error', 'Data tidak ditemukan');
+        }
+
+        return view('order.index', compact('id', 'data'));
     }
 
     public function planning_post(Request $request)

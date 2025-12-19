@@ -10,6 +10,30 @@ date_default_timezone_set('Asia/Jakarta');
 
 class OrderModel extends Model
 {
+    public static function index($id)
+    {
+        return DB::table('tb_source_tacc_ticket_alita AS tstta')
+            ->leftJoin('tb_witel AS tw', 'tstta.witel', '=', 'tw.name')
+            ->leftJoin('tb_regional AS tr', 'tr.id', '=', 'tw.regional_id')
+            ->select(
+                'tstta.id AS row_id',
+                'tstta.tt_site_id',
+                'tstta.tt_site',
+                'tr.name AS regional_name',
+                'tw.name AS witel_name',
+                'tstta.start_time AS tiket_start_time',
+                'tstta.site_down',
+                'tstta.site_name_down',
+                'tstta.latitude_site_down',
+                'tstta.longitude_site_down',
+                'tstta.site_detect',
+                'tstta.site_name_detect',
+                'tstta.tiket_terima'
+            )
+            ->where('tstta.id', $id)
+            ->first();
+    }
+
     public static function get_ticket_alita_detail($id)
     {
         $data = DB::table('tb_source_tacc_ticket_alita_detail')
