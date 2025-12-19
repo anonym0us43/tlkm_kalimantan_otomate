@@ -459,6 +459,9 @@
 			border-radius: 8px;
 			overflow: hidden;
 			border: 1px solid #e5e7eb;
+			position: relative;
+			z-index: 0;
+			isolation: isolate;
 		}
 
 		.custom-marker {
