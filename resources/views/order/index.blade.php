@@ -115,6 +115,35 @@
 			height: 42px;
 		}
 
+		.material-field-group .select2-container .select2-selection--single {
+			height: 42px !important;
+			display: flex;
+			align-items: center;
+			border-radius: 6px;
+		}
+
+		.material-field-group .select2-container .select2-selection__rendered {
+			line-height: normal;
+			padding-left: 12px;
+			padding-top: 0;
+			padding-bottom: 0;
+			padding-right: 50px;
+		}
+
+		.material-field-group .select2-container .select2-selection__arrow {
+			height: 40px;
+		}
+
+		.material-field-group .select2-container .select2-selection__clear {
+			position: absolute;
+			right: 28px;
+			top: 50%;
+			transform: translateY(-50%);
+			font-size: 18px;
+			line-height: 1;
+			margin-right: 0;
+		}
+
 		.material-actions {
 			flex: 0 0 auto;
 			display: flex;
