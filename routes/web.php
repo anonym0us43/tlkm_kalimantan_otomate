@@ -55,6 +55,7 @@ Route::middleware(['auth'])->group(function ()
                 Route::get('/', [AjaxController::class, 'dashboard_monitoring'])->name('ajax.dashboard.monitoring');
                 Route::get('detail', [AjaxController::class, 'dashboard_monitoring_detail'])->name('ajax.dashboard.monitoring.detail');
             });
+            Route::get('rekoncile', [AjaxController::class, 'dashboard_rekoncile'])->name('ajax.dashboard.rekoncile');
         });
 
         Route::prefix('setting')->group(function ()

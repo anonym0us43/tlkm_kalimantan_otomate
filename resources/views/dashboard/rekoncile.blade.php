@@ -27,33 +27,27 @@
 					<tr>
 						<th rowspan="3">WITEL</th>
 						<th colspan="3">PLANNING</th>
-						<th rowspan="2" colspan="4">UMUR</th>
-						<th colspan="3">PERMANENISASI</th>
+						<th rowspan="3">PROGRESS</th>
+						<th colspan="2">PERMANENISASI</th>
 						<th rowspan="3">REKON</th>
 						<th rowspan="3">TOTAL</th>
 					</tr>
 					<tr>
-						<th colspan="2">TL TA</th>
+						<th colspan="2">TA</th>
 						<th colspan="1">MTEL</th>
-						<th colspan="2">TL TA</th>
-						<th colspan="1">MTEL</th>
+						<th colspan="2">MTEL</th>
 					</tr>
 					<tr>
-						<th>NEED APPROVE</th>
+						<th>INDIKASI</th>
 						<th>REJECT</th>
-						<th>NEED APPROVE</th>
-						<th>&lt;1 HARI</th>
-						<th>&gt; 1 HARI</th>
-						<th>&gt; 3 HARI</th>
-						<th>&gt; 7 HARI</th>
-						<th>NEED APPROVE</th>
+						<th>NEED<br>APPROVE</th>
 						<th>REJECT</th>
-						<th>NEED APPROVE</th>
+						<th>NEED<br>APPROVE</th>
 					</tr>
 				</thead>
 				<tbody id="rekoncile-tbody">
 					<tr>
-						<td colspan="13">Loading...</td>
+						<td colspan="9">Loading...</td>
 					</tr>
 				</tbody>
 			</table>
@@ -72,49 +66,41 @@
 			}).format(value);
 		}
 
-		function generateDummyData() {
-			const witels = [
-				'BALIKPAPAN',
-				'SAMARINDA',
-				'TARAKAN',
-				'BANJARMASIN',
-				'PALANGKARAYA',
-				'PONTIANAK'
-			];
-
+		function renderRekoncileTable(data) {
 			const tbody = document.getElementById('rekoncile-tbody');
 			tbody.innerHTML = '';
 
-			let grandTotal = 0;
-			const columnTotals = Array(11).fill(0);
+			if (!data || data.length === 0) {
+				tbody.innerHTML = '<tr><td colspan="9">Tidak ada data</td></tr>';
+				return;
+			}
 
-			witels.forEach((witel) => {
+			let grandTotal = 0;
+			const columnTotals = Array(7).fill(0);
+
+			data.forEach((row) => {
 				const values = [
-					Math.floor(Math.random() * 5000000000) + 1000000000,
-					Math.floor(Math.random() * 3000000000) + 500000000,
-					Math.floor(Math.random() * 4000000000) + 800000000,
-					Math.floor(Math.random() * 2000000000) + 500000000,
-					Math.floor(Math.random() * 3000000000) + 1000000000,
-					Math.floor(Math.random() * 2500000000) + 800000000,
-					Math.floor(Math.random() * 1500000000) + 300000000,
-					Math.floor(Math.random() * 3000000000) + 1000000000,
-					Math.floor(Math.random() * 2000000000) + 500000000,
-					Math.floor(Math.random() * 4000000000) + 1000000000,
-					Math.floor(Math.random() * 2000000000) + 500000000
+					Number(row.planning_indikasi) || 0,
+					Number(row.planning_reject) || 0,
+					Number(row.planning_need_approve) || 0,
+					Number(row.progress) || 0,
+					Number(row.permanenisasi_reject) || 0,
+					Number(row.permanenisasi_need_approve) || 0,
+					Number(row.rekon) || 0
 				];
 
 				const rowTotal = values.reduce((a, b) => a + b, 0);
 
-				let row = `<tr>
-					<td>${witel}</td>`;
+				let rowHtml = `<tr>
+					<td>${row.witel}</td>`;
 
 				values.forEach((val, idx) => {
-					row += `<td>${formatRupiah(val)}</td>`;
+					rowHtml += `<td>${formatRupiah(val)}</td>`;
 					columnTotals[idx] += val;
 				});
 
-				row += `<td class="font-bold">${formatRupiah(rowTotal)}</td></tr>`;
-				tbody.innerHTML += row;
+				rowHtml += `<td class="font-bold">${formatRupiah(rowTotal)}</td></tr>`;
+				tbody.innerHTML += rowHtml;
 				grandTotal += rowTotal;
 			});
 
@@ -126,8 +112,20 @@
 			tbody.innerHTML += totalRow;
 		}
 
+		function fetchRekoncileData() {
+			const tbody = document.getElementById('rekoncile-tbody');
+			tbody.innerHTML = '<tr><td colspan="9">Loading...</td></tr>';
+
+			fetch('/ajax/dashboard/rekoncile')
+				.then(res => res.json())
+				.then(data => renderRekoncileTable(data))
+				.catch(() => {
+					tbody.innerHTML = '<tr><td colspan="9">Gagal memuat data</td></tr>';
+				});
+		}
+
 		document.addEventListener('DOMContentLoaded', function() {
-			generateDummyData();
+			fetchRekoncileData();
 		});
 	</script>
 @endsection

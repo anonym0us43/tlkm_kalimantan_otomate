@@ -77,4 +77,11 @@ class AjaxController extends Controller
 
         return response()->json($data);
     }
+
+    public function dashboard_rekoncile()
+    {
+        $data = DashboardModel::get_rekoncile();
+
+        return response()->json($data);
+    }
 }
