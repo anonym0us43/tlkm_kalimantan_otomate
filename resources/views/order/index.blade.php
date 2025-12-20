@@ -854,6 +854,9 @@
 				<h5 class="text-lg font-semibold mb-0">Quality Check (QC)</h5>
 				<button type="button" class="qc-modal-close" id="qcModalCloseBtn">&times;</button>
 			</div>
+			@php
+				$qcEditable = session('partner_alias') === 'MTEL' && in_array((int) ($data->status_qc_id ?? 0), [2, 4]);
+			@endphp
 			<form id="qcForm" action="{{ route('order.status.post') }}" method="POST">
 				@csrf
 				<input type="hidden" name="assign_order_id" value="{{ $data->assign_order_id }}">
@@ -861,13 +864,14 @@
 
 				<label class="form-label" for="qcNoDoc">Nomor Dokumen</label>
 				<input type="text" id="qcNoDoc" name="no_document" class="form-input"
-					value="{{ $data->no_document ?? '' }}" required>
+					value="{{ $data->no_document ?? '' }}" {{ $qcEditable ? '' : 'readonly' }} required>
 				<br>
-				<label class="form-label" for="qcNotes">Notes</label>
-				<textarea id="qcNotes" name="notes" class="form-input" rows="4" required>{{ $data->qc_notes ?? '' }}</textarea>
+				<label class="form-label" for="qcNotes">Catatan</label>
+				<textarea id="qcNotes" name="notes" class="form-input" rows="4" {{ $qcEditable ? '' : 'readonly' }}
+				 required>{{ $data->qc_notes ?? '' }}</textarea>
 
 				<div class="qc-actions">
-					@if (session('partner_alias') === 'MTEL')
+					@if ($qcEditable)
 						@if ((int) ($data->status_qc_id ?? 0) === 2)
 							<button type="button" class="btn btn-sm btn-danger" id="qcRejectBtn" data-status="1">
 								<i class="bi bi-x-circle"></i>&nbsp; Reject
@@ -875,18 +879,14 @@
 							<button type="button" class="btn btn-sm btn-success" id="qcApproveBtn" data-status="3">
 								<i class="bi bi-check-circle"></i>&nbsp; Approve
 							</button>
-						@elseif ((int) ($data->status_qc_id ?? 0) === 5)
+						@elseif ((int) ($data->status_qc_id ?? 0) === 4)
 							<button type="button" class="btn btn-sm btn-danger" id="qcRejectBtn" data-status="4">
 								<i class="bi bi-x-circle"></i>&nbsp; Reject
 							</button>
 							<button type="button" class="btn btn-sm btn-success" id="qcApproveBtn" data-status="6">
 								<i class="bi bi-check-circle"></i>&nbsp; Approve
 							</button>
-						@else
-							<span class="text-gray-500 text-sm">Tidak ada aksi QC tersedia pada status ini.</span>
 						@endif
-					@else
-						<span class="text-gray-500 text-sm">Hanya MTEL yang dapat melakukan update QC.</span>
 					@endif
 				</div>
 			</form>
@@ -972,6 +972,108 @@
 			return materialsData.find(m => String(m.id) === String(id)) || null;
 		};
 
+		const COORDINATE_DESIGNATOR_PREFIXES = ['SC-OF-SM', 'PU-S'];
+
+		const designatorRequiresCoordinate = (designator = '') => {
+			const normalized = String(designator || '').toUpperCase();
+			return COORDINATE_DESIGNATOR_PREFIXES.some(prefix => normalized.startsWith(prefix));
+		};
+
+		const parseCoordinateValues = (value) => {
+			if (!value) return [];
+			if (Array.isArray(value)) {
+				return value.map(v => (v || '').trim()).filter(Boolean);
+			}
+			if (typeof value === 'string') {
+				try {
+					const parsed = JSON.parse(value);
+					if (Array.isArray(parsed)) {
+						return parsed.map(v => (v || '').trim()).filter(Boolean);
+					}
+				} catch (err) {}
+				return value.split(/\r?\n|;/).map(v => v.trim()).filter(Boolean);
+			}
+			return [];
+		};
+
+		const getCoordinateBaseName = (row) => {
+			const qtyInput = row.querySelector('.qty-input');
+			if (!qtyInput || !qtyInput.name) return '';
+			return qtyInput.name.replace(/\[qty\]$/, '[coordinates_material]');
+		};
+
+		const createCoordinateField = (baseName, index, value = '') => {
+			const wrapper = document.createElement('div');
+			wrapper.className = 'coordinate-item mb-2';
+			const inputName = `${baseName}[${index}]`;
+			wrapper.innerHTML = `
+				<div class="coordinate-label">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    Koordinat Material (${index + 1})
+                </div>
+				<div class="flex gap-2">
+					<input type="text" name="${inputName}" class="coordinate-input flex-1" placeholder="-6.200000, 106.816666" value="${value}">
+					<button type="button" class="btn btn-primary btn-sm get-coordinate-btn" data-target="${inputName}" title="Ambil lokasi dari GPS">
+						<i class="bi bi-geo-alt-fill"></i>
+					</button>
+				</div>
+			`;
+			return wrapper;
+		};
+
+		const syncCoordinateInputs = (row, qty, options = {}) => {
+			const coordinateRow = row.nextElementSibling;
+			const coordinateGroup = coordinateRow ? coordinateRow.querySelector('.coordinate-input-group') : null;
+			const coordinateInputs = coordinateGroup ? coordinateGroup.querySelector('.coordinate-inputs') : null;
+
+			if (!coordinateGroup || !coordinateInputs) {
+				return;
+			}
+
+			if (!options.show) {
+				coordinateGroup.classList.remove('show');
+				coordinateInputs.innerHTML = '';
+				return;
+			}
+
+			const baseName = getCoordinateBaseName(row);
+			if (!baseName) {
+				return;
+			}
+
+			const currentValues = Array.from(coordinateInputs.querySelectorAll('.coordinate-input')).map(input => input
+				.value.trim());
+			let seedValues = currentValues.filter(Boolean);
+
+			if (!seedValues.length && coordinateGroup.dataset.existingCoordinates) {
+				try {
+					const parsed = JSON.parse(coordinateGroup.dataset.existingCoordinates);
+					if (Array.isArray(parsed)) {
+						seedValues = parsed;
+					}
+				} catch (err) {}
+				coordinateGroup.dataset.existingCoordinates = '';
+			}
+
+			coordinateInputs.innerHTML = '';
+			const totalInputs = Math.max(1, Number(qty) || 0);
+
+			for (let i = 0; i < totalInputs; i++) {
+				const value = seedValues[i] || '';
+				const field = createCoordinateField(baseName, i, value);
+				coordinateInputs.appendChild(field);
+			}
+
+			coordinateInputs.querySelectorAll('.coordinate-input').forEach(input => {
+				input.required = true;
+			});
+
+			coordinateGroup.classList.add('show');
+		};
+
 		const updateMaterialRowDisplay = (row, material) => {
 			const descEl = row.querySelector('.material-desc');
 			const unitEl = row.querySelector('.material-unit');
@@ -980,10 +1082,9 @@
 			const totalMaterialEl = row.querySelector('.material-total');
 			const totalServiceEl = row.querySelector('.material-total-service');
 			const qtyInput = row.querySelector('.qty-input');
-			const qty = Number(qtyInput?.value) || 0;
 			const coordinateRow = row.nextElementSibling;
 			const coordinateGroup = coordinateRow ? coordinateRow.querySelector('.coordinate-input-group') : null;
-			const coordInput = coordinateGroup ? coordinateGroup.querySelector('.coordinate-input') : null;
+			const qty = Number(qtyInput?.value) || 0;
 
 			if (!material) {
 				descEl.textContent = '-';
@@ -993,11 +1094,9 @@
 				totalMaterialEl.textContent = 'Rp 0';
 				totalServiceEl.textContent = 'Rp 0';
 				if (coordinateGroup) {
-					coordinateGroup.classList.remove('show');
-					if (coordInput) {
-						coordInput.required = false;
-						coordInput.value = '';
-					}
+					syncCoordinateInputs(row, 0, {
+						show: false
+					});
 				}
 				return;
 			}
@@ -1012,17 +1111,12 @@
 			totalServiceEl.textContent = formatCurrency(servicePrice * qty);
 
 			const designator = material.item_designator || '';
-			const requiresCoordinate = designator.includes('SC-OF-SM') || designator.includes('PU-S');
+			const requiresCoordinate = designatorRequiresCoordinate(designator);
 
-			if (coordinateGroup && coordInput) {
-				if (requiresCoordinate || coordInput.value) {
-					coordinateGroup.classList.add('show');
-					coordInput.required = true;
-				} else {
-					coordinateGroup.classList.remove('show');
-					coordInput.required = false;
-					coordInput.value = '';
-				}
+			if (coordinateGroup) {
+				syncCoordinateInputs(row, qty || 1, {
+					show: requiresCoordinate
+				});
 			}
 
 			updateMaterialTotals();
@@ -1062,27 +1156,19 @@
 				<tr class="material-coordinate-row">
 					<td colspan="9">
 						<div class="coordinate-input-group">
-							<div class="coordinate-label">
-								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-								</svg>
-								Koordinat Material (Latitude, Longitude)
-							</div>
-							<div class="coordinate-inputs">
-								<div class="flex gap-2">
-									<input type="text" name="materials[${index}][coordinates_material]" class="coordinate-input flex-1" placeholder="-6.200000, 106.816666">
-									<button type="button" class="btn btn-primary btn-sm get-coordinate-btn" data-target="materials[${index}][coordinates_material]" title="Ambil lokasi dari GPS">
-										<i class="bi bi-geo-alt-fill"></i>
-									</button>
-								</div>
-							</div>
+							<div class="coordinate-inputs"></div>
 						</div>
 					</td>
 				</tr>
 			`;
 
 			const rows = Array.from(rowWrapper.children);
+			const coordinateGroup = rowWrapper.querySelector('.coordinate-input-group');
+			const existingCoordinates = parseCoordinateValues(existing?.coordinates_material);
+
+			if (coordinateGroup && existingCoordinates.length) {
+				coordinateGroup.dataset.existingCoordinates = JSON.stringify(existingCoordinates);
+			}
 			rows.forEach(r => materialRows.appendChild(r));
 
 			const mainRow = rows[0];

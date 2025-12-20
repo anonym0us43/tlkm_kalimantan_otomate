@@ -63,11 +63,10 @@ class DashboardModel extends Model
                     (TIMESTAMPDIFF(MINUTE, tstta.tiket_terima, NOW()) > 10080)
                 THEN tstta.tt_site_id END) AS age_upper7d,
 
-                COUNT(DISTINCT CASE WHEN tro.status_qc_id = 3 THEN tstta.tt_site_id END) AS permanenisasi_need_approve_ta,
-                COUNT(DISTINCT CASE WHEN tro.status_qc_id = 4 THEN tstta.tt_site_id END) AS permanenisasi_reject_ta,
-                COUNT(DISTINCT CASE WHEN tro.status_qc_id = 5 THEN tstta.tt_site_id END) AS permanenisasi_need_approve_mtel,
+                COUNT(DISTINCT CASE WHEN tro.status_qc_id = 3 THEN tstta.tt_site_id END) AS permanenisasi_reject_ta,
+                COUNT(DISTINCT CASE WHEN tro.status_qc_id = 4 THEN tstta.tt_site_id END) AS permanenisasi_need_approve_mtel,
 
-                COUNT(DISTINCT CASE WHEN tro.status_qc_id = 6 THEN tstta.tt_site_id END) AS permanenisasi_rekon
+                COUNT(DISTINCT CASE WHEN tro.status_qc_id = 5 THEN tstta.tt_site_id END) AS permanenisasi_rekon
             '))
             ->whereRaw('DATE(tstta.tiket_terima) BETWEEN ? AND ?', [$start_date, $end_date])
             ->when(!empty($witel), function ($query) use ($witel)
@@ -160,21 +159,17 @@ class DashboardModel extends Model
         {
             $query->where('tro.status_qc_id', 2);
         }
-        elseif ($status == 'permanenisasi_need_approve_ta')
+        elseif ($status == 'permanenisasi_reject_ta')
         {
             $query->where('tro.status_qc_id', 3);
         }
-        elseif ($status == 'permanenisasi_reject_ta')
+        elseif ($status == 'permanenisasi_need_approve_mtel')
         {
             $query->where('tro.status_qc_id', 4);
         }
-        elseif ($status == 'permanenisasi_need_approve_mtel')
-        {
-            $query->where('tro.status_qc_id', 5);
-        }
         elseif ($status == 'permanenisasi_rekon')
         {
-            $query->where('tro.status_qc_id', 6);
+            $query->where('tro.status_qc_id', 5);
         }
 
         return $query->groupBy('tstta.tt_site_id')->get();

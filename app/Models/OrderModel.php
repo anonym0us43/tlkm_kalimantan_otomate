@@ -10,6 +10,52 @@ date_default_timezone_set('Asia/Jakarta');
 
 class OrderModel extends Model
 {
+    private static function normalizeCoordinatesInput($value)
+    {
+        if (is_array($value))
+        {
+            $normalized = array_values(array_filter(array_map('trim', $value), fn($val) => $val !== ''));
+
+            return !empty($normalized) ? json_encode($normalized) : null;
+        }
+
+        if (is_string($value))
+        {
+            $trimmed = trim($value);
+
+            return $trimmed !== '' ? $trimmed : null;
+        }
+
+        return null;
+    }
+
+    private static function decodeCoordinatesValue($value)
+    {
+        if (empty($value))
+        {
+            return [];
+        }
+
+        if (is_array($value))
+        {
+            return array_values(array_filter(array_map('trim', $value), fn($val) => $val !== ''));
+        }
+
+        if (is_string($value))
+        {
+            $decoded = json_decode($value, true);
+
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded))
+            {
+                return array_values(array_filter(array_map('trim', $decoded), fn($val) => $val !== ''));
+            }
+
+            return array_values(array_filter(array_map('trim', preg_split('/[\r\n;]+/', $value)), fn($val) => $val !== ''));
+        }
+
+        return [];
+    }
+
     public static function index($id)
     {
         return DB::table('tb_source_tacc_ticket_alita AS tstta')
@@ -36,7 +82,8 @@ class OrderModel extends Model
                 'tao.id AS assign_order_id',
                 'tro.status_qc_id',
                 'tro.coordinates_site',
-                'tro.notes AS qc_notes'
+                'tro.notes AS qc_notes',
+                'tro.no_document'
             )
             ->where('tstta.id', $id)
             ->first();
@@ -52,7 +99,13 @@ class OrderModel extends Model
         return DB::table('tb_report_materials')
             ->where('assign_order_id', $assign_order_id)
             ->select('designator_id', 'qty', 'coordinates_material')
-            ->get();
+            ->get()
+            ->map(function ($item)
+            {
+                $item->coordinates_material = self::decodeCoordinatesValue($item->coordinates_material);
+
+                return $item;
+            });
     }
 
     public static function get_ticket_alita_detail($id)
@@ -132,8 +185,9 @@ class OrderModel extends Model
                     'status_qc_id'     => $request->input('status_qc_id'),
                     'notes'            => $request->input('notes'),
                     'coordinates_site' => $request->input('coordinates_site'),
-                    'created_by'       => session('nik') ?? 0,
-                    'created_at'       => now()
+                    'no_document'      => $request->input('no_document'),
+                    'updated_by'       => session('nik') ?? 0,
+                    'updated_at'       => now()
                 ]);
 
             DB::table('tb_report_orders_log')
@@ -142,6 +196,7 @@ class OrderModel extends Model
                     'status_qc_id'     => $request->input('status_qc_id'),
                     'notes'            => $request->input('notes'),
                     'coordinates_site' => $request->input('coordinates_site'),
+                    'no_document'      => $request->input('no_document'),
                     'created_by'       => session('nik') ?? 0,
                     'created_at'       => now()
                 ]);
@@ -154,12 +209,14 @@ class OrderModel extends Model
 
                 foreach ($request->input('materials') as $material)
                 {
+                    $coordinatesMaterial = self::normalizeCoordinatesInput($material['coordinates_material'] ?? null);
+
                     DB::table('tb_report_materials')
                         ->insert([
                             'assign_order_id'      => $id,
                             'designator_id'        => $material['designator_id'],
                             'qty'                  => $material['qty'],
-                            'coordinates_material' => $material['coordinates_material'] ?? null,
+                            'coordinates_material' => $coordinatesMaterial,
                             'created_by'           => session('nik') ?? 0,
                             'created_at'           => now()
                         ]);
@@ -198,6 +255,7 @@ class OrderModel extends Model
                     'status_qc_id'     => $request->input('status_qc_id'),
                     'notes'            => $request->input('notes'),
                     'coordinates_site' => $request->input('coordinates_site'),
+                    'no_document'      => $request->input('no_document'),
                     'created_by'       => session('nik') ?? 0,
                     'created_at'       => now()
                 ]);
@@ -208,6 +266,7 @@ class OrderModel extends Model
                     'status_qc_id'     => $request->input('status_qc_id'),
                     'notes'            => $request->input('notes'),
                     'coordinates_site' => $request->input('coordinates_site'),
+                    'no_document'      => $request->input('no_document'),
                     'created_by'       => session('nik') ?? 0,
                     'created_at'       => now()
                 ]);
@@ -216,12 +275,14 @@ class OrderModel extends Model
             {
                 foreach ($request->input('materials') as $material)
                 {
+                    $coordinatesMaterial = self::normalizeCoordinatesInput($material['coordinates_material'] ?? null);
+
                     DB::table('tb_report_materials')
                         ->insert([
                             'assign_order_id'      => $id,
                             'designator_id'        => $material['designator_id'],
                             'qty'                  => $material['qty'],
-                            'coordinates_material' => $material['coordinates_material'] ?? null,
+                            'coordinates_material' => $coordinatesMaterial,
                             'created_by'           => session('nik') ?? 0,
                             'created_at'           => now()
                         ]);
@@ -257,6 +318,7 @@ class OrderModel extends Model
             ->update([
                 'status_qc_id' => $status_qc_id,
                 'notes'        => $request->input('notes'),
+                'no_document'  => $request->input('no_document'),
                 'updated_by'   => session('nik') ?? 0,
                 'updated_at'   => now()
             ]);
@@ -266,6 +328,7 @@ class OrderModel extends Model
                 'assign_order_id' => $assign_order_id,
                 'status_qc_id'    => $status_qc_id,
                 'notes'           => $request->input('notes'),
+                'no_document'     => $request->input('no_document'),
                 'created_by'      => session('nik') ?? 0,
                 'created_at'      => now()
             ]);
