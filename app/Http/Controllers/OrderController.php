@@ -31,7 +31,7 @@ class OrderController extends Controller
 
         if (!$data)
         {
-            return redirect()->back()->with('error', 'Data tidak ditemukan');
+            return redirect()->back()->with('error', 'Data not found.');
         }
 
         return view('order.index', compact('id', 'data', 'materials', 'existingPhotoUrl'));
@@ -46,6 +46,11 @@ class OrderController extends Controller
 
     public function status_post(Request $request)
     {
+        if (session('partner_alias') !== 'MTEL')
+        {
+            return redirect()->back()->with('error', 'You are not authorized to perform this action.');
+        }
+
         OrderModel::status_post($request);
 
         return redirect()->back()->with('success', 'Status order has been updated successfully.');

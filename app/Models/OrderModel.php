@@ -36,7 +36,7 @@ class OrderModel extends Model
                 'tao.id AS assign_order_id',
                 'tro.status_qc_id',
                 'tro.coordinates_site',
-                'tro.notes AS report_notes'
+                'tro.notes AS qc_notes'
             )
             ->where('tstta.id', $id)
             ->first();
@@ -61,11 +61,11 @@ class OrderModel extends Model
             ->where('id', $id)
             ->get();
 
-        $response[] = [];
+        $response = [];
 
         if (!$data->isEmpty())
         {
-            foreach ($data as $key => $value)
+            foreach ($data as $value)
             {
                 $keywords = ['Upload evidence berangkat:', 'Upload evidence di site:', 'Evidence pengukuran:', 'Evidence RCA:', 'Evidence perbaikan:', 'link up'];
 
@@ -83,9 +83,7 @@ class OrderModel extends Model
             }
         }
 
-        $response = array_filter($response);
-
-        return $response;
+        return array_values(array_filter($response));
     }
 
     public static function planning_post($request)
@@ -131,7 +129,7 @@ class OrderModel extends Model
                 ->where('assign_order_id', $id)
                 ->update([
                     'assign_order_id'  => $id,
-                    'status_qc_id'     => $request->input('status_qc_id', 2),
+                    'status_qc_id'     => $request->input('status_qc_id'),
                     'notes'            => $request->input('notes'),
                     'coordinates_site' => $request->input('coordinates_site'),
                     'created_by'       => session('nik') ?? 0,
@@ -141,7 +139,7 @@ class OrderModel extends Model
             DB::table('tb_report_orders_log')
                 ->insert([
                     'assign_order_id'  => $id,
-                    'status_qc_id'     => $request->input('status_qc_id', 2),
+                    'status_qc_id'     => $request->input('status_qc_id'),
                     'notes'            => $request->input('notes'),
                     'coordinates_site' => $request->input('coordinates_site'),
                     'created_by'       => session('nik') ?? 0,
@@ -197,7 +195,7 @@ class OrderModel extends Model
             DB::table('tb_report_orders')
                 ->insert([
                     'assign_order_id'  => $id,
-                    'status_qc_id'     => $request->input('status_qc_id', 2),
+                    'status_qc_id'     => $request->input('status_qc_id'),
                     'notes'            => $request->input('notes'),
                     'coordinates_site' => $request->input('coordinates_site'),
                     'created_by'       => session('nik') ?? 0,
@@ -207,7 +205,7 @@ class OrderModel extends Model
             DB::table('tb_report_orders_log')
                 ->insert([
                     'assign_order_id'  => $id,
-                    'status_qc_id'     => $request->input('status_qc_id', 2),
+                    'status_qc_id'     => $request->input('status_qc_id'),
                     'notes'            => $request->input('notes'),
                     'coordinates_site' => $request->input('coordinates_site'),
                     'created_by'       => session('nik') ?? 0,

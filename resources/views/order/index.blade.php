@@ -659,6 +659,7 @@
 		<input type="hidden" name="row_id" value="{{ $id }}">
 		<input type="hidden" name="order_id" value="{{ $data->tt_site_id }}">
 		<input type="hidden" name="order_code" value="{{ $data->tt_site }}">
+		<input type="hidden" name="status_qc_id" value="{{ $data->status_qc_id ?? 2 }}">
 
 		<div class="grid grid-cols-1 gap-6 lg:grid-cols-2 mt-6">
 			<div class="panel h-full w-full">
@@ -750,8 +751,8 @@
 								<small class="text-gray-500 text-xs block mb-4">Format: latitude, longitude</small>
 							</div>
 
-							<div class="flex items-center gap-2">
-								<button type="button" class="btn btn-sm btn-outline-secondary" id="materialModalOpenBtn">
+							<div class="flex items-center justify-end gap-2">
+								<button type="button" class="btn btn-sm btn-outline-primary" id="materialModalOpenBtn">
 									<i class="bi bi-pencil-square"></i>
 									&nbsp; BoQ Materials
 								</button>
@@ -857,15 +858,36 @@
 				@csrf
 				<input type="hidden" name="assign_order_id" value="{{ $data->assign_order_id }}">
 				<input type="hidden" name="status_qc_id" value="{{ $data->status_qc_id ?? 0 }}">
+
+				<label class="form-label" for="qcNoDoc">Nomor Dokumen</label>
+				<input type="text" id="qcNoDoc" name="no_document" class="form-input"
+					value="{{ $data->no_document ?? '' }}" required>
+				<br>
 				<label class="form-label" for="qcNotes">Notes</label>
-				<textarea id="qcNotes" name="notes" class="form-input" rows="4" required>{{ $data->report_notes ?? '' }}</textarea>
+				<textarea id="qcNotes" name="notes" class="form-input" rows="4" required>{{ $data->qc_notes ?? '' }}</textarea>
+
 				<div class="qc-actions">
-					<button type="submit" class="btn btn-sm btn-danger">
-						<i class="bi bi-x-circle"></i>&nbsp; Reject
-					</button>
-					<button type="submit" class="btn btn-sm btn-success">
-						<i class="bi bi-check-circle"></i>&nbsp; Approve
-					</button>
+					@if (session('partner_alias') === 'MTEL')
+						@if ((int) ($data->status_qc_id ?? 0) === 2)
+							<button type="button" class="btn btn-sm btn-danger" id="qcRejectBtn" data-status="1">
+								<i class="bi bi-x-circle"></i>&nbsp; Reject
+							</button>
+							<button type="button" class="btn btn-sm btn-success" id="qcApproveBtn" data-status="3">
+								<i class="bi bi-check-circle"></i>&nbsp; Approve
+							</button>
+						@elseif ((int) ($data->status_qc_id ?? 0) === 5)
+							<button type="button" class="btn btn-sm btn-danger" id="qcRejectBtn" data-status="4">
+								<i class="bi bi-x-circle"></i>&nbsp; Reject
+							</button>
+							<button type="button" class="btn btn-sm btn-success" id="qcApproveBtn" data-status="6">
+								<i class="bi bi-check-circle"></i>&nbsp; Approve
+							</button>
+						@else
+							<span class="text-gray-500 text-sm">Tidak ada aksi QC tersedia pada status ini.</span>
+						@endif
+					@else
+						<span class="text-gray-500 text-sm">Hanya MTEL yang dapat melakukan update QC.</span>
+					@endif
 				</div>
 			</form>
 		</div>
@@ -1443,6 +1465,8 @@
 			const qcCloseBtn = document.getElementById('qcModalCloseBtn');
 			const qcForm = document.getElementById('qcForm');
 			const qcNotes = document.getElementById('qcNotes');
+			const qcRejectBtn = document.getElementById('qcRejectBtn');
+			const qcApproveBtn = document.getElementById('qcApproveBtn');
 
 			const toggleQcModal = (show) => {
 				if (!qcModal) return;
@@ -1460,6 +1484,25 @@
 						return;
 					}
 					toggleQcModal(true);
+				});
+			}
+
+			if (qcRejectBtn && qcForm) {
+				qcRejectBtn.addEventListener('click', () => {
+					const statusInput = qcForm.querySelector('input[name="status_qc_id"]');
+					if (statusInput) {
+						statusInput.value = qcRejectBtn.getAttribute('data-status');
+					}
+					qcForm.submit();
+				});
+			}
+			if (qcApproveBtn && qcForm) {
+				qcApproveBtn.addEventListener('click', () => {
+					const statusInput = qcForm.querySelector('input[name="status_qc_id"]');
+					if (statusInput) {
+						statusInput.value = qcApproveBtn.getAttribute('data-status');
+					}
+					qcForm.submit();
 				});
 			}
 
