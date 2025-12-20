@@ -139,7 +139,7 @@ class OrderModel extends Model
         return array_values(array_filter($response));
     }
 
-    public static function planning_post($request)
+    public static function order_post($request)
     {
         $order_id   = $request->input('order_id');
         $order_code = $request->input('order_code');
@@ -304,6 +304,38 @@ class OrderModel extends Model
             {
                 $fileName = 'Foto_Titik_Putus.jpg';
                 $photoFile->move($uploadPath, $fileName);
+            }
+        }
+
+        $allFiles = $request->allFiles();
+        if (!empty($allFiles))
+        {
+            foreach ($allFiles as $key => $file)
+            {
+                if (strpos($key, 'attachment_') === 0)
+                {
+                    if (is_object($file) && method_exists($file, 'isValid') && $file->isValid())
+                    {
+                        $parts = explode('_', $key);
+
+                        if (count($parts) === 4 && $parts[0] === 'attachment')
+                        {
+                            $rowIndex = $parts[1];
+                            $volumeIndex = $parts[2];
+                            $photoType = $parts[3];
+
+                            $attachmentPath = public_path('upload/' . $id . '/attachments/material_' . $rowIndex . '_vol_' . $volumeIndex);
+
+                            if (!File::exists($attachmentPath))
+                            {
+                                File::makeDirectory($attachmentPath, 0755, true);
+                            }
+
+                            $fileName = ucfirst($photoType) . '.jpg';
+                            $file->move($attachmentPath, $fileName);
+                        }
+                    }
+                }
             }
         }
     }

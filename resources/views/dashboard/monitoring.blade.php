@@ -57,6 +57,7 @@
 						<th rowspan="2" colspan="4">PROGRESS</th>
 						<th colspan="2">PERMANENISASI</th>
 						<th rowspan="3">REKON</th>
+						<th rowspan="3">ACH %</th>
 						<th rowspan="3">TOTAL</th>
 					</tr>
 					<tr>
@@ -107,15 +108,34 @@
 			10: 'permanenisasi_rekon'
 		};
 
+		const columnHeaderMap = {
+			1: 'PLANNING - TA - INDIKASI',
+			2: 'PLANNING - TA - REJECT',
+			3: 'PLANNING - MTEL - NEED APPROVE',
+			4: 'PROGRESS - < 1 HARI',
+			5: 'PROGRESS - > 1 HARI',
+			6: 'PROGRESS - > 3 HARI',
+			7: 'PROGRESS - > 7 HARI',
+			8: 'PERMANENISASI - REJECT',
+			9: 'PERMANENISASI - NEED APPROVE',
+			10: 'REKON'
+		};
+
 		function renderMonitoringTable(data) {
 			const tbody = document.getElementById('monitoring-tbody');
 			tbody.innerHTML = '';
 			if (!data || data.length === 0) {
-				tbody.innerHTML = '<tr><td colspan="14">Tidak ada data</td></tr>';
+				tbody.innerHTML = '<tr><td colspan="13">Tidak ada data</td></tr>';
 				return;
 			}
 
-			let colTotals = Array(11).fill(0);
+			const achIndex = 11;
+			let colTotals = Array(12).fill(0);
+			let totalRekonSum = 0;
+			let totalWithoutRekonSum = 0;
+			let totalAdjustedSum = 0;
+			let totalIdleSum = 0;
+
 			data.forEach(row => {
 				const cells = [
 					row.witel_name || '-',
@@ -130,25 +150,45 @@
 					row.permanenisasi_need_approve_mtel || 0,
 					row.permanenisasi_rekon || 0
 				];
-				const total = cells.slice(1).reduce((a, b) => a + Number(b), 0);
+				const totalWithoutRekon = cells.slice(1, 10).reduce((a, b) => a + Number(b), 0);
+				const idleVal = Number(cells[1]) || 0;
+				const rekonVal = Number(cells[10]) || 0;
+				const totalAdjusted = totalWithoutRekon + rekonVal;
+				const numerator = totalAdjusted - idleVal;
+				const achVal = totalAdjusted > 0 ? (numerator / totalAdjusted) * 100 : 0;
+
+				totalWithoutRekonSum += totalWithoutRekon;
+				totalRekonSum += rekonVal;
+				totalAdjustedSum += totalAdjusted;
+				totalIdleSum += idleVal;
+
 				let html = '<tr>';
 				cells.forEach((c, i) => {
 					if (i === 0) {
 						html += `<td>${c}</td>`;
 					} else {
-						html +=
-							`<td data-col="${i}" data-witel="${row.witel_name}" data-witel-id="${row.witel_id}" data-regional-id="${row.regional_id}" onclick="navigateToDetail(this)">${c}</td>`;
+						const clickable = i !== achIndex;
+						html += clickable ?
+							`<td data-col="${i}" data-witel="${row.witel_name}" data-witel-id="${row.witel_id}" data-regional-id="${row.regional_id}" onclick="navigateToDetail(this)">${c}</td>` :
+							`<td>${c}</td>`;
 					}
 					if (i > 0) colTotals[i] += Number(c);
 				});
-				html += `<td class="font-bold">${total}</td></tr>`;
+
+				html += `<td>${achVal.toFixed(2)}%</td>`;
+				colTotals[achIndex] += achVal;
+				html += `<td class="font-bold">${totalWithoutRekon}</td></tr>`;
 				tbody.innerHTML += html;
 			});
+
+			const totalAch = totalAdjustedSum > 0 ? ((totalAdjustedSum - totalIdleSum) / totalAdjustedSum) * 100 : 0;
+
 			let totalRow = '<tr class="font-bold"><td>TOTAL</td>';
-			for (let i = 1; i < colTotals.length; i++) {
+			for (let i = 1; i < colTotals.length - 1; i++) {
 				totalRow += `<td>${colTotals[i]}</td>`;
 			}
-			totalRow += `<td>${colTotals.slice(1).reduce((a, b) => a + b, 0)}</td></tr>`;
+			totalRow += `<td>${totalAch.toFixed(2)}%</td>`;
+			totalRow += `<td>${totalWithoutRekonSum}</td></tr>`;
 			tbody.innerHTML += totalRow;
 		}
 
@@ -162,9 +202,7 @@
 			if (value === '0' || value === '-') return;
 
 			const status = columnStatusMap[colIndex];
-			const table = document.getElementById('monitoring-table');
-			const headers = Array.from(table.querySelectorAll('thead th'));
-			const columnHeader = headers[colIndex]?.innerText || 'Unknown';
+			const columnHeader = columnHeaderMap[colIndex] || 'Unknown';
 
 			const params = new URLSearchParams({
 				regional_id: regionalId,
@@ -191,7 +229,7 @@
 			});
 			const url = `/ajax/dashboard/monitoring?${params.toString()}`;
 			const tbody = document.getElementById('monitoring-tbody');
-			tbody.innerHTML = '<tr><td colspan="12">Loading...</td></tr>';
+			tbody.innerHTML = '<tr><td colspan="13">Loading...</td></tr>';
 			fetch(url)
 				.then(res => res.json())
 				.then(data => renderMonitoringTable(data))

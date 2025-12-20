@@ -633,7 +633,7 @@
 			<i class="bi bi-arrow-left"></i>
 			&nbsp; Kembali
 		</a>
-		<button type="submit" form="planningForm" class="btn btn-sm btn-outline-success">
+		<button type="submit" form="orderForm" class="btn btn-sm btn-outline-success">
 			<i class="bi bi-check-circle"></i>
 			&nbsp; Simpan
 		</button>
@@ -656,7 +656,7 @@
 		</div>
 	@endif
 
-	<form action="{{ route('order.planning.post') }}" method="POST" enctype="multipart/form-data" id="planningForm">
+	<form action="{{ route('order.post') }}" method="POST" enctype="multipart/form-data" id="orderForm">
 		@csrf
 		<input type="hidden" name="row_id" value="{{ $id }}">
 		<input type="hidden" name="order_id" value="{{ $data->tt_site_id }}">
@@ -887,7 +887,7 @@
 				<button type="button" class="qc-modal-close" id="qcModalCloseBtn">&times;</button>
 			</div>
 			@php
-				$qcEditable = session('partner_alias') === 'MTEL' && in_array((int) ($data->status_qc_id ?? 0), [2, 4]);
+				$qcEditable = session('partner_alias') === 'MTEL' && in_array((int) ($data->status_qc_id ?? 0), [2, 5]);
 			@endphp
 			<form id="qcForm" action="{{ route('order.status.post') }}" method="POST">
 				@csrf
@@ -911,7 +911,7 @@
 							<button type="button" class="btn btn-sm btn-success" id="qcApproveBtn" data-status="3">
 								<i class="bi bi-check-circle"></i>&nbsp; Approve
 							</button>
-						@elseif ((int) ($data->status_qc_id ?? 0) === 4)
+						@elseif ((int) ($data->status_qc_id ?? 0) === 5)
 							<button type="button" class="btn btn-sm btn-danger" id="qcRejectBtn" data-status="4">
 								<i class="bi bi-x-circle"></i>&nbsp; Reject
 							</button>
@@ -936,6 +936,7 @@
 		let mapInstance = null;
 		const existingMaterials = @json($materials ?? []);
 		const existingPhotoUrl = @json($existingPhotoUrl ?? null);
+		const existingAttachments = @json($existingAttachments ?? []);
 
 		function togglePanel(header) {
 			const content = header.nextElementSibling;
@@ -1335,7 +1336,7 @@
 									</span>
 									<img class="previewImage" hidden>
 								</label>
-								<input type="file" name="attachments[${rowIndex}][${i}][before]" class="photoFileInput" accept="image/*">
+								<input type="file" name="attachment_${rowIndex}_${i}_before" class="photoFileInput" accept="image/*">
 								<div class="action-area">
 									<button type="button" class="btn btn-outline-primary btn-sm uploadBtn" title="Upload Foto">
 										<i class="bi bi-camera"></i>
@@ -1354,7 +1355,7 @@
 									</span>
 									<img class="previewImage" hidden>
 								</label>
-								<input type="file" name="attachments[${rowIndex}][${i}][progress]" class="photoFileInput" accept="image/*">
+								<input type="file" name="attachment_${rowIndex}_${i}_progress" class="photoFileInput" accept="image/*">
 								<div class="action-area">
 									<button type="button" class="btn btn-outline-primary btn-sm uploadBtn" title="Upload Foto">
 										<i class="bi bi-camera"></i>
@@ -1373,7 +1374,7 @@
 									</span>
 									<img class="previewImage" hidden>
 								</label>
-								<input type="file" name="attachments[${rowIndex}][${i}][after]" class="photoFileInput" accept="image/*">
+								<input type="file" name="attachment_${rowIndex}_${i}_after" class="photoFileInput" accept="image/*">
 								<div class="action-area">
 									<button type="button" class="btn btn-outline-primary btn-sm uploadBtn" title="Upload Foto">
 										<i class="bi bi-camera"></i>
@@ -1390,6 +1391,45 @@
 			});
 
 			initializePhotoUpload();
+
+			setTimeout(() => {
+				if (existingAttachments && Object.keys(existingAttachments).length > 0) {
+					Object.keys(existingAttachments).forEach(materialIndex => {
+						if (existingAttachments[materialIndex]) {
+							Object.keys(existingAttachments[materialIndex]).forEach(volumeIndex => {
+								const photos = existingAttachments[materialIndex][volumeIndex];
+
+								if (photos) {
+									['before', 'progress', 'after'].forEach(photoType => {
+										if (photos[photoType]) {
+											const uploadId =
+												`attach-${materialIndex}-${volumeIndex}-${photoType}`;
+											const section = document.querySelector(
+												`[data-upload-id="${uploadId}"]`);
+
+											if (section) {
+												const previewImage = section.querySelector(
+													'.previewImage');
+												const cameraIcon = section.querySelector(
+													'.camera-icon');
+												const deleteBtn = section.querySelector(
+													'.deleteBtn');
+
+												if (previewImage && cameraIcon && deleteBtn) {
+													previewImage.src = photos[photoType];
+													previewImage.hidden = false;
+													cameraIcon.style.display = 'none';
+													deleteBtn.hidden = false;
+												}
+											}
+										}
+									});
+								}
+							});
+						}
+					});
+				}
+			}, 100);
 		}
 
 		function createCustomIcon(text, cssClass) {
@@ -1778,7 +1818,7 @@
 			}
 		});
 
-		document.getElementById('planningForm').addEventListener('submit', function(e) {
+		document.getElementById('orderForm').addEventListener('submit', function(e) {
 			const materialRows = document.querySelectorAll('.material-row');
 			if (materialRows.length === 0) {
 				e.preventDefault();
