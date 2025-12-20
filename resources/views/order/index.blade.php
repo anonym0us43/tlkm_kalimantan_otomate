@@ -5,6 +5,7 @@
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 	<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css" />
 	<style>
 		.select2-container--default .select2-selection--single {
 			background-color: #ffffff00 !important;
@@ -95,7 +96,6 @@
 		.info-label {
 			font-size: 11px;
 			font-weight: 600;
-			color: #6b7280;
 			text-transform: uppercase;
 			padding: 2px 6px;
 			white-space: nowrap;
@@ -103,15 +103,9 @@
 			background: transparent;
 		}
 
-		.info-label::after {
-			content: ':';
-			margin-left: 2px;
-		}
-
 		.info-value {
 			font-size: 11px;
 			font-weight: 500;
-			color: #1f2937;
 			padding: 2px 6px;
 			border: none;
 			background: transparent;
@@ -170,59 +164,30 @@
 			font-size: 13px;
 		}
 
-		.photo-modal {
-			display: none;
-			position: fixed;
-			top: 0;
-			left: 0;
-			right: 0;
-			bottom: 0;
-			background: rgba(0, 0, 0, 0.8);
+		.fancybox__container {
 			z-index: 9999;
-			align-items: center;
-			justify-content: center;
-			padding: 1rem;
 		}
 
-		.photo-modal.active {
-			display: flex;
-		}
-
-		.photo-modal-content {
-			max-width: 90vh;
-			max-height: 90vh;
-			position: relative;
-		}
-
-		.photo-modal img {
-			max-width: 100%;
-			max-height: 80vh;
-			width: auto;
-			height: auto;
-			display: block;
+		.fancybox__image {
 			border-radius: 8px;
 		}
 
-		.photo-modal-close {
-			position: absolute;
-			top: -40px;
-			right: 0;
-			background: rgba(255, 255, 255, 0.2);
-			border: none;
+		.fancybox__caption {
+			background: rgba(0, 0, 0, 0.7);
 			color: white;
-			font-size: 28px;
-			cursor: pointer;
-			width: 40px;
-			height: 40px;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			border-radius: 4px;
-			transition: all 0.2s ease;
+			padding: 12px 16px;
+			font-size: 14px;
+			text-align: center;
+			margin-top: 8px;
 		}
 
-		.photo-modal-close:hover {
-			background: rgba(255, 255, 255, 0.3);
+		.upload-box img {
+			cursor: pointer;
+			transition: opacity 0.2s ease;
+		}
+
+		.upload-box img:hover {
+			opacity: 0.8;
 		}
 
 		.qc-modal {
@@ -514,7 +479,6 @@
 
 		.material-table th,
 		.attachment-table th {
-			background: #f3f4f6;
 			font-weight: 700;
 			color: #374151;
 			position: sticky;
@@ -678,44 +642,39 @@
 						<table class="info-grid">
 							<tbody>
 								<tr class="info-item">
-									<td class="info-label">Created At</td>
-									<td class="info-value">{{ $data->created_at }}</td>
-								</tr>
-								<tr class="info-item">
-									<td class="info-label">TT Site</td>
+									<td class="info-label">No Trouble Ticket (TT)</td>
+									<td>:</td>
 									<td class="info-value">{{ $data->tt_site }}</td>
 								</tr>
 								<tr class="info-item">
-									<td class="info-label">Technician</td>
+									<td class="info-label">No IOH</td>
+									<td>:</td>
+									<td class="info-value">{{ $data->row_id }}</td>
+								</tr>
+								<tr class="info-item">
+									<td class="info-label">Span</td>
+									<td>:</td>
+									<td class="info-value">
+										{{ $data->site_down }} ({{ $data->site_name_down }})
+										<br>
+										<><br>
+											{{ $data->site_detect }} ({{ $data->site_name_detect }})
+									</td>
+								</tr>
+								<tr class="info-item">
+									<td class="info-label">Lokasi Koordinat</td>
+									<td>:</td>
+									<td class="info-value">{{ $data->latitude_site_down }}, {{ $data->longitude_site_down }}</td>
+								</tr>
+								<tr class="info-item">
+									<td class="info-label">Regional / Witel</td>
+									<td>:</td>
+									<td class="info-value">{{ $data->regional_name }} / {{ $data->witel_name }}</td>
+								</tr>
+								<tr class="info-item">
+									<td class="info-label">User</td>
+									<td>:</td>
 									<td class="info-value">{{ $data->tacc_nama }} ({{ $data->tacc_nik }})</td>
-								</tr>
-								<tr class="info-item">
-									<td class="info-label">Site Down</td>
-									<td class="info-value">{{ $data->site_down }}</td>
-								</tr>
-								<tr class="info-item">
-									<td class="info-label">Site Name Down</td>
-									<td class="info-value">{{ $data->site_name_down }}</td>
-								</tr>
-								<tr class="info-item">
-									<td class="info-label">Latitude Site Down</td>
-									<td class="info-value">{{ $data->latitude_site_down }}</td>
-								</tr>
-								<tr class="info-item">
-									<td class="info-label">Longitude Site Down</td>
-									<td class="info-value">{{ $data->longitude_site_down }}</td>
-								</tr>
-								<tr class="info-item">
-									<td class="info-label">Site Detect</td>
-									<td class="info-value">{{ $data->site_detect }}</td>
-								</tr>
-								<tr class="info-item">
-									<td class="info-label">Site Name Detect</td>
-									<td class="info-value">{{ $data->site_name_detect }}</td>
-								</tr>
-								<tr class="info-item">
-									<td class="info-label">Tiket Terima</td>
-									<td class="info-value">{{ $data->tiket_terima }}</td>
 								</tr>
 							</tbody>
 						</table>
@@ -780,6 +739,14 @@
 								<small class="text-gray-500 text-xs block mb-4">Format: latitude, longitude</small>
 							</div>
 
+							<div class="mb-6">
+								<label class="form-label text-sm mb-2">
+									Penyebab Putus
+								</label>
+								<input type="text" name="order_headline" class="form-input" placeholder="Masukkan penyebab putus"
+									value="{{ $data->order_headline ?? '' }}">
+							</div>
+
 							<div class="flex items-center justify-end gap-2">
 								<button type="button" class="btn btn-sm btn-outline-primary" id="materialModalOpenBtn">
 									<i class="bi bi-pencil-square"></i>
@@ -826,7 +793,7 @@
 				</div>
 				<div class="panel-content">
 					<div class="table-responsive">
-						<table class="table table-bordered table-hover text-center attachment-table">
+						<table class="table table-bordered table-hover whitespace-nowrap attachment-table">
 							<thead>
 								<tr>
 									<th rowspan="2">Designator</th>
@@ -960,6 +927,7 @@
 	<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 	<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 	<script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js"></script>
 	<script>
 		let materialsData = [];
 		let mapInstance = null;
@@ -1306,6 +1274,19 @@
 					deleteBtn.hidden = false;
 				}
 
+				const newPreviewImage = previewImage.cloneNode(true);
+				previewImage.parentNode.replaceChild(newPreviewImage, previewImage);
+				const updatedPreviewImage = section.querySelector('.previewImage');
+
+				updatedPreviewImage.addEventListener('click', function(e) {
+					e.stopPropagation();
+					if (!this.hidden && this.src) {
+						const caption = uploadId === 'titik-putus' ? 'Foto Titik Putus' :
+							uploadId === 'foto-otdr' ? 'Foto OTDR' : 'Foto';
+						openPhotoModal(this.src, caption);
+					}
+				});
+				updatedPreviewImage.style.cursor = 'pointer';
 				uploadBtn.addEventListener('click', () => {
 					fileInput.click();
 				});
@@ -1316,8 +1297,8 @@
 
 					const reader = new FileReader();
 					reader.onload = (e) => {
-						previewImage.src = e.target.result;
-						previewImage.hidden = false;
+						updatedPreviewImage.src = e.target.result;
+						updatedPreviewImage.hidden = false;
 						cameraIcon.style.display = 'none';
 						deleteBtn.hidden = false;
 					};
@@ -1325,8 +1306,8 @@
 				});
 
 				deleteBtn.addEventListener('click', function() {
-					previewImage.hidden = true;
-					previewImage.src = '';
+					updatedPreviewImage.hidden = true;
+					updatedPreviewImage.src = '';
 					fileInput.value = '';
 					cameraIcon.style.display = 'block';
 					deleteBtn.hidden = true;
@@ -1609,7 +1590,8 @@
 					photosGrid.querySelectorAll('.photo-item').forEach(item => {
 						item.addEventListener('click', function() {
 							const photoUrl = this.getAttribute('data-photo-url');
-							openPhotoModal(photoUrl);
+							const caption = 'Foto Lampiran';
+							openPhotoModal(photoUrl, caption);
 						});
 					});
 				})
@@ -1619,39 +1601,25 @@
 				});
 		}
 
-		function openPhotoModal(photoUrl) {
-			const modal = document.getElementById('photoModal') || createPhotoModal();
-			const img = modal.querySelector('img');
-			img.src = photoUrl;
-			modal.classList.add('active');
-		}
+		function openPhotoModal(photoUrl, caption = null) {
+			const slideData = {
+				src: photoUrl,
+				type: 'image'
+			};
 
-		function closePhotoModal() {
-			const modal = document.getElementById('photoModal');
-			if (modal) {
-				modal.classList.remove('active');
+			if (caption) {
+				slideData.caption = caption;
 			}
-		}
 
-		function createPhotoModal() {
-			const modal = document.createElement('div');
-			modal.id = 'photoModal';
-			modal.className = 'photo-modal';
-			modal.innerHTML = `
-				<div class="photo-modal-content">
-					<button class="photo-modal-close" onclick="closePhotoModal()">×</button>
-					<img src="" alt="Photo Preview">
-				</div>
-			`;
-			document.body.appendChild(modal);
-
-			modal.addEventListener('click', function(e) {
-				if (e.target === this) {
-					closePhotoModal();
+			Fancybox.show([slideData], {
+				on: {
+					done: (fancybox) => {
+						if (fancybox && fancybox.$root) {
+							fancybox.$root.style.zIndex = '9999';
+						}
+					}
 				}
 			});
-
-			return modal;
 		}
 
 		function getCoordinateFromLocation(btn) {
@@ -1781,7 +1749,8 @@
 
 			if (qcOpenBtn) {
 				qcOpenBtn.addEventListener('click', () => {
-					const assignInput = qcForm ? qcForm.querySelector('input[name="assign_order_id"]') : null;
+					const assignInput = qcForm ? qcForm.querySelector('input[name="assign_order_id"]') :
+						null;
 					if (!assignInput || !assignInput.value) {
 						alert('Assign order belum tersedia untuk QC.');
 						return;

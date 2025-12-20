@@ -80,6 +80,7 @@ class OrderModel extends Model
                 'tstta.tacc_nama',
                 'tstta.tacc_nik',
                 'tao.id AS assign_order_id',
+                'tao.order_headline',
                 'tro.status_qc_id',
                 'tro.coordinates_site',
                 'tro.notes AS qc_notes',
