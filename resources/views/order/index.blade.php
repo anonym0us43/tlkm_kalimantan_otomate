@@ -58,6 +58,11 @@
 			box-sizing: border-box;
 		}
 
+		.dark .coordinate-input-group {
+			background: #0b1220;
+			border-color: #1b2e4b;
+		}
+
 		.coordinate-input-group.show {
 			display: block;
 		}
@@ -72,6 +77,10 @@
 			gap: 4px;
 		}
 
+		.dark .coordinate-label {
+			color: #93c5fd;
+		}
+
 		.coordinate-input {
 			width: 100%;
 			padding: 6px 10px;
@@ -80,10 +89,25 @@
 			font-size: 13px;
 		}
 
+		.dark .coordinate-input {
+			background: #0b1220;
+			border-color: #1b2e4b;
+			color: #cbd5e1;
+		}
+
+		.dark .coordinate-input::placeholder {
+			color: #64748b;
+		}
+
 		.coordinate-input:focus {
 			border-color: #4361ee;
 			outline: none;
 			box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.1);
+		}
+
+		.dark .coordinate-input:focus {
+			border-color: #4361ee;
+			box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2);
 		}
 
 		.info-grid {
@@ -422,6 +446,11 @@
 			overflow: hidden;
 		}
 
+		.dark .material-modal-content {
+			background: #0e1726;
+			color: #cbd5e1;
+		}
+
 		.material-modal-header {
 			display: flex;
 			align-items: center;
@@ -430,9 +459,17 @@
 			border-bottom: 1px solid #e5e7eb;
 		}
 
+		.dark .material-modal-header {
+			border-bottom-color: #1b2e4b;
+		}
+
 		.material-modal-body {
 			padding: 16px 20px 12px;
 			overflow: auto;
+		}
+
+		.dark .material-modal-body {
+			color: #cbd5e1;
 		}
 
 		.material-modal-footer {
@@ -444,6 +481,11 @@
 			background: #f9fafb;
 		}
 
+		.dark .material-modal-footer {
+			border-top-color: #1b2e4b;
+			background: #0b1220;
+		}
+
 		.material-modal-close {
 			background: transparent;
 			border: none;
@@ -453,10 +495,18 @@
 			color: #6b7280;
 		}
 
+		.dark .material-modal-close {
+			color: #94a3b8;
+		}
+
 		.material-table-wrapper {
 			overflow: auto;
 			border: 1px solid #e5e7eb;
 			border-radius: 8px;
+		}
+
+		.dark .material-table-wrapper {
+			border-color: #1b2e4b;
 		}
 
 		.material-table {
@@ -477,6 +527,11 @@
 			border-bottom: 1px solid #e5e7eb;
 		}
 
+		.dark .material-table td,
+		.dark .attachment-table td {
+			border-bottom-color: #1b2e4b;
+		}
+
 		.material-table th,
 		.attachment-table th {
 			font-weight: 700;
@@ -484,6 +539,14 @@
 			position: sticky;
 			top: 0;
 			z-index: 1;
+			background: #f8fafc;
+		}
+
+		.dark .material-table th,
+		.dark .attachment-table th {
+			background: #0b1220;
+			color: #e2e8f0;
+			border-bottom-color: #1b2e4b;
 		}
 
 		.material-table tfoot th {
@@ -494,10 +557,18 @@
 			position: static;
 		}
 
+		.dark .material-table tfoot th {
+			color: #cbd5e1;
+		}
+
 		.material-table tfoot th:last-child {
 			text-align: center;
 			font-size: 14px;
 			color: #059669;
+		}
+
+		.dark .material-table tfoot th:last-child {
+			color: #34d399;
 		}
 
 		.material-price,
@@ -544,6 +615,12 @@
 			position: relative;
 		}
 
+		.dark .material-modal .select2-container--default .select2-selection--single {
+			background: #0b1220;
+			border-color: #1b2e4b;
+			color: #cbd5e1;
+		}
+
 		.material-modal .select2-container--default .select2-selection__rendered {
 			width: 100%;
 			text-align: left;
@@ -551,8 +628,37 @@
 			padding-right: 50px;
 		}
 
+		.dark .material-modal .select2-container--default .select2-selection__rendered {
+			color: #cbd5e1;
+		}
+
+		.dark .material-modal .select2-dropdown {
+			background: #0b1220;
+			border-color: #1b2e4b;
+		}
+
+		.dark .material-modal .select2-search__field {
+			background: #0b1220;
+			color: #cbd5e1;
+			border-color: #1b2e4b;
+		}
+
+		.dark .material-modal .select2-results__option--highlighted {
+			background: #1b2e4b;
+			color: #e2e8f0;
+		}
+
+		.dark .material-modal .select2-container--default .select2-selection__placeholder {
+			color: #94a3b8;
+		}
+
 		.material-modal .select2-container--default .select2-results__option {
 			text-align: left;
+		}
+
+		.dark .material-modal .select2-container--default .select2-results__option {
+			background: #0b1220;
+			color: #cbd5e1;
 		}
 
 		.material-modal .select2-container--default .select2-selection__arrow {
@@ -563,6 +669,10 @@
 			height: 100%;
 		}
 
+		.dark .material-modal .select2-container--default .select2-selection__arrow {
+			color: #cbd5e1;
+		}
+
 		.material-modal .select2-container--default .select2-selection__clear {
 			position: absolute;
 			right: 28px;
@@ -571,6 +681,10 @@
 			font-size: 18px;
 			line-height: 1;
 			margin-right: 0;
+		}
+
+		.dark .material-modal .select2-container--default .select2-selection__clear {
+			color: #cbd5e1;
 		}
 
 		.select2-container--open {
