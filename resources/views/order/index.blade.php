@@ -501,7 +501,9 @@
 		}
 
 		.material-table th,
-		.material-table td {
+		.attachment-table th,
+		.material-table td,
+		.attachment-table td {
 			text-align: center !important;
 			vertical-align: middle !important;
 			padding: 8px !important;
@@ -510,7 +512,8 @@
 			border-bottom: 1px solid #e5e7eb;
 		}
 
-		.material-table th {
+		.material-table th,
+		.attachment-table th {
 			background: #f3f4f6;
 			font-weight: 700;
 			color: #374151;
@@ -520,7 +523,6 @@
 		}
 
 		.material-table tfoot th {
-			background: #e5e7eb;
 			font-weight: 700;
 			color: #1f2937;
 			text-align: right;
@@ -635,7 +637,7 @@
 			<i class="bi bi-check-circle"></i>
 			&nbsp; Simpan
 		</button>
-		<button type="button" class="btn btn-sm btn-outline-info" id="qcModalOpenBtn"
+		<button type="button" class="btn btn-sm btn-outline-danger" id="qcModalOpenBtn"
 			{{ empty($data->assign_order_id) ? 'disabled' : '' }}>
 			<i class="bi bi-clipboard-check"></i>
 			&nbsp; Quality Check (QC)
@@ -715,22 +717,22 @@
 						</table>
 
 						<div class="mt-6">
-							<div class="mb-6">
+							<div class="mb-6 photo-upload-section" data-upload-id="titik-putus">
 								<label class="form-label text-sm mb-2">
 									Foto Titik Putus
 								</label>
-								<label for="photoFileInput" class="upload-box">
-									<span class="camera-icon" id="cameraIcon">
+								<label class="upload-box">
+									<span class="camera-icon">
 										<i class="bi bi-camera-fill"></i>
 									</span>
-									<img id="previewImage" hidden>
+									<img class="previewImage" hidden>
 								</label>
-								<input type="file" name="photos" id="photoFileInput" accept="image/*">
+								<input type="file" name="photos" class="photoFileInput" accept="image/*">
 								<div class="action-area">
-									<button type="button" class="btn btn-outline-primary btn-sm" id="uploadBtn" title="Upload Foto">
+									<button type="button" class="btn btn-outline-primary btn-sm uploadBtn" title="Upload Foto">
 										<i class="bi bi-camera"></i>
 									</button>
-									<button type="button" class="btn btn-outline-danger btn-sm" id="deleteBtn" hidden title="Hapus Foto">
+									<button type="button" class="btn btn-outline-danger btn-sm deleteBtn" hidden title="Hapus Foto">
 										<i class="bi bi-trash"></i>
 									</button>
 								</div>
@@ -785,6 +787,94 @@
 			<div class="panel-content">
 				<div class="photos-grid" data-row-id="{{ $id }}">
 					<div class="photos-empty">Loading photos...</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="panel w-full mt-6">
+			<div class="mb-5 panel-header" onclick="togglePanel(this)">
+				<h5 class="text-lg font-semibold dark:text-white-light">Attachment Evidence</h5>
+				<i class="bi bi-chevron-down collapse-icon"></i>
+			</div>
+			<div class="panel-content">
+				<div class="table-responsive">
+					<table class="table table-bordered table-hover text-center attachment-table">
+						<thead>
+							<tr>
+								<th rowspan="2">Designator</th>
+								<th rowspan="2">Volume</th>
+								<th colspan="3">Photo</th>
+							</tr>
+							<tr>
+								<th width="20%">Before</th>
+								<th width="20%">Progress</th>
+								<th width="20%">After</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>CONTOH-MATERIAL</td>
+								<td>10</td>
+								<td>
+									<div class="photo-upload-section" data-upload-id="attachment-before">
+										<label class="upload-box">
+											<span class="camera-icon">
+												<i class="bi bi-camera-fill"></i>
+											</span>
+											<img class="previewImage" hidden="">
+										</label>
+										<input type="file" class="photoFileInput" accept="image/*">
+										<div class="action-area">
+											<button type="button" class="btn btn-outline-primary btn-sm uploadBtn" title="Upload Foto">
+												<i class="bi bi-camera"></i>
+											</button>
+											<button type="button" class="btn btn-outline-danger btn-sm deleteBtn" hidden title="Hapus Foto">
+												<i class="bi bi-trash"></i>
+											</button>
+										</div>
+									</div>
+								</td>
+								<td>
+									<div class="photo-upload-section" data-upload-id="attachment-progress">
+										<label class="upload-box">
+											<span class="camera-icon">
+												<i class="bi bi-camera-fill"></i>
+											</span>
+											<img class="previewImage" hidden="">
+										</label>
+										<input type="file" class="photoFileInput" accept="image/*">
+										<div class="action-area">
+											<button type="button" class="btn btn-outline-primary btn-sm uploadBtn" title="Upload Foto">
+												<i class="bi bi-camera"></i>
+											</button>
+											<button type="button" class="btn btn-outline-danger btn-sm deleteBtn" hidden title="Hapus Foto">
+												<i class="bi bi-trash"></i>
+											</button>
+										</div>
+									</div>
+								</td>
+								<td>
+									<div class="photo-upload-section" data-upload-id="attachment-after">
+										<label class="upload-box">
+											<span class="camera-icon">
+												<i class="bi bi-camera-fill"></i>
+											</span>
+											<img class="previewImage" hidden="">
+										</label>
+										<input type="file" class="photoFileInput" accept="image/*">
+										<div class="action-area">
+											<button type="button" class="btn btn-outline-primary btn-sm uploadBtn" title="Upload Foto">
+												<i class="bi bi-camera"></i>
+											</button>
+											<button type="button" class="btn btn-outline-danger btn-sm deleteBtn" hidden title="Hapus Foto">
+												<i class="bi bi-trash"></i>
+											</button>
+										</div>
+									</div>
+								</td>
+							</tr>
+						</tbody>
+					</table>
 				</div>
 			</div>
 		</div>
@@ -1215,43 +1305,48 @@
 		}
 
 		function initializePhotoUpload() {
-			const fileInput = document.getElementById('photoFileInput');
-			const previewImage = document.getElementById('previewImage');
-			const cameraIcon = document.getElementById('cameraIcon');
-			const deleteBtn = document.getElementById('deleteBtn');
-			const uploadBtn = document.getElementById('uploadBtn');
+			document.querySelectorAll('.photo-upload-section').forEach(section => {
+				const fileInput = section.querySelector('.photoFileInput');
+				const previewImage = section.querySelector('.previewImage');
+				const cameraIcon = section.querySelector('.camera-icon');
+				const deleteBtn = section.querySelector('.deleteBtn');
+				const uploadBtn = section.querySelector('.uploadBtn');
 
-			if (existingPhotoUrl) {
-				previewImage.src = existingPhotoUrl;
-				previewImage.hidden = false;
-				cameraIcon.style.display = 'none';
-				deleteBtn.hidden = false;
-			}
+				if (!fileInput || !previewImage || !cameraIcon || !deleteBtn || !uploadBtn) return;
 
-			uploadBtn.addEventListener('click', () => {
-				fileInput.click();
-			});
-
-			fileInput.addEventListener('change', function(event) {
-				const file = event.target.files[0];
-				if (!file) return;
-
-				const reader = new FileReader();
-				reader.onload = (e) => {
-					previewImage.src = e.target.result;
+				const uploadId = section.getAttribute('data-upload-id');
+				if (uploadId === 'titik-putus' && existingPhotoUrl) {
+					previewImage.src = existingPhotoUrl;
 					previewImage.hidden = false;
 					cameraIcon.style.display = 'none';
 					deleteBtn.hidden = false;
-				};
-				reader.readAsDataURL(file);
-			});
+				}
 
-			deleteBtn.addEventListener('click', function() {
-				previewImage.hidden = true;
-				previewImage.src = '';
-				fileInput.value = '';
-				cameraIcon.style.display = 'block';
-				deleteBtn.hidden = true;
+				uploadBtn.addEventListener('click', () => {
+					fileInput.click();
+				});
+
+				fileInput.addEventListener('change', function(event) {
+					const file = event.target.files[0];
+					if (!file) return;
+
+					const reader = new FileReader();
+					reader.onload = (e) => {
+						previewImage.src = e.target.result;
+						previewImage.hidden = false;
+						cameraIcon.style.display = 'none';
+						deleteBtn.hidden = false;
+					};
+					reader.readAsDataURL(file);
+				});
+
+				deleteBtn.addEventListener('click', function() {
+					previewImage.hidden = true;
+					previewImage.src = '';
+					fileInput.value = '';
+					cameraIcon.style.display = 'block';
+					deleteBtn.hidden = true;
+				});
 			});
 		}
 
