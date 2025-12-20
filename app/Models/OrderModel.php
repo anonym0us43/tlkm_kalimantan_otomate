@@ -126,6 +126,11 @@ class OrderModel extends Model
                 {
                     if (stripos($value->info, $word) !== false)
                     {
+                        if (empty($value->attachment))
+                        {
+                            continue;
+                        }
+
                         $format = str_replace('https://mtel.tacc.id/storage/bot_file/', '', trim($value->attachment));
 
                         $response[] = 'https://superbot.warriors.id/bot_lensa_task/Download/evidence/' . $format;
@@ -290,21 +295,25 @@ class OrderModel extends Model
             }
         }
 
-        if ($request->hasFile('photos'))
+        $uploadPath = public_path('upload/' . $id);
+
+        if (!File::exists($uploadPath))
         {
-            $uploadPath = public_path('upload/' . $id);
+            File::makeDirectory($uploadPath, 0755, true);
+        }
 
-            if (!File::exists($uploadPath))
-            {
-                File::makeDirectory($uploadPath, 0755, true);
-            }
+        $photoFile = $request->file('Foto_Titik_Putus');
+        if ($photoFile && $photoFile->isValid())
+        {
+            $fileName = 'Foto_Titik_Putus.jpg';
+            $photoFile->move($uploadPath, $fileName);
+        }
 
-            $photoFile = $request->file('photos');
-            if ($photoFile && $photoFile->isValid())
-            {
-                $fileName = 'Foto_Titik_Putus.jpg';
-                $photoFile->move($uploadPath, $fileName);
-            }
+        $otdrFile = $request->file('Foto_OTDR');
+        if ($otdrFile && $otdrFile->isValid())
+        {
+            $fileName = 'Foto_OTDR.jpg';
+            $otdrFile->move($uploadPath, $fileName);
         }
 
         $allFiles = $request->allFiles();

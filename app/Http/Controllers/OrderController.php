@@ -17,6 +17,7 @@ class OrderController extends Controller
 
         $materials = collect();
         $existingPhotoUrl = null;
+        $existingPhotoOtdrUrl = null;
         $existingAttachments = [];
 
         if ($data && $data->assign_order_id)
@@ -27,6 +28,12 @@ class OrderController extends Controller
             if (File::exists($photoPath))
             {
                 $existingPhotoUrl = asset('upload/' . $data->assign_order_id . '/Foto_Titik_Putus.jpg');
+            }
+
+            $photoOtdrPath = public_path('upload/' . $data->assign_order_id . '/Foto_OTDR.jpg');
+            if (File::exists($photoOtdrPath))
+            {
+                $existingPhotoOtdrUrl = asset('upload/' . $data->assign_order_id . '/Foto_OTDR.jpg');
             }
 
             $attachmentBasePath = public_path('upload/' . $data->assign_order_id . '/attachments');
@@ -70,14 +77,14 @@ class OrderController extends Controller
             return redirect()->back()->with('error', 'Data not found.');
         }
 
-        return view('order.index', compact('id', 'data', 'materials', 'existingPhotoUrl', 'existingAttachments'));
+        return view('order.index', compact('id', 'data', 'materials', 'existingPhotoUrl', 'existingPhotoOtdrUrl', 'existingAttachments'));
     }
 
     public function order_post(Request $request)
     {
         OrderModel::order_post($request);
 
-        return redirect()->back()->with('success', 'Planning order has been saved successfully.');
+        return redirect()->back()->with('success', 'Order has been saved successfully.');
     }
 
     public function status_post(Request $request)

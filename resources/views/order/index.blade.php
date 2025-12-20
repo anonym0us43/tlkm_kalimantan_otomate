@@ -656,6 +656,10 @@
 		</div>
 	@endif
 
+	@php
+		$showAttachmentEvidence = !in_array((int) ($data->status_qc_id ?? 0), [0, 1, 2]);
+	@endphp
+
 	<form action="{{ route('order.post') }}" method="POST" enctype="multipart/form-data" id="orderForm">
 		@csrf
 		<input type="hidden" name="row_id" value="{{ $id }}">
@@ -717,24 +721,47 @@
 						</table>
 
 						<div class="mt-6">
-							<div class="mb-6 photo-upload-section" data-upload-id="titik-putus">
-								<label class="form-label text-sm mb-2">
-									Foto Titik Putus
-								</label>
-								<label class="upload-box">
-									<span class="camera-icon">
-										<i class="bi bi-camera-fill"></i>
-									</span>
-									<img class="previewImage" hidden>
-								</label>
-								<input type="file" name="photos" class="photoFileInput" accept="image/*">
-								<div class="action-area">
-									<button type="button" class="btn btn-outline-primary btn-sm uploadBtn" title="Upload Foto">
-										<i class="bi bi-camera"></i>
-									</button>
-									<button type="button" class="btn btn-outline-danger btn-sm deleteBtn" hidden title="Hapus Foto">
-										<i class="bi bi-trash"></i>
-									</button>
+							<div class="flex flex-col md:flex-row gap-4">
+								<div class="flex-1 mb-6 photo-upload-section" data-upload-id="titik-putus">
+									<label class="form-label text-sm mb-2">
+										Foto Titik Putus
+									</label>
+									<label class="upload-box">
+										<span class="camera-icon">
+											<i class="bi bi-camera-fill"></i>
+										</span>
+										<img class="previewImage" hidden>
+									</label>
+									<input type="file" name="Foto_Titik_Putus" class="photoFileInput" accept="image/*">
+									<div class="action-area">
+										<button type="button" class="btn btn-outline-primary btn-sm uploadBtn" title="Upload Foto">
+											<i class="bi bi-camera"></i>
+										</button>
+										<button type="button" class="btn btn-outline-danger btn-sm deleteBtn" hidden title="Hapus Foto">
+											<i class="bi bi-trash"></i>
+										</button>
+									</div>
+								</div>
+
+								<div class="flex-1 mb-6 photo-upload-section" data-upload-id="foto-otdr">
+									<label class="form-label text-sm mb-2">
+										Foto OTDR
+									</label>
+									<label class="upload-box">
+										<span class="camera-icon">
+											<i class="bi bi-camera-fill"></i>
+										</span>
+										<img class="previewImage" hidden>
+									</label>
+									<input type="file" name="Foto_OTDR" class="photoFileInput" accept="image/*">
+									<div class="action-area">
+										<button type="button" class="btn btn-outline-primary btn-sm uploadBtn" title="Upload Foto">
+											<i class="bi bi-camera"></i>
+										</button>
+										<button type="button" class="btn btn-outline-danger btn-sm deleteBtn" hidden title="Hapus Foto">
+											<i class="bi bi-trash"></i>
+										</button>
+									</div>
 								</div>
 							</div>
 
@@ -791,35 +818,37 @@
 			</div>
 		</div>
 
-		<div class="panel w-full mt-6">
-			<div class="mb-5 panel-header" onclick="togglePanel(this)">
-				<h5 class="text-lg font-semibold dark:text-white-light">Attachment</h5>
-				<i class="bi bi-chevron-down collapse-icon"></i>
-			</div>
-			<div class="panel-content">
-				<div class="table-responsive">
-					<table class="table table-bordered table-hover text-center attachment-table">
-						<thead>
-							<tr>
-								<th rowspan="2">Designator</th>
-								<th rowspan="2">Volume</th>
-								<th colspan="3">Photo</th>
-							</tr>
-							<tr>
-								<th width="15%">Before</th>
-								<th width="15%">Progress</th>
-								<th width="15%">After</th>
-							</tr>
-						</thead>
-						<tbody id="attachmentTableBody">
-							<tr>
-								<td colspan="5" class="text-gray-500">Tidak ada material</td>
-							</tr>
-						</tbody>
-					</table>
+		@if ($showAttachmentEvidence)
+			<div class="panel w-full mt-6">
+				<div class="mb-5 panel-header" onclick="togglePanel(this)">
+					<h5 class="text-lg font-semibold dark:text-white-light">Attachment Evidence</h5>
+					<i class="bi bi-chevron-down collapse-icon"></i>
+				</div>
+				<div class="panel-content">
+					<div class="table-responsive">
+						<table class="table table-bordered table-hover text-center attachment-table">
+							<thead>
+								<tr>
+									<th rowspan="2">Designator</th>
+									<th rowspan="2">Volume</th>
+									<th colspan="3">Photo</th>
+								</tr>
+								<tr>
+									<th width="15%">Before</th>
+									<th width="15%">Progress</th>
+									<th width="15%">After</th>
+								</tr>
+							</thead>
+							<tbody id="attachmentTableBody">
+								<tr>
+									<td colspan="5" class="text-gray-500">Tidak ada material</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
 				</div>
 			</div>
-		</div>
+		@endif
 
 		<div class="material-modal" id="materialModal">
 			<div class="material-modal-content">
@@ -936,7 +965,9 @@
 		let mapInstance = null;
 		const existingMaterials = @json($materials ?? []);
 		const existingPhotoUrl = @json($existingPhotoUrl ?? null);
+		const existingPhotoOtdrUrl = @json($existingPhotoOtdrUrl ?? null);
 		const existingAttachments = @json($existingAttachments ?? []);
+		const canEditAttachmentEvidence = @json($showAttachmentEvidence);
 
 		function togglePanel(header) {
 			const content = header.nextElementSibling;
@@ -999,7 +1030,9 @@
 			if (totalJasaEl) totalJasaEl.textContent = formatCurrency(totalJasa);
 			if (totalMaterialJasaEl) totalMaterialJasaEl.textContent = formatCurrency(totalMaterial + totalJasa);
 
-			updateAttachmentTable();
+			if (canEditAttachmentEvidence) {
+				updateAttachmentTable();
+			}
 		};
 
 		const findMaterialById = (id) => {
@@ -1266,6 +1299,12 @@
 					cameraIcon.style.display = 'none';
 					deleteBtn.hidden = false;
 				}
+				if (uploadId === 'foto-otdr' && existingPhotoOtdrUrl) {
+					previewImage.src = existingPhotoOtdrUrl;
+					previewImage.hidden = false;
+					cameraIcon.style.display = 'none';
+					deleteBtn.hidden = false;
+				}
 
 				uploadBtn.addEventListener('click', () => {
 					fileInput.click();
@@ -1296,6 +1335,7 @@
 		}
 
 		function updateAttachmentTable() {
+			if (!canEditAttachmentEvidence) return;
 			const tableBody = document.getElementById('attachmentTableBody');
 			if (!tableBody) return;
 
