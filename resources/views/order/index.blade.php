@@ -793,7 +793,7 @@
 
 		<div class="panel w-full mt-6">
 			<div class="mb-5 panel-header" onclick="togglePanel(this)">
-				<h5 class="text-lg font-semibold dark:text-white-light">Attachment Evidence</h5>
+				<h5 class="text-lg font-semibold dark:text-white-light">Attachment</h5>
 				<i class="bi bi-chevron-down collapse-icon"></i>
 			</div>
 			<div class="panel-content">
@@ -806,72 +806,14 @@
 								<th colspan="3">Photo</th>
 							</tr>
 							<tr>
-								<th width="20%">Before</th>
-								<th width="20%">Progress</th>
-								<th width="20%">After</th>
+								<th width="15%">Before</th>
+								<th width="15%">Progress</th>
+								<th width="15%">After</th>
 							</tr>
 						</thead>
-						<tbody>
+						<tbody id="attachmentTableBody">
 							<tr>
-								<td>CONTOH-MATERIAL</td>
-								<td>10</td>
-								<td>
-									<div class="photo-upload-section" data-upload-id="attachment-before">
-										<label class="upload-box">
-											<span class="camera-icon">
-												<i class="bi bi-camera-fill"></i>
-											</span>
-											<img class="previewImage" hidden="">
-										</label>
-										<input type="file" class="photoFileInput" accept="image/*">
-										<div class="action-area">
-											<button type="button" class="btn btn-outline-primary btn-sm uploadBtn" title="Upload Foto">
-												<i class="bi bi-camera"></i>
-											</button>
-											<button type="button" class="btn btn-outline-danger btn-sm deleteBtn" hidden title="Hapus Foto">
-												<i class="bi bi-trash"></i>
-											</button>
-										</div>
-									</div>
-								</td>
-								<td>
-									<div class="photo-upload-section" data-upload-id="attachment-progress">
-										<label class="upload-box">
-											<span class="camera-icon">
-												<i class="bi bi-camera-fill"></i>
-											</span>
-											<img class="previewImage" hidden="">
-										</label>
-										<input type="file" class="photoFileInput" accept="image/*">
-										<div class="action-area">
-											<button type="button" class="btn btn-outline-primary btn-sm uploadBtn" title="Upload Foto">
-												<i class="bi bi-camera"></i>
-											</button>
-											<button type="button" class="btn btn-outline-danger btn-sm deleteBtn" hidden title="Hapus Foto">
-												<i class="bi bi-trash"></i>
-											</button>
-										</div>
-									</div>
-								</td>
-								<td>
-									<div class="photo-upload-section" data-upload-id="attachment-after">
-										<label class="upload-box">
-											<span class="camera-icon">
-												<i class="bi bi-camera-fill"></i>
-											</span>
-											<img class="previewImage" hidden="">
-										</label>
-										<input type="file" class="photoFileInput" accept="image/*">
-										<div class="action-area">
-											<button type="button" class="btn btn-outline-primary btn-sm uploadBtn" title="Upload Foto">
-												<i class="bi bi-camera"></i>
-											</button>
-											<button type="button" class="btn btn-outline-danger btn-sm deleteBtn" hidden title="Hapus Foto">
-												<i class="bi bi-trash"></i>
-											</button>
-										</div>
-									</div>
-								</td>
+								<td colspan="5" class="text-gray-500">Tidak ada material</td>
 							</tr>
 						</tbody>
 					</table>
@@ -901,7 +843,7 @@
 									<th rowspan="2">Uraian Pekerjaan</th>
 									<th rowspan="2">Satuan</th>
 									<th colspan="2">Paket</th>
-									<th rowspan="2">VLM</th>
+									<th rowspan="2">Volume</th>
 									<th colspan="2">Total Harga</th>
 									<th rowspan="2">Action</th>
 								</tr>
@@ -1055,6 +997,8 @@
 			if (totalMaterialEl) totalMaterialEl.textContent = formatCurrency(totalMaterial);
 			if (totalJasaEl) totalJasaEl.textContent = formatCurrency(totalJasa);
 			if (totalMaterialJasaEl) totalMaterialJasaEl.textContent = formatCurrency(totalMaterial + totalJasa);
+
+			updateAttachmentTable();
 		};
 
 		const findMaterialById = (id) => {
@@ -1348,6 +1292,104 @@
 					deleteBtn.hidden = true;
 				});
 			});
+		}
+
+		function updateAttachmentTable() {
+			const tableBody = document.getElementById('attachmentTableBody');
+			if (!tableBody) return;
+
+			const materialRows = document.querySelectorAll('.material-row');
+			tableBody.innerHTML = '';
+
+			if (materialRows.length === 0) {
+				tableBody.innerHTML = '<tr><td colspan="5" class="text-gray-500">Tidak ada material</td></tr>';
+				return;
+			}
+
+			materialRows.forEach((row, rowIndex) => {
+				const select = row.querySelector('.material-select');
+				const qtyInput = row.querySelector('.qty-input');
+				const qty = Number(qtyInput?.value) || 1;
+
+				if (!select || !select.value) return;
+
+				const material = findMaterialById(select.value);
+				if (!material) return;
+
+				const designator = material.item_designator || '';
+				const requiresMultiple = designatorRequiresCoordinate(designator);
+				const count = requiresMultiple ? qty : 1;
+
+				for (let i = 0; i < count; i++) {
+					const tr = document.createElement('tr');
+					const labelSuffix = requiresMultiple && count > 1 ? ` (${i + 1})` : '';
+
+					tr.innerHTML = `
+						<td>${designator}${labelSuffix}</td>
+						<td>${requiresMultiple && count > 1 ? '1' : qty}</td>
+						<td>
+							<div class="photo-upload-section" data-upload-id="attach-${rowIndex}-${i}-before" data-material-index="${rowIndex}" data-photo-index="${i}" data-photo-type="before">
+								<label class="upload-box">
+									<span class="camera-icon">
+										<i class="bi bi-camera-fill"></i>
+									</span>
+									<img class="previewImage" hidden>
+								</label>
+								<input type="file" name="attachments[${rowIndex}][${i}][before]" class="photoFileInput" accept="image/*">
+								<div class="action-area">
+									<button type="button" class="btn btn-outline-primary btn-sm uploadBtn" title="Upload Foto">
+										<i class="bi bi-camera"></i>
+									</button>
+									<button type="button" class="btn btn-outline-danger btn-sm deleteBtn" hidden title="Hapus Foto">
+										<i class="bi bi-trash"></i>
+									</button>
+								</div>
+							</div>
+						</td>
+						<td>
+							<div class="photo-upload-section" data-upload-id="attach-${rowIndex}-${i}-progress" data-material-index="${rowIndex}" data-photo-index="${i}" data-photo-type="progress">
+								<label class="upload-box">
+									<span class="camera-icon">
+										<i class="bi bi-camera-fill"></i>
+									</span>
+									<img class="previewImage" hidden>
+								</label>
+								<input type="file" name="attachments[${rowIndex}][${i}][progress]" class="photoFileInput" accept="image/*">
+								<div class="action-area">
+									<button type="button" class="btn btn-outline-primary btn-sm uploadBtn" title="Upload Foto">
+										<i class="bi bi-camera"></i>
+									</button>
+									<button type="button" class="btn btn-outline-danger btn-sm deleteBtn" hidden title="Hapus Foto">
+										<i class="bi bi-trash"></i>
+									</button>
+								</div>
+							</div>
+						</td>
+						<td>
+							<div class="photo-upload-section" data-upload-id="attach-${rowIndex}-${i}-after" data-material-index="${rowIndex}" data-photo-index="${i}" data-photo-type="after">
+								<label class="upload-box">
+									<span class="camera-icon">
+										<i class="bi bi-camera-fill"></i>
+									</span>
+									<img class="previewImage" hidden>
+								</label>
+								<input type="file" name="attachments[${rowIndex}][${i}][after]" class="photoFileInput" accept="image/*">
+								<div class="action-area">
+									<button type="button" class="btn btn-outline-primary btn-sm uploadBtn" title="Upload Foto">
+										<i class="bi bi-camera"></i>
+									</button>
+									<button type="button" class="btn btn-outline-danger btn-sm deleteBtn" hidden title="Hapus Foto">
+										<i class="bi bi-trash"></i>
+									</button>
+								</div>
+							</div>
+						</td>
+					`;
+					tableBody.appendChild(tr);
+				}
+			});
+
+			initializePhotoUpload();
 		}
 
 		function createCustomIcon(text, cssClass) {
