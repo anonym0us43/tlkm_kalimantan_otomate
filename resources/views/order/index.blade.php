@@ -939,14 +939,13 @@
 				</div>
 				<div class="material-modal-body">
 					<div class="material-actions-bar">
-						<div class="text-sm text-gray-600"></div>
 						<button type="button" class="btn btn-sm btn-primary add-material-btn">
 							<i class="bi bi-plus-circle"></i>
 							&nbsp; Tambah Material
 						</button>
 					</div>
 					<div class="material-table-wrapper table-responsive">
-						<table class="table table-bordered table-hover text-center material-table" style="text">
+						<table class="table table-bordered table-hover text-center material-table">
 							<thead>
 								<tr>
 									<th rowspan="2" width="15%">Designator</th>
