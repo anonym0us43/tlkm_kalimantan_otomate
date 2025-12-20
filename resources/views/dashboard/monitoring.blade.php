@@ -54,7 +54,7 @@
 					<tr>
 						<th rowspan="3">WITEL</th>
 						<th colspan="3">PLANNING</th>
-						<th rowspan="2" colspan="4">PROGRESS</th>
+						<th rowspan="3">PROGRESS</th>
 						<th colspan="2">PERMANENISASI</th>
 						<th rowspan="3">REKON</th>
 						<th rowspan="3">ACH %</th>
@@ -63,24 +63,19 @@
 					<tr>
 						<th colspan="2">TA</th>
 						<th colspan="1">MTEL</th>
-						<th colspan="1">TA</th>
-						<th colspan="1">MTEL</th>
+						<th colspan="2">MTEL</th>
 					</tr>
 					<tr>
 						<th>INDIKASI</th>
 						<th>REJECT</th>
-						<th>NEED APPROVE</th>
-						<th>&lt;1 HARI</th>
-						<th>&gt; 1 HARI</th>
-						<th>&gt; 3 HARI</th>
-						<th>&gt; 7 HARI</th>
+						<th>NEED<br>APPROVE</th>
 						<th>REJECT</th>
-						<th>NEED APPROVE</th>
+						<th>NEED<br>APPROVE</th>
 					</tr>
 				</thead>
 				<tbody id="monitoring-tbody">
 					<tr>
-						<td colspan="12">Loading...</td>
+						<td colspan="10">Loading...</td>
 					</tr>
 				</tbody>
 			</table>
@@ -99,26 +94,20 @@
 			1: 'idle_order',
 			2: 'planning_reject_ta',
 			3: 'planning_need_approve_mtel',
-			4: 'age_under1d',
-			5: 'age_1d_to_3d',
-			6: 'age_3d_to_7d',
-			7: 'age_upper7d',
-			8: 'permanenisasi_reject_ta',
-			9: 'permanenisasi_need_approve_mtel',
-			10: 'permanenisasi_rekon'
+			4: 'planning_approve_mtel',
+			5: 'permanenisasi_reject_ta',
+			6: 'permanenisasi_need_approve_mtel',
+			7: 'permanenisasi_rekon'
 		};
 
 		const columnHeaderMap = {
 			1: 'PLANNING - TA - INDIKASI',
 			2: 'PLANNING - TA - REJECT',
 			3: 'PLANNING - MTEL - NEED APPROVE',
-			4: 'PROGRESS - < 1 HARI',
-			5: 'PROGRESS - > 1 HARI',
-			6: 'PROGRESS - > 3 HARI',
-			7: 'PROGRESS - > 7 HARI',
-			8: 'PERMANENISASI - REJECT',
-			9: 'PERMANENISASI - NEED APPROVE',
-			10: 'REKON'
+			4: 'PLANNING - MTEL - APPROVE',
+			5: 'PERMANENISASI - REJECT',
+			6: 'PERMANENISASI - NEED APPROVE',
+			7: 'REKON'
 		};
 
 		function renderMonitoringTable(data) {
@@ -129,8 +118,8 @@
 				return;
 			}
 
-			const achIndex = 11;
-			let colTotals = Array(12).fill(0);
+			const achIndex = 8;
+			let colTotals = Array(9).fill(0);
 			let totalRekonSum = 0;
 			let totalWithoutRekonSum = 0;
 			let totalAdjustedSum = 0;
@@ -142,17 +131,14 @@
 					row.idle_order || 0,
 					row.planning_reject_ta || 0,
 					row.planning_need_approve_mtel || 0,
-					row.age_under1d || 0,
-					row.age_1d_to_3d || 0,
-					row.age_3d_to_7d || 0,
-					row.age_upper7d || 0,
+					row.planning_approve_mtel || 0,
 					row.permanenisasi_reject_ta || 0,
 					row.permanenisasi_need_approve_mtel || 0,
 					row.permanenisasi_rekon || 0
 				];
-				const totalWithoutRekon = cells.slice(1, 10).reduce((a, b) => a + Number(b), 0);
+				const totalWithoutRekon = cells.slice(1, 8).reduce((a, b) => a + Number(b), 0);
 				const idleVal = Number(cells[1]) || 0;
-				const rekonVal = Number(cells[10]) || 0;
+				const rekonVal = Number(cells[8]) || 0;
 				const totalAdjusted = totalWithoutRekon + rekonVal;
 				const numerator = totalAdjusted - idleVal;
 				const achVal = totalAdjusted > 0 ? (numerator / totalAdjusted) * 100 : 0;
@@ -229,12 +215,12 @@
 			});
 			const url = `/ajax/dashboard/monitoring?${params.toString()}`;
 			const tbody = document.getElementById('monitoring-tbody');
-			tbody.innerHTML = '<tr><td colspan="13">Loading...</td></tr>';
+			tbody.innerHTML = '<tr><td colspan="10">Loading...</td></tr>';
 			fetch(url)
 				.then(res => res.json())
 				.then(data => renderMonitoringTable(data))
 				.catch(() => {
-					tbody.innerHTML = '<tr><td colspan="12">Gagal memuat data</td></tr>';
+					tbody.innerHTML = '<tr><td colspan="10">Gagal memuat data</td></tr>';
 				});
 		}
 
