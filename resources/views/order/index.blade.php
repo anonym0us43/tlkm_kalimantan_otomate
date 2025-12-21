@@ -840,7 +840,7 @@
 
 							<div class="mb-6">
 								<label class="form-label text-sm mb-2">
-									Koordinat Titik Putus
+									Koordinat Titik Putus <span class="text-danger">*</span>
 								</label>
 								<div class="flex gap-2 mb-2">
 									<input type="text" name="coordinates_site" class="form-input flex-1"
@@ -855,10 +855,10 @@
 
 							<div class="mb-6">
 								<label class="form-label text-sm mb-2">
-									Penyebab Putus
+									Penyebab Putus <span class="text-danger">*</span>
 								</label>
 								<input type="text" name="order_headline" class="form-input" placeholder="Masukkan penyebab putus"
-									value="{{ $data->order_headline ?? '' }}">
+									value="{{ $data->order_headline ?? '' }}" required>
 							</div>
 
 							<div class="flex items-center justify-end gap-2">
@@ -1941,25 +1941,123 @@
 		});
 
 		document.getElementById('orderForm').addEventListener('submit', function(e) {
-			const materialRows = document.querySelectorAll('.material-row');
-			if (materialRows.length === 0) {
+			const fotoTitikPutusInput = document.querySelector('input[name="Foto_Titik_Putus"]');
+			const fotoTitikPutusPreview = document.querySelector('[data-upload-id="titik-putus"] .previewImage');
+			if (!fotoTitikPutusInput.files.length && (!fotoTitikPutusPreview || fotoTitikPutusPreview.hidden || !
+					fotoTitikPutusPreview.src)) {
 				e.preventDefault();
-				alert('Mohon pilih minimal satu material');
+				alert('Foto Titik Putus wajib diupload');
 				return;
 			}
 
-			let hasEmptyMaterial = false;
+			const fotoOtdrInput = document.querySelector('input[name="Foto_OTDR"]');
+			const fotoOtdrPreview = document.querySelector('[data-upload-id="foto-otdr"] .previewImage');
+			if (!fotoOtdrInput.files.length && (!fotoOtdrPreview || fotoOtdrPreview.hidden || !fotoOtdrPreview.src)) {
+				e.preventDefault();
+				alert('Foto OTDR wajib diupload');
+				return;
+			}
+
+			const coordinateSiteInput = document.querySelector('input[name="coordinates_site"]');
+			if (!coordinateSiteInput || !coordinateSiteInput.value.trim()) {
+				e.preventDefault();
+				alert('Koordinat Titik Putus wajib diisi');
+				return;
+			}
+
+			const orderHeadlineInput = document.querySelector('input[name="order_headline"]');
+			if (!orderHeadlineInput || !orderHeadlineInput.value.trim()) {
+				e.preventDefault();
+				alert('Penyebab Putus wajib diisi');
+				return;
+			}
+
+			const materialRows = document.querySelectorAll('.material-row');
+			if (materialRows.length === 0) {
+				e.preventDefault();
+				alert('Minimal harus ada satu material. Silakan tambahkan material di BoQ Materials');
+				return;
+			}
+
+			let hasInvalidMaterial = false;
+			let materialErrorMsg = '';
+
 			materialRows.forEach((row, index) => {
 				const select = row.querySelector('.material-select');
-				if (!select.value) {
-					hasEmptyMaterial = true;
+				const qtyInput = row.querySelector('.qty-input');
+
+				if (!select || !select.value) {
+					hasInvalidMaterial = true;
+					materialErrorMsg = `Material pada baris ${index + 1} belum dipilih`;
+					return;
+				}
+
+				if (!qtyInput || !qtyInput.value || Number(qtyInput.value) <= 0) {
+					hasInvalidMaterial = true;
+					materialErrorMsg = `Quantity pada baris ${index + 1} harus lebih dari 0`;
+					return;
+				}
+
+				const material = findMaterialById(select.value);
+				if (material) {
+					const designator = material.item_designator || '';
+					const requiresCoordinate = designatorRequiresCoordinate(designator);
+
+					if (requiresCoordinate) {
+						const coordinateRow = row.nextElementSibling;
+						const coordinateInputs = coordinateRow ? coordinateRow.querySelectorAll(
+							'.coordinate-input') : [];
+
+						if (coordinateInputs.length === 0) {
+							hasInvalidMaterial = true;
+							materialErrorMsg = `Koordinat material pada baris ${index + 1} belum diisi`;
+							return;
+						}
+
+						coordinateInputs.forEach((input, coordIndex) => {
+							if (!input.value.trim()) {
+								hasInvalidMaterial = true;
+								materialErrorMsg =
+									`Koordinat material pada baris ${index + 1} volume ${coordIndex + 1} belum diisi`;
+								return;
+							}
+						});
+					}
 				}
 			});
 
-			if (hasEmptyMaterial) {
+			if (hasInvalidMaterial) {
 				e.preventDefault();
-				alert('Mohon pilih material untuk semua baris');
+				alert(materialErrorMsg);
 				return;
+			}
+
+			if (canEditAttachmentEvidence) {
+				const attachmentTableBody = document.getElementById('attachmentTableBody');
+				if (attachmentTableBody) {
+					const attachmentSections = attachmentTableBody.querySelectorAll('.photo-upload-section');
+					let hasInvalidAttachment = false;
+					let attachmentErrorMsg = '';
+
+					attachmentSections.forEach((section, index) => {
+						const fileInput = section.querySelector('.photoFileInput');
+						const previewImage = section.querySelector('.previewImage');
+						const uploadId = section.getAttribute('data-upload-id');
+
+						if (!fileInput.files.length && (!previewImage || previewImage.hidden || !previewImage
+								.src)) {
+							hasInvalidAttachment = true;
+							attachmentErrorMsg = `Foto attachment "${uploadId}" wajib diupload`;
+							return;
+						}
+					});
+
+					if (hasInvalidAttachment) {
+						e.preventDefault();
+						alert(attachmentErrorMsg);
+						return;
+					}
+				}
 			}
 		});
 	</script>
