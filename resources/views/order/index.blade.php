@@ -383,6 +383,26 @@
 			border-top-color: #2196F3;
 		}
 
+		.marker-material {
+			background-color: #FF9800;
+			color: white;
+			border-color: #EF6C00;
+		}
+
+		.marker-material::after {
+			border-top-color: #FF9800;
+		}
+
+		.marker-titik-putus {
+			background-color: #F44336;
+			color: white;
+			border-color: #D32F2F;
+		}
+
+		.marker-titik-putus::after {
+			border-top-color: #F44336;
+		}
+
 		.panel-header {
 			display: flex;
 			align-items: center;
@@ -1044,6 +1064,8 @@
 	<script>
 		let materialsData = [];
 		let mapInstance = null;
+		let materialsLayerGroup = null;
+		let titikPutusLayerGroup = null;
 		const existingMaterials = @json($materials ?? []);
 		const existingPhotoUrl = @json($existingPhotoUrl ?? null);
 		const existingPhotoOtdrUrl = @json($existingPhotoOtdrUrl ?? null);
@@ -1114,6 +1136,10 @@
 			if (canEditAttachmentEvidence) {
 				updateAttachmentTable();
 			}
+
+			if (mapInstance) {
+				renderMaterialMarkers();
+			}
 		};
 
 		const findMaterialById = (id) => {
@@ -1144,6 +1170,78 @@
 			}
 			return [];
 		};
+
+		function parseLatLng(str) {
+			if (!str) return null;
+			const parts = String(str).split(',');
+			if (parts.length < 2) return null;
+			const lat = parseFloat(parts[0]);
+			const lng = parseFloat(parts[1]);
+			if (isNaN(lat) || isNaN(lng)) return null;
+			return {
+				lat,
+				lng
+			};
+		}
+
+		function collectMaterialCoordinates() {
+			const items = [];
+			const materialRows = document.querySelectorAll('.material-row');
+			materialRows.forEach((row, rowIndex) => {
+				const select = row.querySelector('.material-select');
+				if (!select || !select.value) return;
+				const material = findMaterialById(select.value);
+				if (!material) return;
+				const designator = material.item_designator || '';
+				const coordinateRow = row.nextElementSibling;
+				const inputs = coordinateRow ? coordinateRow.querySelectorAll('.coordinate-input') : [];
+				inputs.forEach((input, i) => {
+					const parsed = parseLatLng(input.value.trim());
+					if (parsed) {
+						const suffix = inputs.length > 1 ? ` (${i + 1})` : '';
+						items.push({
+							lat: parsed.lat,
+							lng: parsed.lng,
+							label: `${designator}${suffix}`
+						});
+					}
+				});
+			});
+			return items;
+		}
+
+		function renderMaterialMarkers() {
+			if (!mapInstance) return;
+			if (!materialsLayerGroup) {
+				materialsLayerGroup = L.layerGroup().addTo(mapInstance);
+			}
+			materialsLayerGroup.clearLayers();
+			const coords = collectMaterialCoordinates();
+			coords.forEach(item => {
+				L.marker([item.lat, item.lng], {
+					icon: createCustomIcon(item.label, 'marker-material')
+				}).addTo(materialsLayerGroup).bindPopup(
+					`<div style="text-align:center;"><strong>${item.label}</strong><br>${item.lat.toFixed(6)}, ${item.lng.toFixed(6)}</div>`
+				);
+			});
+		}
+
+		function renderTitikPutusMarker() {
+			if (!mapInstance) return;
+			if (!titikPutusLayerGroup) {
+				titikPutusLayerGroup = L.layerGroup().addTo(mapInstance);
+			}
+			titikPutusLayerGroup.clearLayers();
+			const input = document.querySelector('input[name="coordinates_site"]');
+			if (!input || !input.value) return;
+			const parsed = parseLatLng(input.value.trim());
+			if (!parsed) return;
+			L.marker([parsed.lat, parsed.lng], {
+				icon: createCustomIcon('Titik Putus', 'marker-titik-putus')
+			}).addTo(titikPutusLayerGroup).bindPopup(
+				`<div style=\"text-align:center;\"><strong>Titik Putus</strong><br>${parsed.lat.toFixed(6)}, ${parsed.lng.toFixed(6)}</div>`
+			);
+		}
 
 		const getCoordinateBaseName = (row) => {
 			const qtyInput = row.querySelector('.qty-input');
@@ -1218,9 +1316,13 @@
 
 			coordinateInputs.querySelectorAll('.coordinate-input').forEach(input => {
 				input.required = true;
+				input.addEventListener('input', () => {
+					renderMaterialMarkers();
+				});
 			});
 
 			coordinateGroup.classList.add('show');
+			renderMaterialMarkers();
 		};
 
 		const updateMaterialRowDisplay = (row, material) => {
@@ -1600,6 +1702,10 @@
 					.bindPopup(
 						`<div style="text-align:center;"><strong>${siteDown}</strong> (${siteNameDown})<br>${ttSite}<br>${lat.toFixed(6)}, ${lng.toFixed(6)}</div>`
 					);
+				materialsLayerGroup = L.layerGroup().addTo(mapInstance);
+				titikPutusLayerGroup = L.layerGroup().addTo(mapInstance);
+				renderMaterialMarkers();
+				renderTitikPutusMarker();
 			};
 
 			const renderMapOnly = () => {
@@ -1607,6 +1713,10 @@
 				L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 					maxZoom: 19
 				}).addTo(mapInstance);
+				materialsLayerGroup = L.layerGroup().addTo(mapInstance);
+				titikPutusLayerGroup = L.layerGroup().addTo(mapInstance);
+				renderMaterialMarkers();
+				renderTitikPutusMarker();
 			};
 
 			fetch(
@@ -1663,6 +1773,10 @@
 							);
 						}
 					}).addTo(mapInstance);
+					materialsLayerGroup = L.layerGroup().addTo(mapInstance);
+					titikPutusLayerGroup = L.layerGroup().addTo(mapInstance);
+					renderMaterialMarkers();
+					renderTitikPutusMarker();
 				})
 				.catch(() => {
 					if (!fallbackLat || !fallbackLng || isNaN(fallbackLat) || isNaN(fallbackLng)) {
@@ -1769,6 +1883,8 @@
 
 					btn.classList.remove('loading');
 					btn.disabled = false;
+					renderMaterialMarkers();
+					renderTitikPutusMarker();
 				},
 				(error) => {
 					let errorMsg = 'Gagal mendapatkan lokasi';
@@ -1814,7 +1930,16 @@
 
 			setTimeout(() => {
 				initializeMap();
+				setTimeout(() => {
+					renderTitikPutusMarker();
+				}, 200);
 			}, 100);
+			const coordinateSiteInput = document.querySelector('input[name="coordinates_site"]');
+			if (coordinateSiteInput) {
+				coordinateSiteInput.addEventListener('input', () => {
+					renderTitikPutusMarker();
+				});
+			}
 
 			const rowId = '{{ $id }}';
 			loadPhotos(rowId);
