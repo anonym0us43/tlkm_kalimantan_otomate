@@ -473,27 +473,33 @@
 
 				<div class="animate__animated p-6" :class="[$store.app.animation]">
 					<div x-data="layouts">
-						<ul class="flex space-x-2 rtl:space-x-reverse">
+						<ol class="flex text-gray-500 font-semibold dark:text-white-dark">
 							<li>
 								<a href="javascript:;"
-									class="text-primary hover:underline">{{ ucwords(request()->segment(1)) ?: 'Home' }}</a>
+									class="hover:text-gray-500/70 dark:hover:text-white-dark/70">{{ ucwords(request()->segment(1)) ?: 'Home' }}</a>
 							</li>
 							@if (request()->segment(2))
-								<li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
-									<span>{{ ucwords(str_replace('-', ' ', request()->segment(2))) }}</span>
+								<li
+									class="before:w-1 before:h-1 before:rounded-full before:bg-primary before:inline-block before:relative before:-top-0.5 before:mx-4">
+									<a href="javascript:;"
+										class="text-primary">{{ ucwords(str_replace(['-', '_'], ' ', request()->segment(2))) }}</a>
 								</li>
 							@endif
 							@if (request()->segment(3))
-								<li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
-									<span>{{ ucwords(str_replace('-', ' ', request()->segment(3))) }}</span>
+								<li
+									class="before:w-1 before:h-1 before:rounded-full before:bg-primary before:inline-block before:relative before:-top-0.5 before:mx-4">
+									<a href="javascript:;"
+										class="hover:text-gray-500/70 dark:hover:text-white-dark/70">{{ ucwords(str_replace(['-', '_'], ' ', request()->segment(3))) }}</a>
 								</li>
 							@endif
 							@if (request()->segment(4))
-								<li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
-									<span>{{ ucwords(str_replace('-', ' ', request()->segment(4))) }}</span>
+								<li
+									class="before:w-1 before:h-1 before:rounded-full before:bg-primary before:inline-block before:relative before:-top-0.5 before:mx-4">
+									<a href="javascript:;"
+										class="hover:text-gray-500/70 dark:hover:text-white-dark/70">{{ ucwords(str_replace(['-', '_'], ' ', request()->segment(4))) }}</a>
 								</li>
 							@endif
-						</ul>
+						</ol>
 
 						<div class="pt-5">
 							@yield('content')
