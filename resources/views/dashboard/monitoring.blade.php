@@ -26,16 +26,43 @@
 		}
 
 		.date-filter-panel {
-			margin-bottom: 1.5rem;
+			background-color: #f9fafb;
+			border-radius: 6px;
+			padding: 10px 12px;
+		}
+
+		.dark .date-filter-panel {
+			background-color: #1b2e4b;
+		}
+
+		.date-filter-panel .form-label {
+			display: block;
+			font-weight: 500;
+			margin-bottom: 3px;
+			font-size: 12px;
+			color: #666;
+		}
+
+		.dark .date-filter-panel .form-label {
+			color: #a3b5d6;
 		}
 
 		.date-filter-panel .form-input {
-			padding: 6px 12px;
+			width: 100%;
+			padding: 6px 10px;
 			border: 1px solid #ddd;
 			border-radius: 4px;
-			font-size: 14px;
-			width: 220px;
-			max-width: 100%;
+			font-size: 13px;
+		}
+
+		.dark .date-filter-panel .form-input {
+			background-color: #0e1726;
+			border-color: #17263c;
+			color: #fff;
+		}
+
+		.date-input-wrapper {
+			position: relative;
 		}
 	</style>
 @endsection
@@ -43,11 +70,26 @@
 @section('title', 'Dashboard Monitoring')
 
 @section('content')
+	<div class="panel mt-4 py-3 px-4">
+		<div class="date-filter-panel grid grid-cols-1 lg:grid-cols-3 gap-2 lg:gap-3 px-0 py-0">
+			<div class="date-input-wrapper">
+				<label for="start-date" class="form-label">Tanggal Mulai</label>
+				<input type="text" id="start-date" class="form-input" placeholder="YYYY-MM-DD" readonly>
+			</div>
+
+			<div class="hidden lg:flex items-end justify-center pb-1 text-gray-400">
+				<span class="text-sm">→</span>
+			</div>
+
+			<div class="date-input-wrapper">
+				<label for="end-date" class="form-label">Tanggal Selesai</label>
+				<input type="text" id="end-date" class="form-input" placeholder="YYYY-MM-DD" readonly>
+			</div>
+		</div>
+	</div>
+
 	<div class="panel mt-6">
 		<h5 class="text-lg font-semibold dark:text-white-light mb-4">Dashboard Monitoring</h5>
-		<div class="date-filter-panel flex items-center gap-2 mb-4">
-			<input type="text" id="date-range" class="form-input" placeholder="Filter: Pilih Rentang Tanggal" readonly>
-		</div>
 		<div class="table-responsive">
 			<table class="table table-bordered table-hover detail-table mt-4" id="monitoring-table">
 				<thead>
@@ -101,13 +143,13 @@
 		};
 
 		const columnHeaderMap = {
-			1: 'PLANNING - TA - INDIKASI',
-			2: 'PLANNING - TA - REJECT',
-			3: 'PLANNING - MTEL - NEED APPROVE',
-			4: 'PLANNING - MTEL - APPROVE',
-			5: 'PERMANENISASI - REJECT',
-			6: 'PERMANENISASI - NEED APPROVE',
-			7: 'REKON'
+			1: 'Planning - TA - Indikasi',
+			2: 'Planning - TA - Reject',
+			3: 'Planning - MTEL - Need Approve',
+			4: 'Planning - MTEL - Approve',
+			5: 'Permanenisasi - MTEL - Reject',
+			6: 'Permanenisasi - MTEL - Need Approve',
+			7: 'Rekon'
 		};
 
 		function renderMonitoringTable(data) {
@@ -225,27 +267,54 @@
 		}
 
 		document.addEventListener('DOMContentLoaded', function() {
-			flatpickr("#date-range", {
-				mode: "range",
-				dateFormat: "Y-m-d",
+			const fpStart = flatpickr('#start-date', {
+				dateFormat: 'Y-m-d',
 				allowInput: true,
 				locale: {
 					firstDayOfWeek: 1
 				},
-				onClose: function(selectedDates, dateStr, instance) {
-					if (selectedDates.length === 2) {
-						const start = instance.formatDate(selectedDates[0], 'Y-m-d');
-						const end = instance.formatDate(selectedDates[1], 'Y-m-d');
-						fetchMonitoringData(start, end);
+				onChange: function(selectedDates) {
+					if (selectedDates.length) {
+						const d = selectedDates[0];
+						fpEnd.set('minDate', d);
+						updateRangeAndFetch();
 					}
 				}
 			});
+
+			const fpEnd = flatpickr('#end-date', {
+				dateFormat: 'Y-m-d',
+				allowInput: true,
+				locale: {
+					firstDayOfWeek: 1
+				},
+				onChange: function(selectedDates) {
+					if (selectedDates.length) {
+						const d = selectedDates[0];
+						fpStart.set('maxDate', d);
+						updateRangeAndFetch();
+					}
+				}
+			});
+
+			function updateRangeAndFetch() {
+				const start = fpStart.input.value;
+				const end = fpEnd.input.value;
+				if (start && end) {
+					fetchMonitoringData(start, end);
+				}
+			}
+
 			const today = new Date();
 			const yyyy = today.getFullYear();
 			const mm = String(today.getMonth() + 1).padStart(2, '0');
 			const dd = String(today.getDate()).padStart(2, '0');
 			const firstDayOfMonth = `${yyyy}-${mm}-01`;
 			const todayStr = `${yyyy}-${mm}-${dd}`;
+			fpStart.setDate(firstDayOfMonth, true);
+			fpEnd.setDate(todayStr, true);
+			fpEnd.set('minDate', firstDayOfMonth);
+			fpStart.set('maxDate', todayStr);
 			fetchMonitoringData(firstDayOfMonth, todayStr);
 		});
 	</script>

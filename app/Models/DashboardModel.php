@@ -138,8 +138,17 @@ class DashboardModel extends Model
         return $query->groupBy('tstta.tt_site_id')->get();
     }
 
-    public static function get_rekoncile()
+    public static function get_rekoncile($start_date = null, $end_date = null)
     {
+        if (!$start_date)
+        {
+            $start_date = date('Y-m-01');
+        }
+        if (!$end_date)
+        {
+            $end_date = date('Y-m-d');
+        }
+
         $witels = DB::table('tb_witel')->select('name')->distinct()->orderBy('name')->pluck('name')->toArray();
 
         $rekoncileData = [];
@@ -153,6 +162,7 @@ class DashboardModel extends Model
                 ->leftJoin('tb_designator_khs AS tdkh', 'trm.designator_id', '=', 'tdkh.id')
                 ->where('tstta.witel', $witel)
                 ->where('tstta.jenis_perbaikan', 'Temporer')
+                ->whereRaw('DATE(tstta.tiket_terima) BETWEEN ? AND ?', [$start_date, $end_date])
                 ->select(
                     'tstta.tt_site_id',
                     'tro.status_qc_id',

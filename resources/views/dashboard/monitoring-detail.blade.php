@@ -196,7 +196,8 @@
 
 			const pageTitle = document.getElementById('pageTitle');
 			if (urlParams.witel && urlParams.column_header) {
-				pageTitle.innerText = `Detail - ${urlParams.witel} (${urlParams.column_header})`;
+				pageTitle.innerText =
+					`${urlParams.witel.charAt(0).toUpperCase() + urlParams.witel.slice(1).toLowerCase()} • ${urlParams.column_header}`;
 			}
 
 			const params = new URLSearchParams({

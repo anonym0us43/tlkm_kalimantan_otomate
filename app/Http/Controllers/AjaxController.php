@@ -80,7 +80,10 @@ class AjaxController extends Controller
 
     public function dashboard_rekoncile()
     {
-        $data = DashboardModel::get_rekoncile();
+        $start_date = request()->input('start_date') ?? date('Y-m-01');
+        $end_date   = request()->input('end_date') ?? date('Y-m-d');
+
+        $data = DashboardModel::get_rekoncile($start_date, $end_date);
 
         return response()->json($data);
     }
