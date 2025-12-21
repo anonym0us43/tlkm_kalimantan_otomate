@@ -149,7 +149,7 @@ class DashboardModel extends Model
             $end_date = date('Y-m-d');
         }
 
-        $witels = DB::table('tb_witel')->select('name')->distinct()->orderBy('name')->pluck('name')->toArray();
+        $witels = DB::table('tb_witel')->select('name')->where('name', '!=', 'REGIONAL')->distinct()->orderBy('name')->pluck('name')->toArray();
 
         $rekoncileData = [];
 
@@ -160,8 +160,10 @@ class DashboardModel extends Model
                 ->leftJoin('tb_report_orders AS tro', 'tao.id', '=', 'tro.assign_order_id')
                 ->leftJoin('tb_report_materials AS trm', 'tro.assign_order_id', '=', 'trm.assign_order_id')
                 ->leftJoin('tb_designator_khs AS tdkh', 'trm.designator_id', '=', 'tdkh.id')
-                ->where('tstta.witel', $witel)
-                ->where('tstta.jenis_perbaikan', 'Temporer')
+                ->where([
+                    ['tstta.witel', '=', $witel],
+                    ['tstta.jenis_perbaikan', '=', 'Temporer']
+                ])
                 ->whereRaw('DATE(tstta.tiket_terima) BETWEEN ? AND ?', [$start_date, $end_date])
                 ->select(
                     'tstta.tt_site_id',

@@ -54,17 +54,40 @@
 		.date-input-wrapper {
 			position: relative;
 		}
+
+		.date-input-wrapper .calendar-icon {
+			position: absolute;
+			right: 10px;
+			bottom: 8px;
+			pointer-events: none;
+			color: #9ca3af;
+		}
+
+		.dark .date-input-wrapper .calendar-icon {
+			color: #6b7280;
+		}
 	</style>
 @endsection
 
 @section('title', 'Dashboard Rekonsiliasi')
 
 @section('content')
-	<div class="panel mt-4 py-3 px-4">
+	<div class="panel mt-6">
+		<h5 class="text-lg font-semibold dark:text-white-light mb-4">Dashboard Rekonsiliasi</h5>
+
 		<div class="date-filter-panel grid grid-cols-1 lg:grid-cols-3 gap-2 lg:gap-3 px-0 py-0">
 			<div class="date-input-wrapper">
 				<label for="start-date" class="form-label">Tanggal Mulai</label>
 				<input type="text" id="start-date" class="form-input" placeholder="YYYY-MM-DD" readonly>
+				<svg class="calendar-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+					xmlns="http://www.w3.org/2000/svg">
+					<path
+						d="M8 2V5M16 2V5M3.5 9.09H20.5M21 8.5V17C21 20 19.5 22 16 22H8C4.5 22 3 20 3 17V8.5C3 5.5 4.5 3.5 8 3.5H16C19.5 3.5 21 5.5 21 8.5Z"
+						stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+					<path
+						d="M15.6947 13.7H15.7037M15.6947 16.7H15.7037M11.9955 13.7H12.0045M11.9955 16.7H12.0045M8.29431 13.7H8.30329M8.29431 16.7H8.30329"
+						stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+				</svg>
 			</div>
 
 			<div class="hidden lg:flex items-end justify-center pb-1 text-gray-400">
@@ -74,12 +97,18 @@
 			<div class="date-input-wrapper">
 				<label for="end-date" class="form-label">Tanggal Selesai</label>
 				<input type="text" id="end-date" class="form-input" placeholder="YYYY-MM-DD" readonly>
+				<svg class="calendar-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+					xmlns="http://www.w3.org/2000/svg">
+					<path
+						d="M8 2V5M16 2V5M3.5 9.09H20.5M21 8.5V17C21 20 19.5 22 16 22H8C4.5 22 3 20 3 17V8.5C3 5.5 4.5 3.5 8 3.5H16C19.5 3.5 21 5.5 21 8.5Z"
+						stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+					<path
+						d="M15.6947 13.7H15.7037M15.6947 16.7H15.7037M11.9955 13.7H12.0045M11.9955 16.7H12.0045M8.29431 13.7H8.30329M8.29431 16.7H8.30329"
+						stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+				</svg>
 			</div>
 		</div>
-	</div>
 
-	<div class="panel mt-6">
-		<h5 class="text-lg font-semibold dark:text-white-light mb-4">Dashboard Rekonsiliasi</h5>
 		<div class="table-responsive">
 			<table class="table table-bordered table-hover detail-table mt-4" id="rekoncile-table">
 				<thead>

@@ -64,17 +64,40 @@
 		.date-input-wrapper {
 			position: relative;
 		}
+
+		.date-input-wrapper .calendar-icon {
+			position: absolute;
+			right: 10px;
+			bottom: 8px;
+			pointer-events: none;
+			color: #9ca3af;
+		}
+
+		.dark .date-input-wrapper .calendar-icon {
+			color: #6b7280;
+		}
 	</style>
 @endsection
 
 @section('title', 'Dashboard Monitoring')
 
 @section('content')
-	<div class="panel mt-4 py-3 px-4">
+	<div class="panel mt-6">
+		<h5 class="text-lg font-semibold dark:text-white-light mb-4">Dashboard Monitoring</h5>
+
 		<div class="date-filter-panel grid grid-cols-1 lg:grid-cols-3 gap-2 lg:gap-3 px-0 py-0">
 			<div class="date-input-wrapper">
 				<label for="start-date" class="form-label">Tanggal Mulai</label>
 				<input type="text" id="start-date" class="form-input" placeholder="YYYY-MM-DD" readonly>
+				<svg class="calendar-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+					xmlns="http://www.w3.org/2000/svg">
+					<path
+						d="M8 2V5M16 2V5M3.5 9.09H20.5M21 8.5V17C21 20 19.5 22 16 22H8C4.5 22 3 20 3 17V8.5C3 5.5 4.5 3.5 8 3.5H16C19.5 3.5 21 5.5 21 8.5Z"
+						stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+					<path
+						d="M15.6947 13.7H15.7037M15.6947 16.7H15.7037M11.9955 13.7H12.0045M11.9955 16.7H12.0045M8.29431 13.7H8.30329M8.29431 16.7H8.30329"
+						stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+				</svg>
 			</div>
 
 			<div class="hidden lg:flex items-end justify-center pb-1 text-gray-400">
@@ -84,12 +107,18 @@
 			<div class="date-input-wrapper">
 				<label for="end-date" class="form-label">Tanggal Selesai</label>
 				<input type="text" id="end-date" class="form-input" placeholder="YYYY-MM-DD" readonly>
+				<svg class="calendar-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+					xmlns="http://www.w3.org/2000/svg">
+					<path
+						d="M8 2V5M16 2V5M3.5 9.09H20.5M21 8.5V17C21 20 19.5 22 16 22H8C4.5 22 3 20 3 17V8.5C3 5.5 4.5 3.5 8 3.5H16C19.5 3.5 21 5.5 21 8.5Z"
+						stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+					<path
+						d="M15.6947 13.7H15.7037M15.6947 16.7H15.7037M11.9955 13.7H12.0045M11.9955 16.7H12.0045M8.29431 13.7H8.30329M8.29431 16.7H8.30329"
+						stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+				</svg>
 			</div>
 		</div>
-	</div>
 
-	<div class="panel mt-6">
-		<h5 class="text-lg font-semibold dark:text-white-light mb-4">Dashboard Monitoring</h5>
 		<div class="table-responsive">
 			<table class="table table-bordered table-hover detail-table mt-4" id="monitoring-table">
 				<thead>
@@ -160,12 +189,11 @@
 				return;
 			}
 
-			const achIndex = 8;
-			let colTotals = Array(9).fill(0);
-			let totalRekonSum = 0;
-			let totalWithoutRekonSum = 0;
-			let totalAdjustedSum = 0;
-			let totalIdleSum = 0;
+			const achIndex = 99;
+			let colTotals = Array(8).fill(0);
+			let totalSum = 0;
+			let totalNumerator = 0;
+			let totalRekon = 0;
 
 			data.forEach(row => {
 				const cells = [
@@ -178,17 +206,19 @@
 					row.permanenisasi_need_approve_mtel || 0,
 					row.permanenisasi_rekon || 0
 				];
-				const totalWithoutRekon = cells.slice(1, 8).reduce((a, b) => a + Number(b), 0);
-				const idleVal = Number(cells[1]) || 0;
-				const rekonVal = Number(cells[8]) || 0;
-				const totalAdjusted = totalWithoutRekon + rekonVal;
-				const numerator = totalAdjusted - idleVal;
-				const achVal = totalAdjusted > 0 ? (numerator / totalAdjusted) * 100 : 0;
+				const planningIndikasi = Number(cells[1]) || 0;
+				const planningRejectTa = Number(cells[2]) || 0;
+				const planningNeedApprove = Number(cells[3]) || 0;
+				const planningApprove = Number(cells[4]) || 0;
+				const permanenisasiReject = Number(cells[5]) || 0;
+				const permanenisasiNeedApprove = Number(cells[6]) || 0;
+				const rekonVal = Number(cells[7]) || 0;
 
-				totalWithoutRekonSum += totalWithoutRekon;
-				totalRekonSum += rekonVal;
-				totalAdjustedSum += totalAdjusted;
-				totalIdleSum += idleVal;
+				const numerator = planningIndikasi + planningRejectTa + planningNeedApprove + planningApprove +
+					permanenisasiReject + permanenisasiNeedApprove;
+				const rowTotal = cells.slice(1).reduce((a, b) => a + Number(b), 0);
+				const achVal = rowTotal > 0 ? (rekonVal / rowTotal) * 100 : 0;
+				totalSum += rowTotal;
 
 				let html = '<tr>';
 				cells.forEach((c, i) => {
@@ -204,19 +234,18 @@
 				});
 
 				html += `<td>${achVal.toFixed(2)}%</td>`;
-				colTotals[achIndex] += achVal;
-				html += `<td class="font-bold">${totalWithoutRekon}</td></tr>`;
+				html += `<td class="font-bold">${rowTotal}</td></tr>`;
 				tbody.innerHTML += html;
 			});
 
-			const totalAch = totalAdjustedSum > 0 ? ((totalAdjustedSum - totalIdleSum) / totalAdjustedSum) * 100 : 0;
+			const totalAch = totalSum > 0 ? (totalRekon / totalSum) * 100 : 0;
 
 			let totalRow = '<tr class="font-bold"><td>TOTAL</td>';
-			for (let i = 1; i < colTotals.length - 1; i++) {
+			for (let i = 1; i < colTotals.length; i++) {
 				totalRow += `<td>${colTotals[i]}</td>`;
 			}
 			totalRow += `<td>${totalAch.toFixed(2)}%</td>`;
-			totalRow += `<td>${totalWithoutRekonSum}</td></tr>`;
+			totalRow += `<td>${totalSum}</td></tr>`;
 			tbody.innerHTML += totalRow;
 		}
 
