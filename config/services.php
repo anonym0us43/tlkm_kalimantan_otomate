@@ -36,7 +36,10 @@ return [
     ],
 
     'telegram' => [
-        'bot_token' => env('TELEGRAM_BOT_TOKEN'),
+        'bot_token'         => env('TELEGRAM_BOT_TOKEN'),
+        'forward_source_id' => env('TELEGRAM_FORWARD_SOURCE_ID'),
+        'forward_target_id' => env('TELEGRAM_FORWARD_TARGET_ID'),
+        'forward_keyword'   => env('TELEGRAM_FORWARD_KEYWORD', '#LAPORAN_MITRATEL_KALIMANTAN'),
     ],
 
 ];

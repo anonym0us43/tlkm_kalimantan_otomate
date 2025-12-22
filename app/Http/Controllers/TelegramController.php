@@ -215,6 +215,31 @@ class TelegramController extends Controller
             $text = $message['text'] ?? '';
             $thread_id = $message['message_thread_id'] ?? null;
 
+            $sourceGroupId = (int) (config('services.telegram.forward_source_id') ?? -1001591832155);
+            $targetGroupId = (int) (config('services.telegram.forward_target_id') ?? -4779249490);
+            $keyword = (string) (config('services.telegram.forward_keyword') ?? '#LAPORAN_MITRATEL_KALIMANTAN');
+
+            $content = '';
+            if (!empty($text))
+            {
+                $content = $text;
+            }
+            elseif (isset($message['caption']) && !empty($message['caption']))
+            {
+                $content = $message['caption'];
+            }
+
+            if ((int)$chat_id === (int)$sourceGroupId && $content !== '' && stripos($content, $keyword) !== false)
+            {
+                $resp = TelegramModel::forwardMessage($tokenBot, $targetGroupId, $sourceGroupId, $messageID);
+                $json = json_decode($resp, true);
+                if (!$json || empty($json['ok']))
+                {
+                    TelegramModel::copyMessage($tokenBot, $targetGroupId, $sourceGroupId, $messageID);
+                }
+                return response()->json(['success' => true]);
+            }
+
             $state = self::getUserState($chat_id);
 
             if ($state && $state['step'] === 'input_id_site' && !empty($text))
@@ -336,6 +361,19 @@ class TelegramController extends Controller
         if (strpos($command, '/start') === 0)
         {
             return self::getGreetingMessage($chat_title);
+        }
+
+        if (strpos($command, '/chat_id') === 0)
+        {
+            $chat_id = $chat['id'] ?? 'Unknown';
+            $thread_id = $message['message_thread_id'] ?? null;
+
+            $nameLine = "Name : <b>{$chat_title}</b>\n";
+            $chatIdLine = "Chat ID : <code>{$chat_id}</code>\n";
+            $threadIdValue = $thread_id !== null ? $thread_id : '-';
+            $threadIdLine = "Thread ID : <code>{$threadIdValue}</code>";
+
+            return $nameLine . $chatIdLine . $threadIdLine;
         }
 
         return 'Maaf, perintah tidak tersedia.';

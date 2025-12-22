@@ -335,4 +335,66 @@ class TelegramModel extends Model
 
         return $response;
     }
+
+    public static function forwardMessage($tokenBot, $toChatID, $fromChatID, $messageID, $toThreadID = null)
+    {
+        $curl = curl_init();
+
+        $postfields = [
+            'chat_id'      => $toChatID,
+            'from_chat_id' => $fromChatID,
+            'message_id'   => $messageID,
+        ];
+
+        if ($toThreadID !== null)
+        {
+            $postfields['message_thread_id'] = $toThreadID;
+        }
+
+        curl_setopt_array($curl, [
+            CURLOPT_URL            => "https://api.telegram.org/bot$tokenBot/forwardMessage",
+            CURLOPT_SSL_VERIFYHOST => false,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CUSTOMREQUEST  => 'POST',
+            CURLOPT_POSTFIELDS     => $postfields,
+        ]);
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+
+        return $response;
+    }
+
+    public static function copyMessage($tokenBot, $toChatID, $fromChatID, $messageID, $toThreadID = null)
+    {
+        $curl = curl_init();
+
+        $postfields = [
+            'chat_id'      => $toChatID,
+            'from_chat_id' => $fromChatID,
+            'message_id'   => $messageID,
+        ];
+
+        if ($toThreadID !== null)
+        {
+            $postfields['message_thread_id'] = $toThreadID;
+        }
+
+        curl_setopt_array($curl, [
+            CURLOPT_URL            => "https://api.telegram.org/bot$tokenBot/copyMessage",
+            CURLOPT_SSL_VERIFYHOST => false,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CUSTOMREQUEST  => 'POST',
+            CURLOPT_POSTFIELDS     => $postfields,
+        ]);
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+
+        return $response;
+    }
 }
