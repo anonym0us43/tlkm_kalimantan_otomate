@@ -16,6 +16,15 @@ class OrderController extends Controller
     {
         $data = OrderModel::index($id);
 
+        if ($data->is_active == null || $data->is_active == 1)
+        {
+            //
+        }
+        else
+        {
+            return redirect()->back()->with('error', 'Data not found.');
+        }
+
         $materials = collect();
         $existingPhotoUrl = null;
         $existingPhotoOtdrUrl = null;
@@ -264,5 +273,17 @@ class OrderController extends Controller
         OrderModel::status_post($request);
 
         return redirect()->back()->with('success', 'Status order has been updated successfully.');
+    }
+
+    public function reject_post(Request $request)
+    {
+        if (session('partner_alias') !== 'TA')
+        {
+            return redirect()->back()->with('error', 'You are not authorized to perform this action.');
+        }
+
+        OrderModel::reject_post($request);
+
+        return redirect()->route('dashboard.monitoring')->with('success', 'Order has been rejected successfully.');
     }
 }

@@ -113,27 +113,39 @@
 		.info-grid {
 			width: 100%;
 			border-collapse: collapse;
-			margin-top: 6px;
+			margin-top: 4px;
 			font-size: 11px;
+			line-height: 1.2;
 		}
 
 		.info-label {
 			font-size: 11px;
 			font-weight: 600;
 			text-transform: uppercase;
-			padding: 2px 6px;
+			padding: 1px 4px;
 			white-space: nowrap;
 			border: none;
 			background: transparent;
+			line-height: 1.2;
 		}
 
 		.info-value {
 			font-size: 11px;
 			font-weight: 500;
-			padding: 2px 6px;
+			padding: 1px 4px;
 			border: none;
 			background: transparent;
 			word-break: break-word;
+			line-height: 1.2;
+		}
+
+		.info-item {
+			line-height: 1.2;
+		}
+
+		.info-item td {
+			padding: 1px 4px;
+			vertical-align: top;
 		}
 
 		.photos-grid {
@@ -711,6 +723,18 @@
 			z-index: 1200 !important;
 		}
 
+		.reject-swal-title,
+		.reject-swal-popup .swal2-title,
+		.reject-swal-popup .swal-title {
+			margin-bottom: 14px !important;
+		}
+
+		.reject-swal-text,
+		.reject-swal-popup .swal2-html-container,
+		.reject-swal-popup .swal-text {
+			margin-top: 6px !important;
+		}
+
 		@media (max-width: 768px) {
 			.grid.grid-cols-2 {
 				grid-template-columns: 1fr;
@@ -735,6 +759,11 @@
 			<i class="bi bi-check-circle"></i>
 			&nbsp; Simpan
 		</button>
+		<button type="button" class="btn btn-sm btn-outline-danger" id="rejectOrderBtn"
+			{{ $data->assign_order_id != null || session('partner_alias') != 'TA' ? 'disabled' : '' }}>
+			<i class="bi bi-x-circle"></i>
+			&nbsp; Reject
+		</button>
 		<button type="button" class="btn btn-sm btn-outline-danger" id="qcModalOpenBtn"
 			{{ empty($data->assign_order_id) ? 'disabled' : '' }}>
 			<i class="bi bi-clipboard-check"></i>
@@ -742,15 +771,36 @@
 		</button>
 	</div>
 
+	<form action="{{ route('order.reject') }}" method="POST" id="rejectForm" style="display:none;">
+		@csrf
+		<input type="hidden" name="assign_order_id" value="{{ $data->assign_order_id }}">
+		<input type="hidden" name="order_id" value="{{ $data->tt_site_id }}">
+		<input type="hidden" name="order_code" value="{{ $data->tt_site }}">
+	</form>
+
 	@if (session('success'))
-		<div class="mb-4 mt-4 flex items-center p-3.5 rounded text-white bg-success">
-			<span class="ltr:pr-2 rtl:pl-2"><strong>Success!</strong> {{ session('success') }}</span>
+		<div class="flex items-center p-3.5 rounded text-success bg-success-light dark:bg-success-dark-light">
+			<span class="ltr:pr-2 rtl:pl-2"><strong class="ltr:mr-1 rtl:ml-1">Success!</strong>{{ session('success') }}</span>
+			<button type="button" class="ltr:ml-auto rtl:mr-auto hover:opacity-80">
+				<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="none"
+					stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+					<line x1="18" y1="6" x2="6" y2="18"></line>
+					<line x1="6" y1="6" x2="18" y2="18"></line>
+				</svg>
+			</button>
 		</div>
 	@endif
 
 	@if (session('error'))
-		<div class="mb-4 mt-4 flex items-center p-3.5 rounded text-white bg-danger">
-			<span class="ltr:pr-2 rtl:pl-2"><strong>Error!</strong> {{ session('error') }}</span>
+		<div class="flex items-center p-3.5 rounded text-danger bg-danger-light dark:bg-danger-dark-light">
+			<span class="ltr:pr-2 rtl:pl-2"><strong class="ltr:mr-1 rtl:ml-1">Danger!</strong>{{ session('error') }}</span>
+			<button type="button" class="ltr:ml-auto rtl:mr-auto hover:opacity-80">
+				<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="none"
+					stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+					<line x1="18" y1="6" x2="6" y2="18"></line>
+					<line x1="6" y1="6" x2="18" y2="18"></line>
+				</svg>
+			</button>
 		</div>
 	@endif
 
@@ -789,16 +839,34 @@
 									<td class="info-label">Span</td>
 									<td>:</td>
 									<td class="info-value">
-										{{ $data->site_down }} ({{ $data->site_name_down }})
-										<br>
-										<><br>
-											{{ $data->site_detect }} ({{ $data->site_name_detect }})
+										{{ $data->site_down }} ({{ $data->site_name_down }})<br>
+										<><br>{{ $data->site_detect }} ({{ $data->site_name_detect }})
 									</td>
 								</tr>
 								<tr class="info-item">
 									<td class="info-label">Lokasi Koordinat</td>
 									<td>:</td>
 									<td class="info-value">{{ $data->latitude_site_down }}, {{ $data->longitude_site_down }}</td>
+								</tr>
+								<tr class="info-item">
+									<td class="info-label">Penyebab Gangguan</td>
+									<td>:</td>
+									<td class="info-value">{{ $data->penyebab_gangguan ?: '-' }}</td>
+								</tr>
+								<tr class="info-item">
+									<td class="info-label">HCA / Detail</td>
+									<td>:</td>
+									<td class="info-value">{{ $data->hca ?: '-' }} / {{ $data->hca_detail ?: '-' }}</td>
+								</tr>
+								<tr class="info-item">
+									<td class="info-label">RCA / Detail</td>
+									<td>:</td>
+									<td class="info-value">{{ $data->rca ?: '-' }} / {{ $data->rca_detail ?: '-' }}</td>
+								</tr>
+								<tr class="info-item">
+									<td class="info-label">Hasil Perbaikan / Detail</td>
+									<td>:</td>
+									<td class="info-value">{{ $data->hasil_perbaikan ?: '-' }} / {{ $data->detail_perbaikan ?: '-' }}</td>
 								</tr>
 								<tr class="info-item">
 									<td class="info-label">Regional / Witel</td>
@@ -1023,9 +1091,18 @@
 				<input type="hidden" name="assign_order_id" value="{{ $data->assign_order_id }}">
 				<input type="hidden" name="status_qc_id" value="{{ $data->status_qc_id ?? 0 }}">
 
+				<label class="form-label" for="qcAgenda">Agenda</label>
+				<input type="text" id="qcAgenda" name="plan" class="form-input" value="{{ $data->plan ?? '' }}"
+					{{ $qcEditable ? '' : 'readonly' }} placeholder="Masukan Agenda untuk Dokumen" required>
+				<br>
 				<label class="form-label" for="qcNoDoc">Nomor Dokumen</label>
 				<input type="text" id="qcNoDoc" name="no_document" class="form-input"
-					value="{{ $data->no_document ?? '' }}" {{ $qcEditable ? '' : 'readonly' }} required>
+					value="{{ $data->no_document ?? '' }}" {{ $qcEditable ? '' : 'readonly' }} placeholder="Masukan Nomor Dokumen"
+					required>
+				<br>
+				<label class="form-label" for="qcDateDoc">Tanggal Dokumen</label>
+				<input type="date" id="qcDateDoc" name="date_document" class="form-input"
+					value="{{ $data->date_document ?? date('Y-m-d') }}" {{ $qcEditable ? '' : 'readonly' }} required>
 				<br>
 				<label class="form-label" for="qcNotes">Catatan</label>
 				<textarea id="qcNotes" name="notes" class="form-input" rows="4" {{ $qcEditable ? '' : 'readonly' }}
@@ -1071,6 +1148,43 @@
 		const existingPhotoOtdrUrl = @json($existingPhotoOtdrUrl ?? null);
 		const existingAttachments = @json($existingAttachments ?? []);
 		const canEditAttachmentEvidence = @json($showAttachmentEvidence);
+
+		document.getElementById('rejectOrderBtn')?.addEventListener('click', function() {
+			const submitReject = () => document.getElementById('rejectForm')?.submit();
+
+			if (typeof Swal !== 'undefined' && typeof Swal.fire === 'function') {
+				Swal.fire({
+					title: 'Reject Order?',
+					text: 'Order akan dikembalikan dan dimatikan. Tidak akan tampil pada Dashboard Monitoring.',
+					customClass: {
+						popup: 'reject-swal-popup',
+						title: 'reject-swal-title',
+						htmlContainer: 'reject-swal-text'
+					},
+					icon: 'warning',
+					showCancelButton: true,
+					confirmButtonText: 'Ya, Reject',
+					cancelButtonText: 'Batal'
+				}).then((result) => {
+					if (result.isConfirmed) submitReject();
+				});
+			} else if (typeof swal !== 'undefined') {
+				swal({
+					title: 'Reject Order?',
+					text: 'Order akan dikembalikan dan dimatikan. Tidak akan tampil pada Dashboard Monitoring.',
+					icon: 'warning',
+					buttons: ['Batal', 'Ya, Reject'],
+					dangerMode: true,
+					className: 'reject-swal-popup'
+				}).then((willReject) => {
+					if (willReject) submitReject();
+				});
+			} else {
+				if (confirm(
+						'Order akan dikembalikan dan dimatikan. Tidak akan tampil pada Dashboard Monitoring. Lanjutkan?'
+					)) submitReject();
+			}
+		});
 
 		function togglePanel(header) {
 			const content = header.nextElementSibling;

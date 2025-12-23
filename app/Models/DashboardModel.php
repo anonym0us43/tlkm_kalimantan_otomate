@@ -41,13 +41,13 @@ class DashboardModel extends Model
 
                 COUNT(DISTINCT CASE WHEN tao.order_id IS NULL THEN tstta.tt_site_id END) AS idle_order,
 
-                COUNT(DISTINCT CASE WHEN tro.status_qc_id = 1 THEN tstta.tt_site_id END) AS planning_reject_ta,
-                COUNT(DISTINCT CASE WHEN tro.status_qc_id = 2 THEN tstta.tt_site_id END) AS planning_need_approve_mtel,
-                COUNT(DISTINCT CASE WHEN tro.status_qc_id = 3 THEN tstta.tt_site_id END) AS planning_approve_mtel,
+                COUNT(DISTINCT CASE WHEN tro.status_qc_id = 1 AND tao.is_active = 1 THEN tstta.tt_site_id END) AS planning_reject_ta,
+                COUNT(DISTINCT CASE WHEN tro.status_qc_id = 2 AND tao.is_active = 1 THEN tstta.tt_site_id END) AS planning_need_approve_mtel,
+                COUNT(DISTINCT CASE WHEN tro.status_qc_id = 3 AND tao.is_active = 1 THEN tstta.tt_site_id END) AS planning_approve_mtel,
 
-                COUNT(DISTINCT CASE WHEN tro.status_qc_id = 4 THEN tstta.tt_site_id END) AS permanenisasi_reject_ta,
-                COUNT(DISTINCT CASE WHEN tro.status_qc_id = 5 THEN tstta.tt_site_id END) AS permanenisasi_need_approve_mtel,
-                COUNT(DISTINCT CASE WHEN tro.status_qc_id = 6 THEN tstta.tt_site_id END) AS permanenisasi_rekon
+                COUNT(DISTINCT CASE WHEN tro.status_qc_id = 4 AND tao.is_active = 1 THEN tstta.tt_site_id END) AS permanenisasi_reject_ta,
+                COUNT(DISTINCT CASE WHEN tro.status_qc_id = 5 AND tao.is_active = 1 THEN tstta.tt_site_id END) AS permanenisasi_need_approve_mtel,
+                COUNT(DISTINCT CASE WHEN tro.status_qc_id = 6 AND tao.is_active = 1  THEN tstta.tt_site_id END) AS permanenisasi_rekon
             '))
             ->where('tstta.jenis_perbaikan', 'Temporer')
             ->whereRaw('DATE(tstta.tiket_terima) BETWEEN ? AND ?', [$start_date, $end_date])
@@ -97,7 +97,8 @@ class DashboardModel extends Model
                 'tstta.site_name_detect',
                 'tstta.tiket_terima',
                 'tstta.tacc_nama',
-                'tstta.tacc_nik'
+                'tstta.tacc_nik',
+                'tro.no_document'
             )
             ->where('tstta.jenis_perbaikan', 'Temporer')
             ->whereRaw('DATE(tstta.tiket_terima) BETWEEN ? AND ?', [$start_date, $end_date])
@@ -112,30 +113,48 @@ class DashboardModel extends Model
         }
         elseif ($status == 'planning_reject_ta')
         {
-            $query->where('tro.status_qc_id', 1);
+            $query->where([
+                ['tro.status_qc_id', '=', 1],
+                ['tao.is_active', '=', 1]
+            ]);
         }
         elseif ($status == 'planning_need_approve_mtel')
         {
-            $query->where('tro.status_qc_id', 2);
+            $query->where([
+                ['tro.status_qc_id', '=', 2],
+                ['tao.is_active', '=', 1]
+            ]);
         }
         elseif ($status == 'planning_approve_mtel')
         {
-            $query->where('tro.status_qc_id', 3);
+            $query->where([
+                ['tro.status_qc_id', '=', 3],
+                ['tao.is_active', '=', 1]
+            ]);
         }
         elseif ($status == 'permanenisasi_reject_ta')
         {
-            $query->where('tro.status_qc_id', 4);
+            $query->where([
+                ['tro.status_qc_id', '=', 4],
+                ['tao.is_active', '=', 1]
+            ]);
         }
         elseif ($status == 'permanenisasi_need_approve_mtel')
         {
-            $query->where('tro.status_qc_id', 5);
+            $query->where([
+                ['tro.status_qc_id', '=', 5],
+                ['tao.is_active', '=', 1]
+            ]);
         }
         elseif ($status == 'permanenisasi_rekon')
         {
-            $query->where('tro.status_qc_id', 6);
+            $query->where([
+                ['tro.status_qc_id', '=', 6],
+                ['tao.is_active', '=', 1]
+            ]);
         }
 
-        return $query->groupBy('tstta.tt_site_id')->get();
+        return $query->groupBy('tstta.tt_site_id', 'tro.no_document')->get();
     }
 
     public static function get_rekoncile($start_date = null, $end_date = null)

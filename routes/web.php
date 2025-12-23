@@ -1,5 +1,6 @@
 <?php
 
+use Mews\Captcha\Captcha;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MapController;
 use App\Http\Controllers\AuthController;
@@ -8,8 +9,8 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AjaxController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\DashboardController;
-use Mews\Captcha\Captcha;
 
 Route::get('login', [AuthController::class, 'login'])->name('login');
 Route::post('login', [AuthController::class, 'login_post'])->name('login.post');
@@ -32,6 +33,7 @@ Route::middleware(['auth'])->group(function ()
         Route::get('{id}', [OrderController::class, 'index'])->name('order.index');
         Route::post('index', [OrderController::class, 'order_post'])->name('order.post');
         Route::post('status', [OrderController::class, 'status_post'])->name('order.status.post');
+        Route::post('reject', [OrderController::class, 'reject_post'])->name('order.reject');
     });
 
     Route::prefix('dashboard')->group(function ()
@@ -39,6 +41,11 @@ Route::middleware(['auth'])->group(function ()
         Route::get('monitoring', [DashboardController::class, 'monitoring'])->name('dashboard.monitoring');
         Route::get('monitoring-detail', [DashboardController::class, 'monitoring_detail'])->name('dashboard.monitoring.detail');
         Route::get('rekoncile', [DashboardController::class, 'rekoncile'])->name('dashboard.rekoncile');
+    });
+
+    Route::prefix('document')->group(function ()
+    {
+        Route::get('generate-spk/{id}', [DocumentController::class, 'generate_spk'])->name('document.generate_spk');
     });
 
     Route::prefix('ajax')->group(function ()

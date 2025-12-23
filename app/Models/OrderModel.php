@@ -64,11 +64,11 @@ class OrderModel extends Model
             ->leftJoin('tb_witel AS tw', 'tstta.witel', '=', 'tw.name')
             ->leftJoin('tb_regional AS tr', 'tr.id', '=', 'tw.regional_id')
             ->select(
+                'tr.name AS regional_name',
+                'tw.name AS witel_name',
                 'tstta.id AS row_id',
                 'tstta.tt_site_id',
                 'tstta.tt_site',
-                'tr.name AS regional_name',
-                'tw.name AS witel_name',
                 'tstta.created_at',
                 'tstta.site_down',
                 'tstta.site_name_down',
@@ -76,15 +76,24 @@ class OrderModel extends Model
                 'tstta.longitude_site_down',
                 'tstta.site_detect',
                 'tstta.site_name_detect',
-                'tstta.tiket_terima',
+                'tstta.penyebab_gangguan',
+                'tstta.hca',
+                'tstta.hca_detail',
+                'tstta.rca',
+                'tstta.rca_detail',
+                'tstta.hasil_perbaikan',
+                'tstta.detail_perbaikan',
                 'tstta.tacc_nama',
                 'tstta.tacc_nik',
                 'tao.id AS assign_order_id',
                 'tao.order_headline',
+                'tao.is_active',
                 'tro.status_qc_id',
                 'tro.coordinates_site',
                 'tro.notes AS qc_notes',
-                'tro.no_document'
+                'tro.no_document',
+                'tro.plan',
+                'tro.date_document'
             )
             ->where('tstta.id', $id)
             ->first();
@@ -169,7 +178,8 @@ class OrderModel extends Model
                     'order_date'     => now(),
                     'order_headline' => $request->input('order_headline'),
                     'updated_by'     => session('nik') ?? 0,
-                    'updated_at'     => now()
+                    'updated_at'     => now(),
+                    'is_active'      => 1
                 ]);
 
             DB::table('tb_assign_orders_log')
@@ -181,7 +191,8 @@ class OrderModel extends Model
                     'order_date'     => now(),
                     'order_headline' => $request->input('order_headline'),
                     'created_by'     => session('nik') ?? 0,
-                    'created_at'     => now()
+                    'created_at'     => now(),
+                    'is_active'      => 1
                 ]);
 
             DB::table('tb_report_orders')
@@ -240,7 +251,8 @@ class OrderModel extends Model
                     'order_date'     => now(),
                     'order_headline' => $request->input('order_headline'),
                     'created_by'     => session('nik') ?? 0,
-                    'created_at'     => now()
+                    'created_at'     => now(),
+                    'is_active'      => 1
                 ]);
 
             DB::table('tb_assign_orders_log')
@@ -252,7 +264,8 @@ class OrderModel extends Model
                     'order_date'     => now(),
                     'order_headline' => $request->input('order_headline'),
                     'created_by'     => session('nik') ?? 0,
-                    'created_at'     => now()
+                    'created_at'     => now(),
+                    'is_active'      => 1
                 ]);
 
             DB::table('tb_report_orders')
@@ -358,21 +371,54 @@ class OrderModel extends Model
         DB::table('tb_report_orders')
             ->where('assign_order_id', $assign_order_id)
             ->update([
-                'status_qc_id' => $status_qc_id,
-                'notes'        => $request->input('notes'),
-                'no_document'  => $request->input('no_document'),
-                'updated_by'   => session('nik') ?? 0,
-                'updated_at'   => now()
+                'status_qc_id'  => $status_qc_id,
+                'plan'          => $request->input('plan'),
+                'no_document'   => $request->input('no_document'),
+                'date_document' => $request->input('date_document'),
+                'notes'         => $request->input('notes'),
+                'updated_by'    => session('nik') ?? 0,
+                'updated_at'    => now()
             ]);
 
         DB::table('tb_report_orders_log')
             ->insert([
                 'assign_order_id' => $assign_order_id,
                 'status_qc_id'    => $status_qc_id,
-                'notes'           => $request->input('notes'),
+                'plan'            => $request->input('plan'),
                 'no_document'     => $request->input('no_document'),
+                'date_document'   => $request->input('date_document'),
+                'notes'           => $request->input('notes'),
                 'created_by'      => session('nik') ?? 0,
                 'created_at'      => now()
+            ]);
+    }
+
+    public static function reject_post($request)
+    {
+        DB::table('tb_assign_orders')
+            ->insert([
+                'team_id'        => $request->input('team_id'),
+                'project_id'     => $request->input('project_id'),
+                'order_id'       => $request->input('order_id'),
+                'order_code'     => $request->input('order_code'),
+                'order_date'     => now(),
+                'order_headline' => 'REJECTED BY USER TA',
+                'created_by'     => session('nik') ?? 0,
+                'created_at'     => now(),
+                'is_active'      => 0
+            ]);
+
+        DB::table('tb_assign_orders_log')
+            ->insert([
+                'team_id'        => $request->input('team_id'),
+                'project_id'     => $request->input('project_id'),
+                'order_id'       => $request->input('order_id'),
+                'order_code'     => $request->input('order_code'),
+                'order_date'     => now(),
+                'order_headline' => 'REJECTED BY USER TA',
+                'created_by'     => session('nik') ?? 0,
+                'created_at'     => now(),
+                'is_active'      => 0
             ]);
     }
 }
