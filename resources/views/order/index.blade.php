@@ -810,7 +810,7 @@
 
 	<form action="{{ route('order.post') }}" method="POST" enctype="multipart/form-data" id="orderForm">
 		@csrf
-		<input type="hidden" name="row_id" value="{{ $id }}">
+		<input type="hidden" name="ticket_alita_id" value="{{ $id }}">
 		<input type="hidden" name="order_id" value="{{ $data->tt_site_id }}">
 		<input type="hidden" name="order_code" value="{{ $data->tt_site }}">
 		<input type="hidden" name="status_qc_id" value="{{ $data->status_qc_id ?? 2 }}">
@@ -833,7 +833,7 @@
 								<tr class="info-item">
 									<td class="info-label">No IOH</td>
 									<td>:</td>
-									<td class="info-value">{{ $data->row_id }}</td>
+									<td class="info-value">{{ $data->ticket_alita_id }}</td>
 								</tr>
 								<tr class="info-item">
 									<td class="info-label">Span</td>

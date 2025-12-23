@@ -59,6 +59,11 @@ class OrderModel extends Model
     public static function index($id)
     {
         return DB::table('tb_source_tacc_ticket_alita AS tstta')
+            ->leftJoin('tb_source_diginav_mtel AS tsdm', function ($join)
+            {
+                $join->on('tstta.site_down', '=', 'tsdm.site_ne')
+                    ->orWhere('tstta.site_down', '=', 'tsdm.site_fe');
+            })
             ->leftJoin('tb_assign_orders AS tao', 'tstta.tt_site_id', '=', 'tao.order_id')
             ->leftJoin('tb_report_orders AS tro', 'tao.id', '=', 'tro.assign_order_id')
             ->leftJoin('tb_witel AS tw', 'tstta.witel', '=', 'tw.name')
@@ -66,10 +71,11 @@ class OrderModel extends Model
             ->select(
                 'tr.name AS regional_name',
                 'tw.name AS witel_name',
-                'tstta.id AS row_id',
+                'tstta.id AS ticket_alita_id',
                 'tstta.tt_site_id',
                 'tstta.tt_site',
                 'tstta.created_at',
+                'tstta.ring_id',
                 'tstta.site_down',
                 'tstta.site_name_down',
                 'tstta.latitude_site_down',
@@ -85,6 +91,7 @@ class OrderModel extends Model
                 'tstta.detail_perbaikan',
                 'tstta.tacc_nama',
                 'tstta.tacc_nik',
+                'tsdm.ring_id AS diginav_ring_id',
                 'tao.id AS assign_order_id',
                 'tao.order_headline',
                 'tao.is_active',
@@ -106,9 +113,10 @@ class OrderModel extends Model
             return collect();
         }
 
-        return DB::table('tb_report_materials')
-            ->where('assign_order_id', $assign_order_id)
-            ->select('designator_id', 'qty', 'coordinates_material')
+        return DB::table('tb_report_materials AS trm')
+            ->leftJoin('tb_designator_khs AS tdk', 'trm.designator_id', '=', 'tdk.id')
+            ->where('trm.assign_order_id', $assign_order_id)
+            ->select('tdk.item_designator', 'trm.designator_id', 'trm.qty', 'trm.coordinates_material')
             ->get()
             ->map(function ($item)
             {
