@@ -470,12 +470,23 @@
 		.material-modal-content {
 			background: #fff;
 			border-radius: 12px;
-			width: min(1800px, 98vw);
+			width: min(1900px, 98vw);
 			max-height: 95vh;
 			display: flex;
 			flex-direction: column;
 			box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
 			overflow: hidden;
+		}
+
+		.qc-modal-content {
+			background: #fff;
+			border-radius: 10px;
+			padding: 20px;
+			max-width: 1000px;
+			width: 100%;
+			box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+			max-height: 90vh;
+			overflow-y: auto;
 		}
 
 		.dark .material-modal-content {
@@ -1091,22 +1102,47 @@
 				<input type="hidden" name="assign_order_id" value="{{ $data->assign_order_id }}">
 				<input type="hidden" name="status_qc_id" value="{{ $data->status_qc_id ?? 0 }}">
 
-				<label class="form-label" for="qcAgenda">Agenda</label>
-				<input type="text" id="qcAgenda" name="plan" class="form-input" value="{{ $data->plan ?? '' }}"
-					{{ $qcEditable ? '' : 'readonly' }} placeholder="Masukan Agenda untuk Dokumen" required>
-				<br>
-				<label class="form-label" for="qcNoDoc">Nomor Dokumen</label>
-				<input type="text" id="qcNoDoc" name="no_document" class="form-input"
-					value="{{ $data->no_document ?? '' }}" {{ $qcEditable ? '' : 'readonly' }} placeholder="Masukan Nomor Dokumen"
-					required>
-				<br>
-				<label class="form-label" for="qcDateDoc">Tanggal Dokumen</label>
-				<input type="date" id="qcDateDoc" name="date_document" class="form-input"
-					value="{{ $data->date_document ?? date('Y-m-d') }}" {{ $qcEditable ? '' : 'readonly' }} required>
-				<br>
-				<label class="form-label" for="qcNotes">Catatan</label>
-				<textarea id="qcNotes" name="notes" class="form-input" rows="4" {{ $qcEditable ? '' : 'readonly' }}
-				 required>{{ $data->qc_notes ?? '' }}</textarea>
+				<div class="space-y-4">
+
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<div>
+							<label class="form-label" for="qcPlan">Nama Agenda</label>
+							<textarea id="qcPlan" name="plan" class="form-input" rows="3" {{ $qcEditable ? '' : 'readonly' }}
+							 placeholder="Masukan NamaAgenda untuk Dokumen SPK">{{ $data->plan ?? '' }}</textarea>
+						</div>
+						<div>
+							<label class="form-label" for="qcProject">Nama Proyek</label>
+							<textarea id="qcProject" name="project_name" class="form-input" rows="3" {{ $qcEditable ? '' : 'readonly' }}
+							 placeholder="Masukan Nama Proyek untuk Dokumen SPK">{{ $data->project_name ?? '' }}</textarea>
+						</div>
+						<div>
+							<label class="form-label" for="qcNoSPK">Nomor Dokumen SPK</label>
+							<input type="text" id="qcNoSPK" name="no_spk" class="form-input" value="{{ $data->no_spk ?? '' }}"
+								{{ $qcEditable ? '' : 'readonly' }} placeholder="Masukan Nomor Dokumen SPK">
+						</div>
+						<div>
+							<label class="form-label" for="qcNoBa">Nomor BA Recovery</label>
+							<input type="text" id="qcNoBa" name="no_ba_recovery" class="form-input"
+								value="{{ $data->no_ba_recovery ?? '' }}" {{ $qcEditable ? '' : 'readonly' }}
+								placeholder="Masukan Nomor BA Recovery">
+						</div>
+						<div>
+							<label class="form-label" for="qcDateSPK">Tanggal Dokumen SPK</label>
+							<input type="date" id="qcDateSPK" name="date_spk" class="form-input"
+								value="{{ $data->date_spk ?? date('Y-m-d') }}" {{ $qcEditable ? '' : 'readonly' }}>
+						</div>
+						<div>
+							<label class="form-label" for="qcDateBa">Tanggal BA Recovery</label>
+							<input type="date" id="qcDateBa" name="date_ba_recovery" class="form-input"
+								value="{{ $data->date_ba_recovery ?? date('Y-m-d') }}" {{ $qcEditable ? '' : 'readonly' }}>
+						</div>
+					</div>
+				</div>
+
+				<div class="mt-4">
+					<label class="form-label" for="qcNotes">Catatan</label>
+					<textarea id="qcNotes" name="notes" class="form-input" rows="4" {{ $qcEditable ? '' : 'readonly' }}>{{ $data->qc_notes ?? '' }}</textarea>
+				</div>
 
 				<div class="qc-actions">
 					@if ($qcEditable)

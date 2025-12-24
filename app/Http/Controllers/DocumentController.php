@@ -77,10 +77,10 @@ class DocumentController extends Controller
 
         $templateProcessor = new TemplateProcessor($templatePath);
 
-        $templateProcessor->setValue('no_document', $this->escapeValue($data->no_document));
+        $templateProcessor->setValue('no_spk', $this->escapeValue($data->no_spk));
         $templateProcessor->setValue('plan', $this->escapeValue($data->plan));
-        $dateDocument = $data->date_document ? $this->generate_date($data->date_document) : '';
-        $templateProcessor->setValue('date_document', $dateDocument);
+        $dateSPK = $data->date_spk ? $this->generate_date($data->date_spk) : '';
+        $templateProcessor->setValue('date_spk', $dateSPK);
         $templateProcessor->setValue('tt_site', $this->escapeValue($data->tt_site));
         $templateProcessor->setValue('no_ioh', $this->escapeValue($data->ticket_alita_id));
         $orderDate = $data->created_at ? $this->generate_date($data->created_at) : '';
@@ -93,7 +93,7 @@ class DocumentController extends Controller
         $templateProcessor->setValue('site_name_detect', $this->escapeValue($data->site_name_detect));
         $templateProcessor->setValue('latitude_site_down', $this->escapeValue($data->latitude_site_down));
         $templateProcessor->setValue('longitude_site_down', $this->escapeValue($data->longitude_site_down));
-        $templateProcessor->setValue('partner_alias', '');
+        $templateProcessor->setValue('partner_name', '');
         $templateProcessor->setValue('witel_name', $this->escapeValue($data->witel_name));
         $templateProcessor->setValue('package_id', $this->escapeValue($data->package_id));
 
@@ -187,6 +187,108 @@ class DocumentController extends Controller
         {
             $templateProcessor->setValue('photo_otdr', 'Foto OTDR tidak tersedia');
         }
+
+        $templateProcessor->saveAs($outputPath);
+
+        return response()->download($outputPath);
+    }
+
+    public function generate_ba_recovery($id)
+    {
+        $data = OrderModel::index($id);
+
+        if (!$data)
+        {
+            return redirect()->back()->with('error', 'Data not found.');
+        }
+
+        $templatePath = public_path('template-documents/Berita_Acara_Recovery_Mitratel.docx');
+
+        if (!File::exists($templatePath))
+        {
+            return redirect()->back()->with('error', 'Template document not found.');
+        }
+
+        $outputFileName = 'BA_RECOVERY_MTEL_' .
+            $data->site_detect . '_' .
+            $data->site_name_detect . '_' .
+            $data->tt_site . '_' .
+            $data->ticket_alita_id . '.docx';
+
+        $documentsPath = public_path('upload/' . $data->assign_order_id . '/documents');
+
+        if (!File::exists($documentsPath))
+        {
+            File::makeDirectory($documentsPath, 0755, true);
+        }
+
+        $outputPath = $documentsPath . '/' . $outputFileName;
+
+        $templateProcessor = new TemplateProcessor($templatePath);
+
+        $templateProcessor->setValue('project_name', $this->escapeValue($data->project_name));
+        $dateBA = $data->date_ba_recovery ? $this->generate_date($data->date_ba_recovery) : '';
+        $templateProcessor->setValue('date_ba_recovery', $dateBA);
+        $templateProcessor->setValue('partner_name', $this->escapeValue($data->partner_name));
+        $templateProcessor->setValue('witel_name', $this->escapeValue($data->witel_name));
+        $templateProcessor->setValue('tt_site', $this->escapeValue($data->tt_site));
+        $templateProcessor->setValue('no_ioh', $this->escapeValue($data->no_ioh));
+        $templateProcessor->setValue('site_down', $this->escapeValue($data->site_down));
+        $templateProcessor->setValue('site_name_down', $this->escapeValue($data->site_name_down));
+        $templateProcessor->setValue('site_detect', $this->escapeValue($data->site_detect));
+        $templateProcessor->setValue('site_name_detect', $this->escapeValue($data->site_name_detect));
+        $templateProcessor->setValue('order_headline', $this->escapeValue($data->order_headline));
+        $orderDate = $data->created_at ? $this->generate_date($data->created_at) : '';
+        $templateProcessor->setValue('order_date', $orderDate);
+        $templateProcessor->setValue('package_id', $this->escapeValue($data->package_id));
+
+        $qty_joint_closure = $qty_cable = 0;
+        $data_material = OrderModel::get_materials($data->assign_order_id);
+
+        $templateProcessor->cloneRow('no', count($data_material));
+
+        $totalMaterialPrice = $totalServicePrice = 0;
+
+        foreach ($data_material as $index => $material)
+        {
+            $rowNumber = $index + 1;
+
+            $templateProcessor->setValue('no#' . $rowNumber, $this->escapeValue($rowNumber));
+            $templateProcessor->setValue('item_designator#' . $rowNumber, $this->escapeValue($material->item_designator));
+            $templateProcessor->setValue('item_description#' . $rowNumber, $this->escapeValue($material->item_description));
+            $templateProcessor->setValue('unit#' . $rowNumber, $this->escapeValue($material->unit));
+            $templateProcessor->setValue('material_price#' . $rowNumber, $this->escapeValue('Rp. ' . number_format($material->material_price_mtel, 0, ',', '.')));
+            $templateProcessor->setValue('service_price#' . $rowNumber, $this->escapeValue('Rp. ' . number_format($material->service_price_mtel, 0, ',', '.')));
+            $templateProcessor->setValue('qty#' . $rowNumber, $this->escapeValue($material->qty));
+
+            $ttlPriceMaterial = $material->material_price_mtel * $material->qty;
+            $ttlPriceService = $material->service_price_mtel * $material->qty;
+            $templateProcessor->setValue('ttl_price_material#' . $rowNumber, $this->escapeValue('Rp. ' . number_format($ttlPriceMaterial, 0, ',', '.')));
+            $templateProcessor->setValue('ttl_price_service#' . $rowNumber, $this->escapeValue('Rp. ' . number_format($ttlPriceService, 0, ',', '.')));
+
+            $totalMaterialPrice += $ttlPriceMaterial;
+            $totalServicePrice += $ttlPriceService;
+
+            if (strpos($material->item_designator, 'SC-OF-SM') !== false)
+            {
+                $qty_joint_closure += $material->qty;
+            }
+            if (strpos($material->item_designator, 'AC-OF-SM') !== false)
+            {
+                $qty_cable += $material->qty;
+            }
+        }
+
+        $templateProcessor->cloneRow('summary_label', 3);
+
+        $templateProcessor->setValue('summary_label#1', $this->escapeValue('Total Material'));
+        $templateProcessor->setValue('summary_value#1', $this->escapeValue('Rp. ' . number_format($totalMaterialPrice, 0, ',', '.')));
+
+        $templateProcessor->setValue('summary_label#2', $this->escapeValue('Total Jasa'));
+        $templateProcessor->setValue('summary_value#2', $this->escapeValue('Rp. ' . number_format($totalServicePrice, 0, ',', '.')));
+
+        $templateProcessor->setValue('summary_label#3', $this->escapeValue('Total Jasa + Material'));
+        $templateProcessor->setValue('summary_value#3', $this->escapeValue('Rp. ' . number_format($totalMaterialPrice + $totalServicePrice, 0, ',', '.')));
 
         $templateProcessor->saveAs($outputPath);
 

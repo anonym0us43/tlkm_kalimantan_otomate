@@ -97,11 +97,14 @@ class OrderModel extends Model
                 'tao.order_headline',
                 'tao.is_active',
                 'tro.status_qc_id',
-                'tro.coordinates_site',
                 'tro.notes AS qc_notes',
-                'tro.no_document',
+                'tro.coordinates_site',
                 'tro.plan',
-                'tro.date_document'
+                'tro.no_spk',
+                'tro.date_spk',
+                'tro.project_name',
+                'tro.no_ba_recovery',
+                'tro.date_ba_recovery'
             )
             ->where('tstta.id', $id)
             ->first();
@@ -216,7 +219,7 @@ class OrderModel extends Model
                     'status_qc_id'     => $request->input('status_qc_id'),
                     'notes'            => $request->input('notes'),
                     'coordinates_site' => $request->input('coordinates_site'),
-                    'no_document'      => $request->input('no_document'),
+                    'no_spk'      => $request->input('no_spk'),
                     'updated_by'       => session('nik') ?? 0,
                     'updated_at'       => now()
                 ]);
@@ -227,7 +230,7 @@ class OrderModel extends Model
                     'status_qc_id'     => $request->input('status_qc_id'),
                     'notes'            => $request->input('notes'),
                     'coordinates_site' => $request->input('coordinates_site'),
-                    'no_document'      => $request->input('no_document'),
+                    'no_spk'      => $request->input('no_spk'),
                     'created_by'       => session('nik') ?? 0,
                     'created_at'       => now()
                 ]);
@@ -288,7 +291,7 @@ class OrderModel extends Model
                     'status_qc_id'     => $request->input('status_qc_id'),
                     'notes'            => $request->input('notes'),
                     'coordinates_site' => $request->input('coordinates_site'),
-                    'no_document'      => $request->input('no_document'),
+                    'no_spk'      => $request->input('no_spk'),
                     'created_by'       => session('nik') ?? 0,
                     'created_at'       => now()
                 ]);
@@ -299,7 +302,7 @@ class OrderModel extends Model
                     'status_qc_id'     => $request->input('status_qc_id'),
                     'notes'            => $request->input('notes'),
                     'coordinates_site' => $request->input('coordinates_site'),
-                    'no_document'      => $request->input('no_document'),
+                    'no_spk'      => $request->input('no_spk'),
                     'created_by'       => session('nik') ?? 0,
                     'created_at'       => now()
                 ]);
@@ -385,25 +388,31 @@ class OrderModel extends Model
         DB::table('tb_report_orders')
             ->where('assign_order_id', $assign_order_id)
             ->update([
-                'status_qc_id'  => $status_qc_id,
-                'plan'          => $request->input('plan'),
-                'no_document'   => $request->input('no_document'),
-                'date_document' => $request->input('date_document'),
-                'notes'         => $request->input('notes'),
-                'updated_by'    => session('nik') ?? 0,
-                'updated_at'    => now()
+                'status_qc_id'     => $status_qc_id,
+                'plan'             => $request->input('plan'),
+                'project_name'     => $request->input('project_name'),
+                'no_spk'           => $request->input('no_spk'),
+                'date_spk'         => $request->input('date_spk'),
+                'no_ba_recovery'   => $request->input('no_ba_recovery'),
+                'date_ba_recovery' => $request->input('date_ba_recovery'),
+                'notes'            => $request->input('notes'),
+                'updated_by'       => session('nik') ?? 0,
+                'updated_at'       => now()
             ]);
 
         DB::table('tb_report_orders_log')
             ->insert([
-                'assign_order_id' => $assign_order_id,
-                'status_qc_id'    => $status_qc_id,
-                'plan'            => $request->input('plan'),
-                'no_document'     => $request->input('no_document'),
-                'date_document'   => $request->input('date_document'),
-                'notes'           => $request->input('notes'),
-                'created_by'      => session('nik') ?? 0,
-                'created_at'      => now()
+                'assign_order_id'  => $assign_order_id,
+                'status_qc_id'     => $status_qc_id,
+                'plan'             => $request->input('plan'),
+                'project_name'     => $request->input('project_name'),
+                'no_spk'           => $request->input('no_spk'),
+                'date_spk'         => $request->input('date_spk'),
+                'no_ba_recovery'   => $request->input('no_ba_recovery'),
+                'date_ba_recovery' => $request->input('date_ba_recovery'),
+                'notes'            => $request->input('notes'),
+                'created_by'       => session('nik') ?? 0,
+                'created_at'       => now()
             ]);
     }
 

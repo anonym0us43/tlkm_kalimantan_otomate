@@ -46,6 +46,7 @@ Route::middleware(['auth'])->group(function ()
     Route::prefix('document')->group(function ()
     {
         Route::get('generate-spk/{id}', [DocumentController::class, 'generate_spk'])->name('document.generate_spk');
+        Route::get('generate-ba-recovery/{id}', [DocumentController::class, 'generate_ba_recovery'])->name('document.generate_ba_recovery');
     });
 
     Route::prefix('ajax')->group(function ()

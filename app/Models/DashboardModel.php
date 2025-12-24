@@ -98,7 +98,12 @@ class DashboardModel extends Model
                 'tstta.tiket_terima',
                 'tstta.tacc_nama',
                 'tstta.tacc_nik',
-                'tro.no_document'
+                'tro.plan',
+                'tro.no_spk',
+                'tro.date_spk',
+                'tro.project_name',
+                'tro.no_ba_recovery',
+                'tro.date_ba_recovery'
             )
             ->where('tstta.jenis_perbaikan', 'Temporer')
             ->whereRaw('DATE(tstta.tiket_terima) BETWEEN ? AND ?', [$start_date, $end_date])
@@ -154,7 +159,7 @@ class DashboardModel extends Model
             ]);
         }
 
-        return $query->groupBy('tstta.tt_site_id', 'tro.no_document')->get();
+        return $query->groupBy('tstta.tt_site_id', 'tro.no_spk')->get();
     }
 
     public static function get_rekoncile($start_date = null, $end_date = null)

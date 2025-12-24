@@ -130,7 +130,7 @@
 			tbody.innerHTML = '';
 			data.forEach((row, index) => {
 				const tr = document.createElement('tr');
-				const documentBtn = row.no_document ? `
+				const documentBtn = row.no_spk ? `
 					<a href="/document/generate-spk/${row.ticket_alita_id}" x-tooltip="Generate SPK"
 						class="inline-flex items-center justify-center w-9 h-9 rounded-md text-primary hover:text-primary-dark transition-colors">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
