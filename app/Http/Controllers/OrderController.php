@@ -97,6 +97,7 @@ class OrderController extends Controller
             'coordinates_site'          => 'required|string',
             'Foto_Titik_Putus'          => 'nullable|image|mimes: jpeg,jpg,png|max: 10240',
             'Foto_OTDR'                 => 'nullable|image|mimes: jpeg,jpg,png|max: 10240',
+            'Foto_KML'                  => 'nullable|image|mimes: jpeg,jpg,png|max: 10240',
             'materials'                 => 'required|array|min  : 1',
             'materials.*.designator_id' => 'required|integer',
             'materials.*.qty'           => 'required|integer|min:1',

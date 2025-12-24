@@ -347,6 +347,13 @@ class OrderModel extends Model
             $otdrFile->move($uploadPath, $fileName);
         }
 
+        $kmlFile = $request->file('Foto_KML');
+        if ($kmlFile && $kmlFile->isValid())
+        {
+            $fileName = 'Foto_KML.jpg';
+            $kmlFile->move($uploadPath, $fileName);
+        }
+
         $allFiles = $request->allFiles();
         if (!empty($allFiles))
         {

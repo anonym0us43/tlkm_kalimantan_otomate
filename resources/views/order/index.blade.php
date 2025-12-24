@@ -935,6 +935,27 @@
 										</button>
 									</div>
 								</div>
+
+								<div class="flex-1 mb-6 photo-upload-section" data-upload-id="foto-kml">
+									<label class="form-label text-sm mb-2">
+										Foto KML
+									</label>
+									<label class="upload-box">
+										<span class="camera-icon">
+											<i class="bi bi-camera-fill"></i>
+										</span>
+										<img class="previewImage" hidden>
+									</label>
+									<input type="file" name="Foto_KML" class="photoFileInput" accept="image/*">
+									<div class="action-area">
+										<button type="button" class="btn btn-outline-primary btn-sm uploadBtn" title="Upload Foto">
+											<i class="bi bi-camera"></i>
+										</button>
+										<button type="button" class="btn btn-outline-danger btn-sm deleteBtn" hidden title="Hapus Foto">
+											<i class="bi bi-trash"></i>
+										</button>
+									</div>
+								</div>
 							</div>
 
 							<div class="mb-6">
@@ -1182,6 +1203,9 @@
 		const existingMaterials = @json($materials ?? []);
 		const existingPhotoUrl = @json($existingPhotoUrl ?? null);
 		const existingPhotoOtdrUrl = @json($existingPhotoOtdrUrl ?? null);
+		const existingPhotoKmlUrl = @json(isset($data->assign_order_id) && file_exists(public_path('upload/' . $data->assign_order_id . '/Foto_KML.jpg'))
+				? asset('upload/' . $data->assign_order_id . '/Foto_KML.jpg')
+				: null);
 		const existingAttachments = @json($existingAttachments ?? []);
 		const canEditAttachmentEvidence = @json($showAttachmentEvidence);
 
@@ -1634,6 +1658,12 @@
 				}
 				if (uploadId === 'foto-otdr' && existingPhotoOtdrUrl) {
 					previewImage.src = existingPhotoOtdrUrl;
+					previewImage.hidden = false;
+					cameraIcon.style.display = 'none';
+					deleteBtn.hidden = false;
+				}
+				if (uploadId === 'foto-kml' && existingPhotoKmlUrl) {
+					previewImage.src = existingPhotoKmlUrl;
 					previewImage.hidden = false;
 					cameraIcon.style.display = 'none';
 					deleteBtn.hidden = false;

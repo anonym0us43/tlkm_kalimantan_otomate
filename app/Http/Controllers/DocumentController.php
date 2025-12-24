@@ -13,15 +13,15 @@ class DocumentController extends Controller
     private function generate_date($date)
     {
         $month = [
-            1 => 'Januari',
-            2 => 'Februari',
-            3 => 'Maret',
-            4 => 'April',
-            5 => 'Mei',
-            6 => 'Juni',
-            7 => 'Juli',
-            8 => 'Agustus',
-            9 => 'September',
+            1  => 'Januari',
+            2  => 'Februari',
+            3  => 'Maret',
+            4  => 'April',
+            5  => 'Mei',
+            6  => 'Juni',
+            7  => 'Juli',
+            8  => 'Agustus',
+            9  => 'September',
             10 => 'Oktober',
             11 => 'November',
             12 => 'Desember'
@@ -162,7 +162,7 @@ class DocumentController extends Controller
                     'path'   => $photoTitikPath,
                     'width'  => 280,
                     'height' => 245,
-                    'ratio'  => false
+                    'ratio'  => true
                 ]
             );
         }
@@ -179,13 +179,31 @@ class DocumentController extends Controller
                     'path'   => $photoOtdrPath,
                     'width'  => 280,
                     'height' => 245,
-                    'ratio'  => false
+                    'ratio'  => true
                 ]
             );
         }
         else
         {
             $templateProcessor->setValue('photo_otdr', 'Foto OTDR tidak tersedia');
+        }
+
+        $photoKmlPath = public_path('upload/' . $data->assign_order_id . '/Foto_KML.jpg');
+        if (File::exists($photoKmlPath))
+        {
+            $templateProcessor->setImageValue(
+                'photo_kml',
+                [
+                    'path'   => $photoKmlPath,
+                    'width'  => 280,
+                    'height' => 245,
+                    'ratio'  => true
+                ]
+            );
+        }
+        else
+        {
+            $templateProcessor->setValue('photo_kml', 'Foto KML tidak tersedia');
         }
 
         $templateProcessor->saveAs($outputPath);
@@ -289,6 +307,115 @@ class DocumentController extends Controller
 
         $templateProcessor->setValue('summary_label#3', $this->escapeValue('Total Jasa + Material'));
         $templateProcessor->setValue('summary_value#3', $this->escapeValue('Rp. ' . number_format($totalMaterialPrice + $totalServicePrice, 0, ',', '.')));
+
+        $attachmentBasePath = public_path('upload/' . $data->assign_order_id . '/attachments');
+        $evidenceRows = [];
+
+        foreach ($data_material as $materialIndex => $material)
+        {
+            $designator = $material->item_designator ?? '';
+            $requiresMultiple = in_array(substr($designator, 0, 8), ['SC-OF-SM']) || in_array(substr($designator, 0, 4), ['PU-S']);
+            $count = $requiresMultiple ? ($material->qty ?? 1) : 1;
+
+            for ($volumeIndex = 0; $volumeIndex < $count; $volumeIndex++)
+            {
+                $volumePath = $attachmentBasePath . '/material_' . $materialIndex . '_vol_' . $volumeIndex;
+                $beforePath   = $volumePath . '/Before.jpg';
+                $progressPath = $volumePath . '/Progress.jpg';
+                $afterPath    = $volumePath . '/After.jpg';
+
+                $evidenceRows[] = [
+                    'no'              => count($evidenceRows) + 1,
+                    'item_designator' => $designator . ' (' . ($volumeIndex + 1) . ')',
+                    'volume'          => 1,
+                    'before'          => File::exists($beforePath) ? $beforePath : null,
+                    'progress'        => File::exists($progressPath) ? $progressPath : null,
+                    'after'           => File::exists($afterPath) ? $afterPath : null
+                ];
+            }
+        }
+
+        if (!empty($evidenceRows))
+        {
+            $templateProcessor->cloneRow('photo_before', count($evidenceRows));
+
+            foreach ($evidenceRows as $rowNumber => $row)
+            {
+                $index = $rowNumber + 1;
+                $templateProcessor->setValue('no#' . $index, $this->escapeValue($row['no']));
+                $templateProcessor->setValue('item_designator#' . $index, $this->escapeValue($row['item_designator']));
+                $templateProcessor->setValue('volume#' . $index, $this->escapeValue($row['volume']));
+
+                if ($row['before'])
+                {
+                    $templateProcessor->setImageValue('photo_before#' . $index, [
+                        'path'   => $row['before'],
+                        'width'  => 140,
+                        'height' => 105,
+                        'ratio'  => true
+                    ]);
+                }
+                else
+                {
+                    $templateProcessor->setValue('photo_before#' . $index, 'Tidak ada foto');
+                }
+
+                if ($row['progress'])
+                {
+                    $templateProcessor->setImageValue('photo_progress#' . $index, [
+                        'path'   => $row['progress'],
+                        'width'  => 140,
+                        'height' => 105,
+                        'ratio'  => true
+                    ]);
+                }
+                else
+                {
+                    $templateProcessor->setValue('photo_progress#' . $index, 'Tidak ada foto');
+                }
+
+                if ($row['after'])
+                {
+                    $templateProcessor->setImageValue('photo_after#' . $index, [
+                        'path'   => $row['after'],
+                        'width'  => 140,
+                        'height' => 105,
+                        'ratio'  => true
+                    ]);
+                }
+                else
+                {
+                    $templateProcessor->setValue('photo_after#' . $index, 'Tidak ada foto');
+                }
+            }
+        }
+        else
+        {
+            $templateProcessor->setValue('photo_before', 'Evidence belum tersedia');
+            $templateProcessor->setValue('photo_progress', 'Evidence belum tersedia');
+            $templateProcessor->setValue('photo_after', 'Evidence belum tersedia');
+            $templateProcessor->setValue('no', '');
+            $templateProcessor->setValue('item_designator', '');
+            $templateProcessor->setValue('volume', '');
+        }
+
+        $photoKmlPath = public_path('upload/' . $data->assign_order_id . '/Foto_KML.jpg');
+        if (File::exists($photoKmlPath))
+        {
+            $templateProcessor->setImageValue(
+                'photo_kml',
+                [
+                    'path'   => $photoKmlPath,
+                    'width'  => 280,
+                    'height' => 245,
+                    'ratio'  => true
+                ]
+            );
+        }
+        else
+        {
+            $templateProcessor->setValue('photo_kml', 'Foto KML tidak tersedia');
+        }
 
         $templateProcessor->saveAs($outputPath);
 
