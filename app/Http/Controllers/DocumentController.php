@@ -10,7 +10,7 @@ use PhpOffice\PhpWord\TemplateProcessor;
 
 class DocumentController extends Controller
 {
-    public static function generate_date($date)
+    private function generate_date($date)
     {
         $month = [
             1 => 'Januari',
@@ -32,6 +32,16 @@ class DocumentController extends Controller
         $tahun = date('Y', strtotime($date));
 
         return $tanggal . ' ' . $bulan . ' ' . $tahun;
+    }
+
+    private function escapeValue($value)
+    {
+        if ($value === null)
+        {
+            return '';
+        }
+
+        return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
     }
 
     public function generate_spk($id)
@@ -124,6 +134,17 @@ class DocumentController extends Controller
             }
         }
 
+        $templateProcessor->cloneRow('summary_label', 3);
+
+        $templateProcessor->setValue('summary_label#1', $this->escapeValue('Total Material'));
+        $templateProcessor->setValue('summary_value#1', $this->escapeValue('Rp. ' . number_format($totalMaterialPrice, 0, ',', '.')));
+
+        $templateProcessor->setValue('summary_label#2', $this->escapeValue('Total Jasa'));
+        $templateProcessor->setValue('summary_value#2', $this->escapeValue('Rp. ' . number_format($totalServicePrice, 0, ',', '.')));
+
+        $templateProcessor->setValue('summary_label#3', $this->escapeValue('Total Jasa + Material'));
+        $templateProcessor->setValue('summary_value#3', $this->escapeValue('Rp. ' . number_format($totalMaterialPrice + $totalServicePrice, 0, ',', '.')));
+
         $notePlan1 = "Penggelaran KU " . $qty_cable . " ,Penyambungan " . $qty_joint_closure . " Sisi Joint ";
         $notePlan2 = "Kemudian lanjut Pemasangan " . $qty_joint_closure . " Closure & Terminasi di Joint " . $qty_joint_closure . " Sisi.";
 
@@ -170,15 +191,5 @@ class DocumentController extends Controller
         $templateProcessor->saveAs($outputPath);
 
         return response()->download($outputPath);
-    }
-
-    private function escapeValue($value)
-    {
-        if ($value === null)
-        {
-            return '';
-        }
-
-        return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
     }
 }
