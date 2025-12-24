@@ -229,10 +229,10 @@ class DocumentController extends Controller
         $templateProcessor->setValue('project_name', $this->escapeValue($data->project_name));
         $dateBA = $data->date_ba_recovery ? $this->generate_date($data->date_ba_recovery) : '';
         $templateProcessor->setValue('date_ba_recovery', $dateBA);
-        $templateProcessor->setValue('partner_name', $this->escapeValue($data->partner_name));
+        $templateProcessor->setValue('partner_name', '');
         $templateProcessor->setValue('witel_name', $this->escapeValue($data->witel_name));
         $templateProcessor->setValue('tt_site', $this->escapeValue($data->tt_site));
-        $templateProcessor->setValue('no_ioh', $this->escapeValue($data->no_ioh));
+        $templateProcessor->setValue('no_ioh', $this->escapeValue($data->ticket_alita_id));
         $templateProcessor->setValue('site_down', $this->escapeValue($data->site_down));
         $templateProcessor->setValue('site_name_down', $this->escapeValue($data->site_name_down));
         $templateProcessor->setValue('site_detect', $this->escapeValue($data->site_detect));

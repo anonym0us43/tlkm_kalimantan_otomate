@@ -33,6 +33,84 @@
 			color: #3451d4;
 			gap: 12px;
 		}
+
+		.doc-modal {
+			position: fixed;
+			inset: 0;
+			display: none;
+			align-items: center;
+			justify-content: center;
+			background: rgba(17, 24, 39, 0.35);
+			z-index: 50;
+			padding: 16px;
+		}
+
+		.doc-modal.show {
+			display: flex;
+		}
+
+		.doc-modal-card {
+			background: #ffffff;
+			border-radius: 12px;
+			padding: 20px;
+			width: 100%;
+			max-width: 420px;
+			box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+		}
+
+		.doc-modal-header {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			margin-bottom: 12px;
+		}
+
+		.doc-modal-title {
+			font-weight: 600;
+			font-size: 16px;
+			margin: 0;
+			color: #111827;
+		}
+
+		.doc-modal-close {
+			border: none;
+			background: none;
+			font-size: 20px;
+			cursor: pointer;
+			color: #6b7280;
+		}
+
+		.doc-list {
+			display: grid;
+			gap: 10px;
+			margin: 0;
+			padding: 0;
+			list-style: none;
+		}
+
+		.doc-item a {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			padding: 12px 14px;
+			border: 1px solid #e5e7eb;
+			border-radius: 10px;
+			color: #111827;
+			text-decoration: none;
+			transition: all 0.15s ease;
+			font-weight: 500;
+		}
+
+		.doc-item a:hover {
+			border-color: #4f46e5;
+			color: #312e81;
+			box-shadow: 0 6px 16px rgba(79, 70, 229, 0.12);
+		}
+
+		.doc-item small {
+			color: #6b7280;
+			font-weight: 400;
+		}
 	</style>
 @endsection
 
@@ -91,6 +169,16 @@
 			</table>
 		</div>
 	</div>
+
+	<div class="doc-modal" id="documentModal" aria-hidden="true">
+		<div class="doc-modal-card">
+			<div class="doc-modal-header">
+				<h6 class="doc-modal-title">Dokumen</h6>
+				<button type="button" class="doc-modal-close" id="documentModalClose" aria-label="Tutup">&times;</button>
+			</div>
+			<ul class="doc-list" id="documentList"></ul>
+		</div>
+	</div>
 @endsection
 
 @section('scripts')
@@ -101,6 +189,9 @@
 	<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
 	<script>
 		let detailDatatable = null;
+		let documentModal = null;
+		let documentList = null;
+		let documentModalClose = null;
 
 		function getUrlParams() {
 			const params = new URLSearchParams(window.location.search);
@@ -130,15 +221,16 @@
 			tbody.innerHTML = '';
 			data.forEach((row, index) => {
 				const tr = document.createElement('tr');
-				const documentBtn = row.no_spk ? `
-					<a href="/document/generate-spk/${row.ticket_alita_id}" x-tooltip="Generate SPK"
-						class="inline-flex items-center justify-center w-9 h-9 rounded-md text-primary hover:text-primary-dark transition-colors">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path opacity="0.5" d="M3 10C3 6.22876 3 4.34315 4.17157 3.17157C5.34315 2 7.22876 2 11 2H13C16.7712 2 18.6569 2 19.8284 3.17157C21 4.34315 21 6.22876 21 10V14C21 17.7712 21 19.6569 19.8284 20.8284C18.6569 22 16.7712 22 13 22H11C7.22876 22 5.34315 22 4.17157 20.8284C3 19.6569 3 17.7712 3 14V10Z" stroke="#1C274C" stroke-width="1.5"/>
-                                <path d="M8 10H16" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round"/>
-                                <path d="M8 14H13" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round"/>
-                            </svg>
-						</a>
+				const hasDocs = Boolean(row.no_spk) || Boolean(row.no_ba_recovery);
+				const documentBtn = hasDocs ? `
+					<button type="button" class="document-modal-trigger inline-flex items-center justify-center w-9 h-9 rounded-md text-primary hover:text-primary-dark transition-colors"
+						data-ticket-id="${row.ticket_alita_id}" data-no-spk="${row.no_spk || ''}" data-no-ba-recovery="${row.no_ba_recovery || ''}">
+							<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+								<path opacity="0.5" d="M3 10C3 6.22876 3 4.34315 4.17157 3.17157C5.34315 2 7.22876 2 11 2H13C16.7712 2 18.6569 2 19.8284 3.17157C21 4.34315 21 6.22876 21 10V14C21 17.7712 21 19.6569 19.8284 20.8284C18.6569 22 16.7712 22 13 22H11C7.22876 22 5.34315 22 4.17157 20.8284C3 19.6569 3 17.7712 3 14V10Z" stroke="#1C274C" stroke-width="1.5"/>
+								<path d="M8 10H16" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round"/>
+								<path d="M8 14H13" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round"/>
+							</svg>
+						</button>
 				` : '';
 
 				tr.innerHTML = `
@@ -209,6 +301,51 @@
 			});
 		}
 
+		function buildDocumentItem(label, href, subtitle) {
+			return `
+				<li class="doc-item">
+					<a href="${href}">
+						<span>${label}</span>
+						<small>${subtitle}</small>
+					</a>
+				</li>
+			`;
+		}
+
+		function openDocumentModal({
+			ticketId,
+			noSpk,
+			noBaRecovery
+		}) {
+			if (!documentModal || !documentList) return;
+
+			documentList.innerHTML = '';
+
+			if (noSpk) {
+				documentList.innerHTML += buildDocumentItem('Surat Perintah Kerja (SPK)', `/document/generate-spk/${ticketId}`,
+					noSpk);
+			}
+
+			if (noBaRecovery) {
+				documentList.innerHTML += buildDocumentItem('Berita Acara Recovery',
+					`/document/generate-ba-recovery/${ticketId}`, noBaRecovery);
+			}
+
+			if (!documentList.innerHTML) {
+				documentList.innerHTML =
+					'<li class="doc-item"><a href="#" onclick="return false;">Dokumen belum tersedia</a></li>';
+			}
+
+			documentModal.classList.add('show');
+			documentModal.setAttribute('aria-hidden', 'false');
+		}
+
+		function closeDocumentModal() {
+			if (!documentModal) return;
+			documentModal.classList.remove('show');
+			documentModal.setAttribute('aria-hidden', 'true');
+		}
+
 		function fetchDetailData() {
 			const urlParams = getUrlParams();
 
@@ -239,6 +376,29 @@
 		}
 
 		document.addEventListener('DOMContentLoaded', function() {
+			documentModal = document.getElementById('documentModal');
+			documentList = document.getElementById('documentList');
+			documentModalClose = document.getElementById('documentModalClose');
+
+			const tbody = document.getElementById('detail-tbody');
+			tbody.addEventListener('click', function(event) {
+				const trigger = event.target.closest('.document-modal-trigger');
+				if (!trigger) return;
+
+				openDocumentModal({
+					ticketId: trigger.dataset.ticketId,
+					noSpk: trigger.dataset.noSpk,
+					noBaRecovery: trigger.dataset.noBaRecovery
+				});
+			});
+
+			documentModalClose.addEventListener('click', closeDocumentModal);
+			documentModal.addEventListener('click', function(event) {
+				if (event.target === documentModal) {
+					closeDocumentModal();
+				}
+			});
+
 			fetchDetailData();
 		});
 	</script>
