@@ -71,6 +71,7 @@ class OrderModel extends Model
             ->select(
                 'tr.name AS regional_name',
                 'tw.name AS witel_name',
+                'tw.package_id',
                 'tstta.id AS ticket_alita_id',
                 'tstta.tt_site_id',
                 'tstta.tt_site',
@@ -116,7 +117,12 @@ class OrderModel extends Model
         return DB::table('tb_report_materials AS trm')
             ->leftJoin('tb_designator_khs AS tdk', 'trm.designator_id', '=', 'tdk.id')
             ->where('trm.assign_order_id', $assign_order_id)
-            ->select('tdk.item_designator', 'trm.designator_id', 'trm.qty', 'trm.coordinates_material')
+            ->select(
+                'trm.designator_id',
+                'tdk.*',
+                'trm.qty',
+                'trm.coordinates_material'
+            )
             ->get()
             ->map(function ($item)
             {

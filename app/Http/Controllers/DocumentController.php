@@ -10,6 +10,30 @@ use PhpOffice\PhpWord\TemplateProcessor;
 
 class DocumentController extends Controller
 {
+    public static function generate_date($date)
+    {
+        $month = [
+            1 => 'Januari',
+            2 => 'Februari',
+            3 => 'Maret',
+            4 => 'April',
+            5 => 'Mei',
+            6 => 'Juni',
+            7 => 'Juli',
+            8 => 'Agustus',
+            9 => 'September',
+            10 => 'Oktober',
+            11 => 'November',
+            12 => 'Desember'
+        ];
+
+        $tanggal = date('d', strtotime($date));
+        $bulan = $month[(int)date('m', strtotime($date))];
+        $tahun = date('Y', strtotime($date));
+
+        return $tanggal . ' ' . $bulan . ' ' . $tahun;
+    }
+
     public function generate_spk($id)
     {
         $data = OrderModel::index($id);
@@ -45,11 +69,12 @@ class DocumentController extends Controller
 
         $templateProcessor->setValue('no_document', $this->escapeValue($data->no_document));
         $templateProcessor->setValue('plan', $this->escapeValue($data->plan));
-        $dateDocument = $data->date_document ? date('Y-m-d', strtotime($data->date_document)) : '';
+        $dateDocument = $data->date_document ? $this->generate_date($data->date_document) : '';
         $templateProcessor->setValue('date_document', $dateDocument);
         $templateProcessor->setValue('tt_site', $this->escapeValue($data->tt_site));
         $templateProcessor->setValue('no_ioh', $this->escapeValue($data->ticket_alita_id));
-        $templateProcessor->setValue('order_date', date('Y-m-d', strtotime($data->created_at)));
+        $orderDate = $data->created_at ? $this->generate_date($data->created_at) : '';
+        $templateProcessor->setValue('order_date', $orderDate);
         $templateProcessor->setValue('order_headline', $this->escapeValue($data->order_headline));
         $templateProcessor->setValue('ring_id', $this->escapeValue($data->ring_id ?? $data->diginav_ring_id));
         $templateProcessor->setValue('site_down', $this->escapeValue($data->site_down));
@@ -60,11 +85,35 @@ class DocumentController extends Controller
         $templateProcessor->setValue('longitude_site_down', $this->escapeValue($data->longitude_site_down));
         $templateProcessor->setValue('partner_alias', '');
         $templateProcessor->setValue('witel_name', $this->escapeValue($data->witel_name));
+        $templateProcessor->setValue('package_id', $this->escapeValue($data->package_id));
 
         $qty_joint_closure = $qty_cable = 0;
         $data_material = OrderModel::get_materials($data->assign_order_id);
-        foreach ($data_material as $material)
+
+        $templateProcessor->cloneRow('no', count($data_material));
+
+        $totalMaterialPrice = $totalServicePrice = 0;
+
+        foreach ($data_material as $index => $material)
         {
+            $rowNumber = $index + 1;
+
+            $templateProcessor->setValue('no#' . $rowNumber, $this->escapeValue($rowNumber));
+            $templateProcessor->setValue('item_designator#' . $rowNumber, $this->escapeValue($material->item_designator));
+            $templateProcessor->setValue('item_description#' . $rowNumber, $this->escapeValue($material->item_description));
+            $templateProcessor->setValue('unit#' . $rowNumber, $this->escapeValue($material->unit));
+            $templateProcessor->setValue('material_price#' . $rowNumber, $this->escapeValue('Rp. ' . number_format($material->material_price_mtel, 0, ',', '.')));
+            $templateProcessor->setValue('service_price#' . $rowNumber, $this->escapeValue('Rp. ' . number_format($material->service_price_mtel, 0, ',', '.')));
+            $templateProcessor->setValue('qty#' . $rowNumber, $this->escapeValue($material->qty));
+
+            $ttlPriceMaterial = $material->material_price_mtel * $material->qty;
+            $ttlPriceService = $material->service_price_mtel * $material->qty;
+            $templateProcessor->setValue('ttl_price_material#' . $rowNumber, $this->escapeValue('Rp. ' . number_format($ttlPriceMaterial, 0, ',', '.')));
+            $templateProcessor->setValue('ttl_price_service#' . $rowNumber, $this->escapeValue('Rp. ' . number_format($ttlPriceService, 0, ',', '.')));
+
+            $totalMaterialPrice += $ttlPriceMaterial;
+            $totalServicePrice += $ttlPriceService;
+
             if (strpos($material->item_designator, 'SC-OF-SM') !== false)
             {
                 $qty_joint_closure += $material->qty;
@@ -74,6 +123,7 @@ class DocumentController extends Controller
                 $qty_cable += $material->qty;
             }
         }
+
         $notePlan1 = "Penggelaran KU " . $qty_cable . " ,Penyambungan " . $qty_joint_closure . " Sisi Joint ";
         $notePlan2 = "Kemudian lanjut Pemasangan " . $qty_joint_closure . " Closure & Terminasi di Joint " . $qty_joint_closure . " Sisi.";
 
