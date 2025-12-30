@@ -1,4 +1,4 @@
-@extends('map.map_fullscreen')
+@extends('map.map-fullscreen')
 
 @section('styles')
 	<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
