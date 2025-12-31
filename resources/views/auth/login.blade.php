@@ -221,8 +221,10 @@
 								</form>
 							</div>
 							<p class="absolute bottom-6 w-full text-center dark:text-white">
-								© <span id="footer-year">{{ date('Y') }}</span>. Optimizing Troubleshooting Mitratel and Management Core
-								(OTOMATE)
+								<small>
+									© <span id="footer-year">{{ date('Y') }}</span>. Optimizing Troubleshooting Mitratel and Management Core
+									(OTOMATE)
+								</small>
 							</p>
 						</div>
 					</div>

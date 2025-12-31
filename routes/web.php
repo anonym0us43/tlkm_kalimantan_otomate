@@ -49,6 +49,12 @@ Route::middleware(['auth'])->group(function ()
         Route::get('generate-ba-recovery/{id}', [DocumentController::class, 'generate_ba_recovery'])->name('document.generate_ba_recovery');
     });
 
+    Route::prefix('map')->group(function ()
+    {
+        Route::get('/', [MapController::class, 'index'])->name('map.index');
+        Route::get('upload-file', [MapController::class, 'upload_file'])->name('map.upload-file');
+    });
+
     Route::prefix('ajax')->group(function ()
     {
         Route::prefix('order')->group(function ()
@@ -77,7 +83,6 @@ Route::middleware(['guest'])->group(function ()
 {
     Route::prefix('map')->group(function ()
     {
-        Route::get('/', [MapController::class, 'index'])->name('map.index');
         Route::get('site-to-site', [MapController::class, 'site_to_site'])->name('map.site.to.site');
     });
 

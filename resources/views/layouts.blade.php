@@ -344,8 +344,8 @@
 							<li class="nav-item">
 								<ul>
 									<li class="nav-item">
-										<a href="{{ route('map.upload-kml') }}"
-											class="{{ Request::is('map/upload-kml') ? 'active' : '' }} group nav-link">
+										<a href="{{ route('map.upload-file') }}"
+											class="{{ Request::is('map/upload-file') ? 'active' : '' }} group nav-link">
 											<div class="flex items-center">
 												<svg width="24" height="24" viewBox="0 0 24 24" fill="none"
 													xmlns="http://www.w3.org/2000/svg">
@@ -357,7 +357,7 @@
 														fill="#1C274C" />
 												</svg>
 												<span class="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">Upload
-													KML</span>
+													File KML/KMZ</span>
 											</div>
 										</a>
 									</li>
@@ -562,8 +562,10 @@
 				</div>
 
 				<div class="mt-auto p-6 pt-0 text-center dark:text-white-dark ltr:sm:text-left rtl:sm:text-right">
-					© <span id="footer-year">{{ date('Y') }}</span>. Optimizing Troubleshooting Mitratel and Management Core
-					(OTOMATE)
+					<small>
+						© <span id="footer-year">{{ date('Y') }}</span>. Optimizing Troubleshooting Mitratel and Management Core
+						(OTOMATE)
+					</small>
 				</div>
 			</div>
 		</div>

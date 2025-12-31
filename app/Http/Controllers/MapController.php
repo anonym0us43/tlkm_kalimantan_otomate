@@ -20,4 +20,9 @@ class MapController extends Controller
 
         return view('map.site-to-site', compact('site_from', 'site_to'));
     }
+
+    public function upload_file()
+    {
+        return view('map.upload-file');
+    }
 }
