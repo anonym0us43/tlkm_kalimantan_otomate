@@ -219,7 +219,6 @@ class OrderModel extends Model
                     'status_qc_id'     => $request->input('status_qc_id'),
                     'notes'            => $request->input('notes'),
                     'coordinates_site' => $request->input('coordinates_site'),
-                    'no_spk'      => $request->input('no_spk'),
                     'updated_by'       => session('nik') ?? 0,
                     'updated_at'       => now()
                 ]);
@@ -230,7 +229,6 @@ class OrderModel extends Model
                     'status_qc_id'     => $request->input('status_qc_id'),
                     'notes'            => $request->input('notes'),
                     'coordinates_site' => $request->input('coordinates_site'),
-                    'no_spk'      => $request->input('no_spk'),
                     'created_by'       => session('nik') ?? 0,
                     'created_at'       => now()
                 ]);
@@ -291,7 +289,6 @@ class OrderModel extends Model
                     'status_qc_id'     => $request->input('status_qc_id'),
                     'notes'            => $request->input('notes'),
                     'coordinates_site' => $request->input('coordinates_site'),
-                    'no_spk'      => $request->input('no_spk'),
                     'created_by'       => session('nik') ?? 0,
                     'created_at'       => now()
                 ]);
@@ -302,7 +299,6 @@ class OrderModel extends Model
                     'status_qc_id'     => $request->input('status_qc_id'),
                     'notes'            => $request->input('notes'),
                     'coordinates_site' => $request->input('coordinates_site'),
-                    'no_spk'      => $request->input('no_spk'),
                     'created_by'       => session('nik') ?? 0,
                     'created_at'       => now()
                 ]);
