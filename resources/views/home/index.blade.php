@@ -5,8 +5,10 @@
 		integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 	<style>
 		#map {
-			height: 600px;
+			height: 650px;
 			width: 100%;
+			position: relative;
+			z-index: 1;
 		}
 	</style>
 @endsection
@@ -14,7 +16,7 @@
 @section('title', 'Home')
 
 @section('content')
-	<div class="container mt-4">
+	<div class="container">
 		<div id="map"></div>
 	</div>
 @endsection
@@ -47,7 +49,7 @@
 				let lat = position.coords.latitude;
 				let lon = position.coords.longitude;
 
-				map.setView([lat, lon], 13);
+				map.setView([lat, lon], 18);
 
 				L.marker([lat, lon]).addTo(map)
 					.bindPopup('Lokasi Anda')
