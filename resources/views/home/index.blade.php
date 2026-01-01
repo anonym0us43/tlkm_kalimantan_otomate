@@ -14,10 +14,8 @@
 @section('title', 'Home')
 
 @section('content')
-	<div class="panel">
-		<div class="container mt-4">
-			<div id="map"></div>
-		</div>
+	<div class="container mt-4">
+		<div id="map"></div>
 	</div>
 @endsection
 
