@@ -56,11 +56,10 @@
 					.openPopup();
 			}, function(error) {
 				console.error('Error mendapatkan lokasi:', error);
-				alert('Tidak dapat mengakses lokasi GPS. Menggunakan lokasi default.');
 				map.setView([0, 117], 5);
 			});
 		} else {
-			alert('Browser Anda tidak mendukung Geolocation.');
+			console.error('Geolocation tidak didukung oleh browser ini.');
 			map.setView([0, 117], 5);
 		}
 	</script>
